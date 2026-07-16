@@ -27,7 +27,7 @@ zutaten:
 quelle:
   typ: scan
   autor: Familienrezept (02.07.2020)
-bild: ../anhang/streifenkuchen.jpg
+bild: ../anhang/streifenkuchen.png
 gekocht: []
 status: entwurf
 ---
