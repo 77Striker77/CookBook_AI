@@ -77,6 +77,19 @@ Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze da
   (`pdftoppm … -png …`) nach `kochbuch/anhang/<slug>-<name>.png` und im Rezept-
   text als Markdown-Bild einbetten: `![kurze Beschreibung](../anhang/<slug>-<name>.png)`.
 
+**Grafiken im Website-Look neu bauen (bevorzugt bei Diagrammen/Skizzen).** Wenn
+ein Schaubild informativ, aber im fremden Stil ist (oder ein Foto schief/
+verzerrt), zeichne es **im Kochbuch-Look neu** statt den Rohausschnitt zu nehmen:
+- Eine HTML-Datei mit **inline SVG** in der Palette schreiben (Grün `#3D7A4E`,
+  Safran `#D99A2B`, Creme `#FBFAF7`, Tinte `#20261F`, Linie `#E0DFD4`; Serif für
+  Überschriften). Denselben Informationsgehalt abbilden — nichts weglassen.
+- Mit dem vorinstallierten Chromium zu einem scharfen PNG rendern
+  (`playwright-core`, `deviceScaleFactor: 2`, `element.screenshot()`), nach
+  `kochbuch/anhang/…png` speichern und einbinden.
+- Jede erzeugte Grafik ansehen und Feinheiten (abgeschnittene Labels, Farben)
+  korrigieren. Echte Fotos des Gerichts nur dann durch eine Illustration
+  ersetzen, wenn das Foto unbrauchbar ist — die Originale bleiben im Scan/PDF.
+
 ### 4. Ins Schema übersetzen
 `kochbuch/rezepte/<slug>.md` nach `_meta/schema.md`: Pflichtfelder `titel`,
 `kategorie`, `portionen`, `zutaten`. Zutaten als lesbare Zeilen
