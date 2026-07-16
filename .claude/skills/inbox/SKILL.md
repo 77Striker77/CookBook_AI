@@ -12,18 +12,29 @@ Vault verwandeln — in dieser Session, ohne Anthropic-API-Key. Bezugspunkte:
 ## Ablauf
 
 1. **Inbox lesen.** Hole die offenen Issues mit Label `import` aus dem Repo
-   (GitHub-MCP: `list_issues` mit `state: open`, `labels: ["import"]`, Repo
-   `77Striker77/CookBook_AI`). Gibt es keine, dem User Bescheid geben und stoppen.
+   (GitHub-MCP: `list_issues` mit `state: OPEN`, `labels: ["import"]`, Repo
+   `77Striker77/CookBook_AI`). **Falls das leer ist**, zusätzlich alle offenen
+   Issues listen und die als Einreichung behandeln, deren Body die Formular-
+   Überschriften enthält (`### Link …`, `### … oder Foto / Scan`) — das Label
+   fehlt manchmal. Gibt es gar nichts, dem User Bescheid geben und stoppen.
    Zeig dem User kurz die Liste (Nummer + Titel), bevor du loslegst.
 
 2. **Pro Issue die Quelle auswerten** (Felder aus dem Issue-Body: „Link", „Foto
    / Scan", „Notiz"):
    - **Web-Link:** Seite mit WebFetch holen. Bevorzugt `Recipe`-JSON-LD
      (Schema.org) verwenden; sonst aus dem Seitentext extrahieren.
-   - **Foto / Scan:** Die angehängte Bild-URL (`github.com/user-attachments/…`
-     oder `user-images.githubusercontent.com/…`) mit `curl -L` nach
-     `kochbuch/anhang/<slug>-scan.<ext>` herunterladen, dann mit dem Read-Tool
-     als Bild öffnen und auswerten (auch Handschrift).
+   - **Foto / Scan / PDF:** Die Anhang-URL im Issue-Body zeigt auf
+     `github.com/user-attachments/…`. Direktes `curl` darauf wird vom Proxy
+     geblockt — stattdessen **WebFetch** auf die URL aufrufen; sie liefert einen
+     Redirect auf eine signierte `objects.githubusercontent.com`-URL (ca. 5 Min
+     gültig). Diese signierte URL dann mit `curl -sSL` nach
+     `kochbuch/anhang/<slug>-scan.<ext>` laden.
+     - **Bild** (jpg/png): mit dem Read-Tool öffnen und auswerten (auch Handschrift).
+     - **PDF**: hat es Text, `pdftotext -layout <datei> -` nutzen; ist es ein
+       reiner Scan, mit dem Read-Tool (Seiten als Bild) lesen. Fehlt `pdftotext`/
+       `pdftoppm`, einmal `apt-get update && apt-get install -y poppler-utils`.
+       Ein PDF **nicht** als `bild:` setzen (nur echte Bilder erlaubt) — im Text
+       auf die Scan-Datei verweisen.
    - **Instagram-Reel:** Aus Caption/Beschreibung arbeiten, soweit vorhanden.
      Reicht das nicht (Info nur im Video/Ton), das Rezept **nicht raten** —
      im Issue nachfragen bzw. als offen kennzeichnen und überspringen.
