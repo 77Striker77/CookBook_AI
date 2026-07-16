@@ -59,8 +59,15 @@ Je nach Typ:
 - **Web-Link:** Seite mit WebFetch holen; bevorzugt `Recipe`-JSON-LD
   (Schema.org), sonst Seitentext. Das **Titelfoto** der Seite (og:image oder
   Hauptbild) als Bild mitnehmen (siehe Schritt 3).
-- **Instagram-Reel:** aus Caption/Beschreibung, soweit vorhanden. Steckt die
-  Info nur im Video/Ton, **nicht raten** — im Issue nachfragen bzw. offen lassen.
+- **Instagram-Reel / Video-Link:** Prüfe zuerst, ob die Reel-Vorbereitung schon
+  gelaufen ist — dann liegt (nach `git pull`) ein Ordner
+  `kochbuch/_reel-inbox/<nr>/` vor mit `frames/*.jpg` (eingeblendete Texte/
+  Zutaten — **mit dem Read-Tool ansehen**), `transkript.txt` (Tonspur) und
+  `caption.txt`/`titel.txt`/`autor.txt`. Das Rezept aus **Bildern + Transkript +
+  Caption gemeinsam** bauen. Nach dem Einarbeiten den Ordner
+  `kochbuch/_reel-inbox/<nr>/` löschen (`git rm -r`). Fehlt der Ordner (Reel
+  nicht ladbar / Login), aus der Caption arbeiten soweit vorhanden — sonst
+  **nicht raten**, Issue offen lassen.
 
 ### 3. Bilder ins Rezept holen
 Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze das.

@@ -5,6 +5,9 @@ name: Website bauen & deployen
 on:
   push:
     branches: [main, claude/cookbook-system-design-ajr3oy]
+    # Zwischen-Commits der Reel-Vorbereitung lösen kein Deployment aus.
+    paths-ignore:
+      - "kochbuch/_reel-inbox/**"
   workflow_dispatch:
 
 permissions:

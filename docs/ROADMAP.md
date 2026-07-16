@@ -38,12 +38,19 @@ GitHub Pages). Eigene Domain? Echte Lieblingsrezepte als Startbestand.
 Wenn du magst, sagst du in einer Session `/inbox` — die Rezepte werden erzeugt,
 geprüft und die Issues geschlossen. Kosten: nur dein Claude-Code-Abo.
 
-## Phase 3 — Königsdisziplin: Instagram-Reels
+## Phase 3 — Königsdisziplin: Instagram-Reels ✅ *(schlank gebaut)*
 
-- [ ] yt-dlp-Download + ffmpeg (Audio, Standbilder)
-- [ ] Transkription (faster-whisper im Runner)
-- [ ] Synthese Caption + Transkript + Frames → Rezept
-- [ ] Fallback: Video-Datei direkt im Formular hochladen
+Nur den Reel-Link einwerfen genügt. Eine Action (`reel-vorbereiten.yml`) holt
+auf GitHubs offenem Netz das Reel und bereitet es vor; das Rezept baust du dann
+per `/inbox` (kein API-Key, keine Kosten).
+
+- [x] `reel-vorbereiten.yml`: yt-dlp-Download + ffmpeg (Standbilder) + Transkript
+      (faster-whisper im Runner) → Material am Issue, committet nach `_reel-inbox/`
+- [x] `/inbox` verarbeitet Frames + Transkript + Caption → Rezept
+- [x] Fallback: Video-Datei bzw. Text direkt ans Issue anhängen
+- [ ] **Einmalig, nur falls nötig:** Instagram-Cookies als Secret
+      `INSTAGRAM_COOKIES` (öffentliche Reels gehen oft ohne). Cookies laufen
+      alle paar Wochen ab.
 
 ## Phase 4 — Küchen-Hirn
 
