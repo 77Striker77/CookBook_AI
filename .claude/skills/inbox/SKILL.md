@@ -1,76 +1,116 @@
 ---
 name: inbox
-description: Arbeitet die Rezept-Inbox ab — alle offenen GitHub-Issues mit Label "import". Wertet je Einreichung Link/Foto/Notiz aus, legt schema-konforme Rezepte im Vault an, prüft den Build und schließt die Issues. Nutzen, wenn der User "Inbox abarbeiten", "neue Rezepte einpflegen" o. Ä. möchte. Braucht keinen API-Key — läuft in dieser Session.
+description: Arbeitet die Rezept-Inbox ab — alle offenen GitHub-Issues mit Label "import". Wertet je Einreichung Link/Foto/Scan/PDF vollständig aus (inkl. Bilder, Schaubilder, Maße), legt schema-konforme Rezepte samt Bildern im Vault an, prüft den Build und schließt die Issues. Nutzen, wenn der User "Inbox abarbeiten", "neue Rezepte einpflegen" o. Ä. möchte. Braucht keinen API-Key — läuft in dieser Session.
 ---
 
 # Rezept-Inbox abarbeiten
 
-Ziel: Alle offenen Einreichungen aus dem Briefkasten in fertige Rezepte im
-Vault verwandeln — in dieser Session, ohne Anthropic-API-Key. Bezugspunkte:
-`kochbuch/_meta/schema.md` (Schema) und `kochbuch/_meta/synonyme.yaml` (Zutaten).
+Ziel: Alle offenen Einreichungen aus dem Briefkasten **vollständig und
+originalgetreu** in Rezepte im Vault verwandeln — in dieser Session, ohne
+Anthropic-API-Key. Bezugspunkte: `kochbuch/_meta/schema.md` (Schema) und
+`kochbuch/_meta/synonyme.yaml` (Zutaten).
+
+## Grundprinzip: nichts weglassen, nichts erfinden
+
+Ein eingereichtes Rezept ist oft mehr als reiner Text. **Bevor du schreibst,
+verschaffe dir einen vollständigen Blick auf die Quelle** und übernimm alles,
+was zum Nachkochen gehört:
+
+- **Fotos** (fertiges Gericht) → als Titelbild ins Rezept.
+- **Schaubilder / Skizzen / Diagramme** (z. B. Schichtung, Schnittführung) →
+  als Bild in den Rezepttext einbetten *oder* präzise beschreiben — niemals
+  stillschweigend fallen lassen.
+- **Maße, Mengen, Formeln, Temperaturen, Zeiten, Reihenfolgen, Warnhinweise** →
+  wörtlich/inhaltsgetreu übernehmen.
+
+Fasse **nicht zusammen** und **vereinfache nicht**. Fehlt eine Angabe wirklich,
+kennzeichne das in „Notizen" — rate sie nicht. Prüfe am Ende: Ist jede Zutat,
+jeder Schritt, jedes Maß und jede Abbildung aus der Quelle im Rezept vertreten?
 
 ## Ablauf
 
-1. **Inbox lesen.** Hole die offenen Issues mit Label `import` aus dem Repo
-   (GitHub-MCP: `list_issues` mit `state: OPEN`, `labels: ["import"]`, Repo
-   `77Striker77/CookBook_AI`). **Falls das leer ist**, zusätzlich alle offenen
-   Issues listen und die als Einreichung behandeln, deren Body die Formular-
-   Überschriften enthält (`### Link …`, `### … oder Foto / Scan`) — das Label
-   fehlt manchmal. Gibt es gar nichts, dem User Bescheid geben und stoppen.
-   Zeig dem User kurz die Liste (Nummer + Titel), bevor du loslegst.
+### 1. Inbox lesen
+Offene Issues mit Label `import` holen (GitHub-MCP: `list_issues`, `state: OPEN`,
+`labels: ["import"]`, Repo `77Striker77/CookBook_AI`). **Ist das leer**,
+zusätzlich alle offenen Issues listen und die als Einreichung behandeln, deren
+Body die Formular-Überschriften enthält (`### Link …`, `### … oder Foto / Scan`)
+— das Label fehlt manchmal. Gibt es gar nichts, dem User Bescheid geben und
+stoppen. Zeig dem User kurz die Liste (Nummer + Titel), bevor du loslegst.
 
-2. **Pro Issue die Quelle auswerten** (Felder aus dem Issue-Body: „Link", „Foto
-   / Scan", „Notiz"):
-   - **Web-Link:** Seite mit WebFetch holen. Bevorzugt `Recipe`-JSON-LD
-     (Schema.org) verwenden; sonst aus dem Seitentext extrahieren.
-   - **Foto / Scan / PDF:** Die Anhang-URL im Issue-Body zeigt auf
-     `github.com/user-attachments/…`. Direktes `curl` darauf wird vom Proxy
-     geblockt — stattdessen **WebFetch** auf die URL aufrufen; sie liefert einen
-     Redirect auf eine signierte `objects.githubusercontent.com`-URL (ca. 5 Min
-     gültig). Diese signierte URL dann mit `curl -sSL` nach
-     `kochbuch/anhang/<slug>-scan.<ext>` laden.
-     - **Bild** (jpg/png): mit dem Read-Tool öffnen und auswerten (auch Handschrift).
-     - **PDF**: hat es Text, `pdftotext -layout <datei> -` nutzen; ist es ein
-       reiner Scan, mit dem Read-Tool (Seiten als Bild) lesen. Fehlt `pdftotext`/
-       `pdftoppm`, einmal `apt-get update && apt-get install -y poppler-utils`.
-       Ein PDF **nicht** als `bild:` setzen (nur echte Bilder erlaubt) — im Text
-       auf die Scan-Datei verweisen.
-   - **Instagram-Reel:** Aus Caption/Beschreibung arbeiten, soweit vorhanden.
-     Reicht das nicht (Info nur im Video/Ton), das Rezept **nicht raten** —
-     im Issue nachfragen bzw. als offen kennzeichnen und überspringen.
-   - **Notiz** immer mitberücksichtigen (Portionen, Änderungen, Kontext).
+### 2. Quelle vollständig sichten
+Felder aus dem Issue-Body: „Link", „Foto / Scan", „Notiz". Die Notiz immer
+mitberücksichtigen (Portionen, Änderungen, Kontext).
 
-3. **Ins Schema übersetzen.** Schreibe `kochbuch/rezepte/<slug>.md` nach
-   `_meta/schema.md`: Pflichtfelder `titel`, `kategorie`, `portionen`,
-   `zutaten`. Zutaten als lesbare Zeilen `<Menge> <Einheit> <Zutat>, <Notiz>`;
-   Zwischenüberschriften als `# …`. `quelle.typ`/`quelle.url` setzen,
-   `status: entwurf`. Titelbild (falls vorhanden) als `anhang/<slug>.<ext>`
-   ablegen und `bild:` setzen. **Nichts erfinden** — Unklares in „Notizen"
-   kennzeichnen.
+**Anhang herunterladen** (Foto/Scan/PDF): Die URL im Body zeigt auf
+`github.com/user-attachments/…`. Direktes `curl` blockt der Proxy — stattdessen
+**WebFetch** auf die URL; sie liefert einen Redirect auf eine signierte
+`objects.githubusercontent.com`-URL (ca. 5 Min gültig). Diese dann mit
+`curl -sSL` nach `kochbuch/anhang/<slug>-scan.<ext>` laden. Werkzeuge einmalig:
+`apt-get update && apt-get install -y poppler-utils` (für PDFs).
 
-4. **Zutaten normalisieren.** Neue, sinnvolle Varianten in `synonyme.yaml`
-   ergänzen (z. B. „Kirschtomaten" → `Tomaten`), damit Verlinkung und
-   Vorrats-Abgleich sauber bleiben.
+Je nach Typ:
 
-5. **Prüfen.** `npm run build` laufen lassen — der Build validiert das Schema.
-   Fehler beheben, bis grün. Slugs unter `dist/zutat` kurz gegen `synonyme.yaml`
-   prüfen (überraschende Doppel-Slugs = fehlendes Synonym).
+- **PDF:** **Jede Seite als Bild rendern und ansehen** — nicht auf `pdftotext`
+  verlassen (verliert Fotos, Schaubilder, Layout):
+  `pdftoppm -png -r 140 <scan.pdf> /tmp/seite` → jede `seite-*.png` mit dem
+  Read-Tool öffnen. Für exakte Wortlaute zusätzlich `pdftotext -layout` nutzen.
+- **Foto / Scan (jpg/png):** mit dem Read-Tool öffnen und auswerten (auch
+  Handschrift).
+- **Web-Link:** Seite mit WebFetch holen; bevorzugt `Recipe`-JSON-LD
+  (Schema.org), sonst Seitentext. Das **Titelfoto** der Seite (og:image oder
+  Hauptbild) als Bild mitnehmen (siehe Schritt 3).
+- **Instagram-Reel:** aus Caption/Beschreibung, soweit vorhanden. Steckt die
+  Info nur im Video/Ton, **nicht raten** — im Issue nachfragen bzw. offen lassen.
 
-6. **Übernehmen.** Auf dem aktuellen Arbeitsbranch committen und pushen (der
-   User ist beim Review in dieser Session dabei — kein extra PR nötig, außer der
-   User wünscht es).
+### 3. Bilder ins Rezept holen
+Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze das.
 
-7. **Issue schließen.** Jedes eingearbeitete Issue mit kurzem Kommentar
-   schließen (GitHub-MCP: `add_issue_comment` + `issue_write`/close), z. B.
-   „Eingepflegt als `rezepte/<slug>.md` ✅". Konnte etwas nicht ausgewertet
-   werden, Issue **offen lassen** und im Kommentar sagen, was fehlt.
+- **Titelbild:** das Foto des fertigen Gerichts.
+  - *PDF:* die Foto-Region der Seite ausschneiden, z. B.
+    `pdftoppm -jpeg -r 200 -f <seite> -l <seite> -x <X> -y <Y> -W <B> -H <H> -singlefile <scan.pdf> kochbuch/anhang/<slug>` (A4 @ 200 dpi ≈ 1654×2339 px).
+    Den Ausschnitt mit dem Read-Tool prüfen und die Koordinaten anpassen, bis er sitzt.
+  - *Web:* das Bild von der og:image-/Hauptbild-URL nach `kochbuch/anhang/<slug>.jpg` laden.
+  - Im Frontmatter `bild: ../anhang/<slug>.jpg` setzen (Pfad **relativ zur
+    Rezeptdatei**, mit `../`). Ein **PDF nie** als `bild` — nur echte Bilder
+    (jpg/png/webp).
+- **Schaubilder / Skizzen** aus dem Original genauso ausschneiden
+  (`pdftoppm … -png …`) nach `kochbuch/anhang/<slug>-<name>.png` und im Rezept-
+  text als Markdown-Bild einbetten: `![kurze Beschreibung](../anhang/<slug>-<name>.png)`.
 
-8. **Zusammenfassen.** Dem User am Ende auflisten: X eingepflegt, Y offen
-   geblieben (mit Grund).
+### 4. Ins Schema übersetzen
+`kochbuch/rezepte/<slug>.md` nach `_meta/schema.md`: Pflichtfelder `titel`,
+`kategorie`, `portionen`, `zutaten`. Zutaten als lesbare Zeilen
+`<Menge> <Einheit> <Zutat>, <Notiz>`; Zwischenüberschriften als `# …` (in YAML
+quoten). Zubereitung als klare, nummerierungsfreie Schritte — **mit** allen
+Maßen, Temperaturen, Formeln und eingebetteten Schaubildern. `quelle.typ`/`.url`/
+`.autor` setzen, `status: entwurf`. Kategorie/Schwierigkeit nur aus den erlaubten
+Werten. In „Notizen" auf die Original-Vorlage (`anhang/<slug>-scan.*`) verweisen
+und Unklares kennzeichnen.
+
+### 5. Zutaten normalisieren
+Neue, sinnvolle Varianten in `synonyme.yaml` ergänzen (z. B. „Schoko-Kuvertüre" →
+`Schokolade`), damit Verlinkung und Vorrats-Abgleich sauber bleiben.
+
+### 6. Prüfen
+`npm run build` (im Projekt-Root!) laufen lassen — validiert das Schema und
+verarbeitet die Bilder. Fehler beheben, bis grün. Kurz `dist/zutat` gegen
+`synonyme.yaml` prüfen (überraschende Doppel-Slugs = fehlendes Synonym).
+
+### 7. Übernehmen & Issue schließen
+Auf dem aktuellen Arbeitsbranch committen und pushen. Jedes eingearbeitete Issue
+mit kurzem Kommentar schließen (GitHub-MCP: `add_issue_comment` + `issue_write`
+`state: closed`), z. B. „Eingepflegt als `rezepte/<slug>.md` ✅". Konnte etwas
+nicht ausgewertet werden, Issue **offen lassen** und im Kommentar sagen, was fehlt.
+
+### 8. Zusammenfassen
+Dem User auflisten: X eingepflegt (mit den übernommenen Bildern/Schaubildern),
+Y offen geblieben (mit Grund).
 
 ## Wichtig
 
-- Kategorie/Schwierigkeit nur aus den erlaubten Werten (siehe schema.md).
-- Bei mehreren Issues nacheinander sauber abarbeiten; ein kaputtes Rezept darf
-  den Build nicht rot lassen (vor dem Push muss `npm run build` grün sein).
-- Keine stillen Mengen-Änderungen: Unsicheres dem User vorlegen.
+- **Vollständigkeit vor Kürze.** Lieber ein langes, exaktes Rezept als eine
+  hübsche Vereinfachung. Schaubilder und Maße sind Teil des Rezepts.
+- Keine stillen Mengen- oder Reihenfolge-Änderungen: Unsicheres dem User vorlegen.
+- Ein kaputtes Rezept darf den Build nicht rot lassen (vor dem Push grün).
+- Shell-Arbeitsverzeichnis im Blick behalten — `npm run build` gehört ins
+  Projekt-Root, nicht nach `kochbuch/anhang`.

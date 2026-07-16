@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
 import { parseZutaten, formatMenge } from '../../lib/zutaten';
@@ -46,6 +47,12 @@ const quelleText: Record<string, string> = {
     <div class="tagrow">
       {d.tags.map((t) => <a class="tag" href={`${url('/')}?tag=${t}`}>#{t}</a>)}
     </div>
+
+    {d.bild && (
+      <figure class="hero-bild">
+        <Image src={d.bild} alt={d.titel} widths={[480, 800, 1200]} sizes="(max-width: 780px) 100vw, 720px" />
+      </figure>
+    )}
 
     <div class="layout">
       <aside class="zutaten-box" id="zbox" data-basis={d.portionen}>

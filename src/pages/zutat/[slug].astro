@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
 import { parseZutaten } from '../../lib/zutaten';
@@ -42,6 +43,7 @@ rezepte.sort((a: any, b: any) => a.data.titel.localeCompare(b.data.titel, 'de'))
       {rezepte.map((r: any) => (
         <a class="rcard" href={url(`/rezept/${r.id}`)}>
           <div class="thumb" style={`background:${verlauf(r.data.kategorie)}`}>
+            {r.data.bild && <Image src={r.data.bild} alt={r.data.titel} widths={[260, 460]} sizes="260px" />}
             <span class="kat">{katLabel(r.data.kategorie)}</span>
           </div>
           <div class="body">
