@@ -1,8 +1,11 @@
-name: Rezept importieren
+name: Rezept importieren (optional)
 
-# Wird ausgelöst, sobald ein Rezept über den Briefkasten (Issue-Formular mit
-# Label "import") eingeworfen wird. Wertet die Quelle aus und legt das Rezept
-# als Pull Request an.
+# STANDARDMÄSSIG AUS. Der normale Weg ist der /inbox-Skill in einer
+# Claude-Code-Session (kein API-Key nötig) — siehe .claude/skills/inbox/.
+#
+# Diese Action ist nur der optionale Vollautomatik-Schalter: Setze die
+# Repository-Variable AUTO_IMPORT = true UND hinterlege das Secret
+# ANTHROPIC_API_KEY, dann werden Briefkasten-Issues automatisch zu PRs.
 on:
   issues:
     types: [opened, labeled]
@@ -14,8 +17,8 @@ permissions:
 
 jobs:
   import:
-    # Nur für Briefkasten-Issues.
-    if: contains(github.event.issue.labels.*.name, 'import')
+    # Nur wenn ausdrücklich aktiviert und es ein Briefkasten-Issue ist.
+    if: vars.AUTO_IMPORT == 'true' && contains(github.event.issue.labels.*.name, 'import')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

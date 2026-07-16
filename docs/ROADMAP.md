@@ -22,20 +22,21 @@ erst das Fundament fühlen, dann die Import-Maschine bauen.
 **Offen / Entscheidungen:** Repo privat? (→ ggf. Cloudflare Pages statt
 GitHub Pages). Eigene Domain? Echte Lieblingsrezepte als Startbestand.
 
-## Phase 2 — Briefkasten ✅ *(erledigt)*
+## Phase 2 — Briefkasten (Inbox + Skill) ✅ *(erledigt)*
 
-**Ziel:** Die zweite Person kann selbstständig einreichen.
+**Ziel:** Die zweite Person kann selbstständig einreichen; du pflegst per Skill ein.
 
-- [x] Issue-Formular „Neues Rezept“ (Link, Foto-Upload, Notiz)
+- [x] Issue-Formular „Neues Rezept“ (Link, Foto-Upload, Notiz) als **Inbox**
 - [x] „+ Rezept“-Button auf der Website → Formular
-- [x] Import-Action: Web-Links (Schema.org bevorzugt, sonst Claude-Extraktion)
-- [x] Import-Action: Scans/Fotos (Claude Vision)
-- [x] PR-Erstellung mit Vorschau-Kommentar im Issue
-- [x] Schema-Check als PR-Gate (Build-Validierung)
+- [x] `/inbox`-Skill: arbeitet offene Einreichungen in einer Claude-Code-Session
+      ab (Web-Link inkl. Schema.org, Foto/Scan via Bild-Auswertung) — **kein API-Key**
+- [x] Schema-Check als Gate (Build-Validierung, CI auf PRs)
+- [x] Optionaler Vollautomatik-Schalter (Action + `AUTO_IMPORT`/`ANTHROPIC_API_KEY`),
+      standardmäßig aus
 
-**Einmalig einzurichten:** `ANTHROPIC_API_KEY` als Actions-Secret
-(Settings → Secrets and variables → Actions). Optional `CLAUDE_MODEL` als
-Variable, um das Modell (Kosten) umzustellen.
+**So läuft's:** Einreichungen sammeln sich als offene Issues (Label `import`).
+Wenn du magst, sagst du in einer Session `/inbox` — die Rezepte werden erzeugt,
+geprüft und die Issues geschlossen. Kosten: nur dein Claude-Code-Abo.
 
 ## Phase 3 — Königsdisziplin: Instagram-Reels
 

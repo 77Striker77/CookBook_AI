@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Wirf einfach einen **Link** rein *oder* lade ein **Foto/Scan** hoch — mehr musst du nicht tun.
-        Eine KI wertet die Quelle aus und legt das fertige Rezept als Vorschlag an.
+        Das landet in der Rezept-Inbox und wird beim nächsten Durchgang eingearbeitet.
   - type: input
     id: link
     attributes:

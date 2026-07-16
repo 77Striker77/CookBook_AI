@@ -34,7 +34,7 @@ src/               ← Astro-Website (liest aus dem Vault)
   content.config.ts  Schema-Validierung (Zod)
   lib/zutaten.ts     Zutaten-Parser & kanonische Verlinkung
   pages/             Startseite, Rezept-, Zutaten-, Suchseite
-.claude/skills/    ← /neues-rezept und /review-rezept
+.claude/skills/    ← /inbox, /neues-rezept, /review-rezept
 .github/workflows/ ← Build & Deploy auf GitHub Pages
 docs/              ← Konzept, Architektur, Roadmap
 ```
@@ -54,5 +54,7 @@ docs/              ← Konzept, Architektur, Roadmap
    mit striktem Schema, versioniert, exportierbar, für immer lesbar.
 2. **Alltag:** Statische Website (Astro + GitHub Pages, kostenlos) mit Suche,
    Filtern, Portionsrechner und Kochmodus — als PWA auf jedem Homescreen.
-3. **Wachstum:** Issue-Formular als Briefkasten → GitHub Action → Claude API
-   analysiert Link/Reel/Scan → fertiges Rezept als Pull Request → Review → live.
+3. **Wachstum:** „+ Rezept"-Button → Einreichung landet in einer Inbox (Issue).
+   Der `/inbox`-Skill arbeitet die Einreichungen in einer Claude-Code-Session
+   ab (Link/Foto/Scan → strukturiertes Rezept), prüft den Build, fertig — ganz
+   ohne API-Key. Vollautomatik per Claude API bleibt als optionaler Schalter.

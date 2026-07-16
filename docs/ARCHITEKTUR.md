@@ -31,28 +31,35 @@
 - **Deployment:** GitHub Action baut bei jedem Push auf `main` und deployt
   auf GitHub Pages.
 
-### Import-Pipeline (Phasen 2–3)
+### Import-Pipeline (Inbox + Skill)
 
-Auslöser: Issue mit Label `import` (erstellt über ein Issue-Formular mit
-Feldern für Link, Foto-Upload und optionale Notiz).
+**Standardweg — ohne API-Key.** Einreichungen sammeln sich als offene Issues
+(Label `import`, erstellt über das Issue-Formular mit Link, Foto-Upload, Notiz).
+Der `/inbox`-Skill (`.claude/skills/inbox/`) arbeitet sie in einer
+Claude-Code-Session ab:
 
-1. **Quellenerkennung:** Instagram / Web / Bild.
-2. **Materialbeschaffung:**
-   - *Web:* HTML laden, Schema.org-`Recipe`-JSON-LD bevorzugen.
-   - *Instagram:* `yt-dlp` lädt Video + Caption; `ffmpeg` extrahiert
-     Audio und Standbilder; Transkription via `faster-whisper` im Runner
-     (kostenlos) oder API.
-   - *Scan:* Bild aus dem Issue-Anhang.
-3. **Synthese (Claude API):** Caption + Transkript + Bilder → strukturiertes
-   Rezept nach Vault-Schema. Modell: `claude-sonnet-5` (gutes
-   Preis-Leistungs-Verhältnis für Extraktion; Vision inklusive).
-4. **PR-Erstellung:** Branch + Rezept-Datei + Titelbild + Vorschau-Kommentar
-   im Issue.
-5. **Review:** Review-Agent kommentiert Qualitätscheck (Schema, Mengen-/
-   Zeiten-Plausibilität, Duplikatsuche); Person 1 merged.
+1. **Inbox lesen:** offene `import`-Issues holen (GitHub-MCP).
+2. **Materialbeschaffung je Einreichung:**
+   - *Web:* Seite via WebFetch; Schema.org-`Recipe`-JSON-LD bevorzugt.
+   - *Foto/Scan:* Anhang mit `curl` nach `kochbuch/anhang/` laden, mit dem
+     Read-Tool als Bild auswerten (auch Handschrift).
+   - *Instagram:* aus Caption/Beschreibung, soweit vorhanden (Ton/Video → Phase 3).
+3. **Synthese in der Session** (das Session-Modell, kein API-Key): Rezept nach
+   Vault-Schema; Unklares wird markiert, nicht geraten.
+4. **Prüfen:** `npm run build` validiert das Schema; committen & pushen.
+5. **Issue schließen** mit Hinweis auf die angelegte Datei.
 
-**Fallback Instagram:** Schlägt der Auto-Download fehl, kann die Video-Datei
-direkt ins Issue-Formular hochgeladen werden — Schritt 2 entfällt, Rest identisch.
+**Kosten:** nur das Claude-Code-Abo — keine laufenden API-Kosten.
+
+**Optionaler Vollautomatik-Schalter.** Für „Button → fertiger PR ohne Session"
+existiert zusätzlich eine Action (`.github/workflows/import.yml`) mit dem
+Skript `scripts/import-rezept.mjs` (Claude API, Modell via `CLAUDE_MODEL`,
+Default `claude-opus-4-8`). **Standardmäßig aus** — aktiviert nur, wenn die
+Repository-Variable `AUTO_IMPORT=true` gesetzt und das Secret
+`ANTHROPIC_API_KEY` hinterlegt ist.
+
+**Fallback Instagram:** Reicht die Caption nicht, das Video als Datei ins
+Formular hochladen — die Bild-/Textauswertung ab dort ist identisch.
 
 ### Agents & Skills (im Repo unter `.claude/`)
 
@@ -61,7 +68,8 @@ automatisiert via GitHub Actions.
 
 | Skill | Zweck |
 |---|---|
-| `/neues-rezept <url\|datei>` | Manueller Import einer Quelle in einer Session |
+| `/inbox` | Arbeitet alle offenen Einreichungen (Label `import`) in einer Session ab |
+| `/neues-rezept <url\|datei>` | Manueller Import einer einzelnen Quelle |
 | `/review-rezept [datei]` | Schema-, Plausibilitäts- und Duplikat-Check |
 | `/koch-was [zutaten]` | Vorrats-Abgleich → Vorschläge aus dem Kochbuch |
 | `/wochenplan` | Ausgewogener Wochenplan + Einkaufsliste |

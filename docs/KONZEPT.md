@@ -21,7 +21,7 @@ werden müssen. Gewünscht ist:
 |---|---|
 | Hosting | Statische Website aus dem Repo (GitHub Pages, kostenlos) |
 | Rolle von Obsidian | Datenformat + Power-Tool; Alltag läuft über den Browser |
-| KI-Import (Reels, Scans) | Ja, Claude API mit kleinen laufenden Kosten (~1–5 ct/Import) |
+| KI-Import (Reels, Scans) | Inbox + `/inbox`-Skill in einer Claude-Code-Session (kein API-Key, keine laufenden Kosten). Vollautomatik per API bleibt als optionaler Schalter. |
 | Nutzerprofil | Eine Person technisch (verwaltet Git/Reviews), eine nicht (bekommt den einfachen Einreich-Weg) |
 
 ## Die drei Säulen
@@ -58,9 +58,11 @@ Neue Rezepte werden über ein GitHub-Issue-Formular eingeworfen (verlinkt als
 | **Web-Link** | Schema.org-Rezeptdaten direkt lesen; sonst KI-Extraktion aus der Seite |
 | **Scan/Foto** | Claude Vision liest auch Handschrift und strukturiert ins Schema |
 
-Der Import-Agent erstellt einen Pull Request, ein Review-Agent prüft Schema,
-Plausibilität und Duplikate, die technische Person merged — 2 Minuten später
-ist das Rezept auf allen Geräten live.
+Die Einreichungen landen als offene Issues in einer **Inbox**. Beim nächsten
+Durchgang sagt die technische Person in einer Claude-Code-Session `/inbox` —
+die Rezepte werden ausgewertet, ins Schema gebracht, der Build prüft sie, und
+die Issues werden geschlossen. Kein API-Key, keine laufenden Kosten. (Ein
+optionaler Vollautomatik-Schalter über die Claude API bleibt für später drin.)
 
 ## Später: das Küchen-Hirn
 
