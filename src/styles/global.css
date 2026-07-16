@@ -65,6 +65,8 @@ img { max-width: 100%; display: block; }
 .nav { display: flex; gap: 4px; margin-left: auto; align-items: center; }
 .nav a { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 550; padding: 7px 12px; border-radius: 8px; }
 .nav a:hover { background: var(--surface); color: var(--ink); }
+.nav a.nav-add { background: var(--green); color: var(--green-ink); font-weight: 650; }
+.nav a.nav-add:hover { background: color-mix(in srgb, var(--green) 88%, #000); color: var(--green-ink); }
 .theme-toggle { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; width: 38px; height: 38px; cursor: pointer; font-size: 1rem; }
 
 /* ---- Startseite ---- */

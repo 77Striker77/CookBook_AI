@@ -1,0 +1,26 @@
+name: Rezept prüfen
+
+# Automatischer Qualitäts-Check auf jedem Pull Request: der Build validiert das
+# Schema aller Rezepte (Zod). Eine kaputte Rezept-Datei lässt den Check
+# fehlschlagen und kann so nicht gemerged werden.
+on:
+  pull_request:
+    paths:
+      - "kochbuch/**"
+      - "src/**"
+      - "package.json"
+      - "package-lock.json"
+      - "astro.config.mjs"
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Schema & Build prüfen
+        run: npm run build

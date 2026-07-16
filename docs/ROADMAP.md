@@ -22,16 +22,20 @@ erst das Fundament fühlen, dann die Import-Maschine bauen.
 **Offen / Entscheidungen:** Repo privat? (→ ggf. Cloudflare Pages statt
 GitHub Pages). Eigene Domain? Echte Lieblingsrezepte als Startbestand.
 
-## Phase 2 — Briefkasten
+## Phase 2 — Briefkasten ✅ *(erledigt)*
 
 **Ziel:** Die zweite Person kann selbstständig einreichen.
 
-- [ ] Issue-Formular „Neues Rezept“ (Link, Foto-Upload, Notiz)
-- [ ] „+“-Button auf der Website → vorausgefülltes Formular
-- [ ] Import-Action: Web-Links (Schema.org, sonst Claude-Extraktion)
-- [ ] Import-Action: Scans/Fotos (Claude Vision)
-- [ ] PR-Erstellung mit Vorschau-Kommentar im Issue
-- [ ] Review-Agent als PR-Check
+- [x] Issue-Formular „Neues Rezept“ (Link, Foto-Upload, Notiz)
+- [x] „+ Rezept“-Button auf der Website → Formular
+- [x] Import-Action: Web-Links (Schema.org bevorzugt, sonst Claude-Extraktion)
+- [x] Import-Action: Scans/Fotos (Claude Vision)
+- [x] PR-Erstellung mit Vorschau-Kommentar im Issue
+- [x] Schema-Check als PR-Gate (Build-Validierung)
+
+**Einmalig einzurichten:** `ANTHROPIC_API_KEY` als Actions-Secret
+(Settings → Secrets and variables → Actions). Optional `CLAUDE_MODEL` als
+Variable, um das Modell (Kosten) umzustellen.
 
 ## Phase 3 — Königsdisziplin: Instagram-Reels
 

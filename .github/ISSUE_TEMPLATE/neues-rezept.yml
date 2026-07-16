@@ -1,0 +1,33 @@
+name: "🥕 Neues Rezept"
+description: "Wirf ein Rezept in den Briefkasten — per Link, Foto oder Text. Der Rest passiert automatisch."
+title: "[Rezept] "
+labels: ["import"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Wirf einfach einen **Link** rein *oder* lade ein **Foto/Scan** hoch — mehr musst du nicht tun.
+        Eine KI wertet die Quelle aus und legt das fertige Rezept als Vorschlag an.
+  - type: input
+    id: link
+    attributes:
+      label: "Link (Instagram-Reel, Blog, YouTube …)"
+      placeholder: "https://www.instagram.com/reel/…"
+    validations:
+      required: false
+  - type: textarea
+    id: bild
+    attributes:
+      label: "… oder Foto / Scan"
+      description: "Zieh ein Foto vom ausgedruckten Rezept oder einen Screenshot hier hinein."
+      placeholder: "Bild hier ablegen (GitHub lädt es automatisch hoch)."
+    validations:
+      required: false
+  - type: textarea
+    id: notiz
+    attributes:
+      label: "Notiz (optional)"
+      description: "Alles, was hilft — z. B. „das, was wir bei Anna gegessen haben“, Anzahl Portionen, Änderungen."
+      placeholder: "Optional …"
+    validations:
+      required: false
