@@ -1,0 +1,30 @@
+# Zutaten-Synonyme: Varianten -> kanonischer Name.
+# Der Zutaten-Parser mappt jede erkannte Zutat über diese Tabelle auf einen
+# einheitlichen Namen, damit "Tomaten", "gehackte Tomaten" und "Dose Tomaten"
+# alle auf dieselbe Zutaten-Seite und denselben Vorrats-Abgleich zeigen.
+#
+# Der Bibliothekar-Skill pflegt diese Datei und meldet neue, unbekannte Zutaten.
+# Format:  kanonischer Name:  [variante, variante, ...]
+
+Tomaten: [tomate, gehackte tomaten, dose tomaten, passierte tomaten, cherrytomaten, kirschtomaten]
+Zwiebel: [zwiebeln, gemüsezwiebel, rote zwiebel, rote zwiebeln]
+Knoblauch: [knoblauchzehe, knoblauchzehen, knofi]
+Olivenöl: [natives olivenöl, olivenöl extra vergine]
+Ei: [eier, hühnerei, hühnereier]
+Paprika: [paprikaschote, paprikaschoten, rote paprika, gelbe paprika, spitzpaprika]
+Petersilie: [glatte petersilie, krause petersilie]
+Feta: [fetakäse, schafskäse]
+Kreuzkümmel: [cumin, gemahlener kreuzkümmel]
+Paprikapulver: [paprika edelsüß, edelsüßes paprikapulver, geräuchertes paprikapulver]
+Salz: [meersalz, speisesalz]
+Pfeffer: [schwarzer pfeffer, pfeffer aus der mühle]
+Nudeln: [pasta, spaghetti, penne, fusilli, tagliatelle]
+Erbsen: [tk-erbsen, tiefkühlerbsen, gartenerbsen]
+Parmesan: [parmigiano, grana padano, hartkäse]
+Linsen: [tellerlinsen, braune linsen, berglinsen]
+Kartoffeln: [kartoffel, festkochende kartoffeln, mehligkochende kartoffeln]
+Karotten: [karotte, möhre, möhren, mohrrüben]
+Gemüsebrühe: [brühe, gemüsebrühe instant, gemüsefond]
+Zitrone: [bio-zitrone, zitronen, zitronensaft, zitronenabrieb]
+Butter: [deutsche markenbutter, süßrahmbutter]
+Mehl: [weizenmehl, weizenmehl type 405, dinkelmehl]

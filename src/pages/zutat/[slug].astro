@@ -1,0 +1,58 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/url';
+import { parseZutaten } from '../../lib/zutaten';
+import { verlauf, katLabel, zeitLabel } from '../../lib/darstellung';
+
+export async function getStaticPaths() {
+  const rezepte = await getCollection('rezepte');
+
+  // Kanonische Zutat -> Liste der Rezepte, die sie verwenden.
+  const index = new Map<string, { name: string; rezepte: any[] }>();
+  for (const r of rezepte) {
+    const gesehen = new Set<string>();
+    for (const z of parseZutaten(r.data.zutaten)) {
+      if (gesehen.has(z.slug)) continue;
+      gesehen.add(z.slug);
+      if (!index.has(z.slug)) index.set(z.slug, { name: z.kanonisch, rezepte: [] });
+      index.get(z.slug)!.rezepte.push(r);
+    }
+  }
+
+  return [...index.entries()].map(([slug, eintrag]) => ({
+    params: { slug },
+    props: { name: eintrag.name, rezepte: eintrag.rezepte },
+  }));
+}
+
+const { name, rezepte } = Astro.props;
+rezepte.sort((a: any, b: any) => a.data.titel.localeCompare(b.data.titel, 'de'));
+---
+
+<Base titel={name} beschreibung={`Rezepte mit ${name}`}>
+  <div class="wrap zutat-head">
+    <p class="crumb"><a href={url('/')}>Rezepte</a> › Zutat</p>
+    <h1>{name}</h1>
+    <p>{rezepte.length} {rezepte.length === 1 ? 'Rezept verwendet' : 'Rezepte verwenden'} diese Zutat.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="grid" style="padding-top:16px">
+      {rezepte.map((r: any) => (
+        <a class="rcard" href={url(`/rezept/${r.id}`)}>
+          <div class="thumb" style={`background:${verlauf(r.data.kategorie)}`}>
+            <span class="kat">{katLabel(r.data.kategorie)}</span>
+          </div>
+          <div class="body">
+            <span class="title">{r.data.titel}</span>
+            <span class="meta">
+              {zeitLabel(r.data.zeit_gesamt) && <span>{zeitLabel(r.data.zeit_gesamt)}</span>}
+              <span>{r.data.portionen} Portionen</span>
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>

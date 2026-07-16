@@ -1,0 +1,65 @@
+---
+import '../styles/global.css';
+import { url } from '../lib/url';
+
+interface Props {
+  titel?: string;
+  beschreibung?: string;
+}
+const { titel, beschreibung } = Astro.props;
+const seitenTitel = titel ? `${titel} · Unser Kochbuch` : 'Unser Kochbuch';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{seitenTitel}</title>
+    {beschreibung && <meta name="description" content={beschreibung} />}
+    <meta name="theme-color" content="#3D7A4E" />
+    <link rel="manifest" href={url('/manifest.webmanifest')} />
+    <link rel="icon" href={url('/icon.svg')} type="image/svg+xml" />
+    <script is:inline>
+      // Theme früh setzen, damit kein Flackern entsteht.
+      (() => {
+        const t = localStorage.getItem('theme');
+        if (t) document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="logo" href={url('/')}>Unser <span>Kochbuch</span></a>
+        <nav class="nav">
+          <a href={url('/')}>Rezepte</a>
+          <a href={url('/suche')}>Suche</a>
+          <button class="theme-toggle" id="themeToggle" aria-label="Hell/Dunkel umschalten">◐</button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <span>Unser Kochbuch · gemeinsam gesammelt</span>
+        <span>{new Date().getFullYear()}</span>
+      </div>
+    </footer>
+
+    <script is:inline>
+      const tgl = document.getElementById('themeToggle');
+      tgl?.addEventListener('click', () => {
+        const cur = document.documentElement.dataset.theme
+          || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+    </script>
+  </body>
+</html>

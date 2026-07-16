@@ -1,0 +1,124 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/url';
+import { parseZutaten, formatMenge } from '../../lib/zutaten';
+import { katLabel, zeitLabel, verlauf } from '../../lib/darstellung';
+
+export async function getStaticPaths() {
+  const rezepte = await getCollection('rezepte');
+  return rezepte.map((r) => ({ params: { slug: r.id }, props: { r } }));
+}
+
+const { r } = Astro.props;
+const d = r.data;
+const { Content } = await render(r);
+const zutaten = parseZutaten(d.zutaten);
+
+// Flache Anzeige-Liste: Gruppen-Überschrift einfügen, wenn sich die Gruppe ändert.
+type Zeile = { typ: 'grp'; text: string } | { typ: 'item'; z: (typeof zutaten)[number] };
+const anzeige: Zeile[] = [];
+let letzteGruppe: string | null = null;
+for (const z of zutaten) {
+  if (z.gruppe && z.gruppe !== letzteGruppe) anzeige.push({ typ: 'grp', text: z.gruppe });
+  letzteGruppe = z.gruppe;
+  anzeige.push({ typ: 'item', z });
+}
+
+const quelleText: Record<string, string> = {
+  instagram: 'Instagram', web: 'Web', scan: 'Scan', eigen: 'Eigenkreation', familie: 'Familienrezept',
+};
+---
+
+<Base titel={d.titel} beschreibung={`${katLabel(d.kategorie)} · ${d.portionen} Portionen`}>
+  <div class="wrap recipe" data-pagefind-body>
+    <p class="crumb"><a href={url('/')}>Rezepte</a> › {katLabel(d.kategorie)}</p>
+    <h1>{d.titel}</h1>
+
+    <div class="facts">
+      <span class="fact"><b>{d.portionen}</b> Portionen</span>
+      {zeitLabel(d.zeit_gesamt) && <span class="fact">⏱ {zeitLabel(d.zeit_gesamt)}</span>}
+      {d.schwierigkeit && <span class="fact">{d.schwierigkeit}</span>}
+      {d.küche && <span class="fact">{d.küche}</span>}
+      {d.bewertung && <span class="fact" style="color:var(--saffron)">{'★'.repeat(d.bewertung)}</span>}
+    </div>
+
+    <div class="tagrow">
+      {d.tags.map((t) => <a class="tag" href={`${url('/')}?tag=${t}`}>#{t}</a>)}
+    </div>
+
+    <div class="layout">
+      <aside class="zutaten-box" id="zbox" data-basis={d.portionen}>
+        <h2>Zutaten</h2>
+        <div class="portionen">
+          <span class="lbl">Portionen</span>
+          <div class="stepper">
+            <button id="minus" aria-label="weniger">−</button>
+            <span class="val" id="pval">{d.portionen}</span>
+            <button id="plus" aria-label="mehr">+</button>
+          </div>
+        </div>
+        <ul class="zutaten">
+          {anzeige.map((zeile) => zeile.typ === 'grp'
+            ? <li class="grp">{zeile.text}</li>
+            : (
+              <li>
+                <span
+                  class="menge"
+                  data-base={zeile.z.skalierbar ? String(zeile.z.menge) : ''}
+                  data-basemax={zeile.z.skalierbar && zeile.z.mengeMax !== null ? String(zeile.z.mengeMax) : ''}
+                  data-einheit={zeile.z.einheit ?? ''}
+                >{[
+                  zeile.z.menge !== null ? (zeile.z.mengeMax ? `${formatMenge(zeile.z.menge)}–${formatMenge(zeile.z.mengeMax)}` : formatMenge(zeile.z.menge)) : '',
+                  zeile.z.einheit ?? '',
+                ].filter(Boolean).join(' ')}</span>
+                <span class="znam"><a href={url(`/zutat/${zeile.z.slug}`)}>{zeile.z.name}</a>{zeile.z.notiz && <span class="znotiz">, {zeile.z.notiz}</span>}</span>
+              </li>
+            ))}
+        </ul>
+      </aside>
+
+      <div class="zubereitung reading">
+        <Content />
+        <p class="quelle">
+          Quelle: {quelleText[d.quelle?.typ ?? 'eigen']}
+          {d.quelle?.autor && ` · ${d.quelle.autor}`}
+          {d.quelle?.url && <> · <a href={d.quelle.url} rel="noreferrer">Original</a></>}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const box = document.getElementById('zbox');
+      const basis = Number(box.dataset.basis) || 1;
+      let ziel = basis;
+      const pval = document.getElementById('pval');
+      const mengen = [...box.querySelectorAll('.menge')];
+
+      function fmt(w) {
+        if (w === null || Number.isNaN(w)) return '';
+        const ganz = Math.floor(w), rest = w - ganz;
+        const br = [[0.25,'¼'],[0.5,'½'],[0.75,'¾'],[1/3,'⅓'],[2/3,'⅔']];
+        for (const [f, s] of br) if (Math.abs(rest - f) < 0.02) return ganz > 0 ? `${ganz} ${s}` : s;
+        return String(Math.round(w * 100) / 100).replace('.', ',');
+      }
+      function render() {
+        const faktor = ziel / basis;
+        for (const el of mengen) {
+          const b = el.dataset.base;
+          if (b === '') continue;
+          const einheit = el.dataset.einheit;
+          const bmax = el.dataset.basemax;
+          let txt = fmt(Number(b) * faktor);
+          if (bmax) txt += '–' + fmt(Number(bmax) * faktor);
+          el.textContent = [txt, einheit].filter(Boolean).join(' ');
+        }
+        pval.textContent = ziel;
+      }
+      document.getElementById('plus').addEventListener('click', () => { ziel++; render(); });
+      document.getElementById('minus').addEventListener('click', () => { if (ziel > 1) { ziel--; render(); } });
+    })();
+  </script>
+</Base>

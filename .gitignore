@@ -1,0 +1,14 @@
+# Build & Dependencies
+node_modules/
+dist/
+.astro/
+
+# Obsidian (Vault-App-Einstellungen, nicht die Inhalte)
+kochbuch/.obsidian/workspace*.json
+kochbuch/.obsidian/cache
+
+# System
+.DS_Store
+*.log
+.env
+.env.*

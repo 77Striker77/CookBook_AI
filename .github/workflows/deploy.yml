@@ -1,0 +1,48 @@
+name: Website bauen & deployen
+
+# Baut die Website aus dem Vault und veröffentlicht sie auf GitHub Pages,
+# sobald etwas auf main landet (also nach dem Merge eines Rezept-PRs).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nur ein Deployment gleichzeitig.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Für GitHub Pages als Projektseite unter <user>.github.io/CookBook_AI.
+      # Bei eigener Domain: BASE_PATH leeren und SITE_URL anpassen.
+      SITE_URL: https://77striker77.github.io
+      BASE_PATH: /CookBook_AI
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

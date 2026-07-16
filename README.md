@@ -9,8 +9,35 @@ erledigen KI-Agents.
 
 ## Status
 
-🚧 **Konzeptphase.** Dieses Repo enthält aktuell das System-Design; die Umsetzung
-folgt nach Freigabe des Pitches (siehe [Roadmap](docs/ROADMAP.md), Phase 1).
+✅ **Phase 1 (Fundament) steht.** Vault-Struktur, validiertes Schema,
+Zutaten-Parser mit automatischer Verlinkung, 3 Startrezepte und die Website
+(Grid, Filter, Portionsrechner, Zutaten-Seiten, Volltextsuche, PWA) sind da und
+bauen grün. Als Nächstes: Phase 2 (Rezept-Briefkasten). Siehe [Roadmap](docs/ROADMAP.md).
+
+## Lokal starten
+
+```bash
+npm install
+npm run dev      # Vorschau unter http://localhost:4321
+npm run build    # baut die Website nach dist/ (inkl. Suchindex)
+```
+
+Die Rezepte liegen in `kochbuch/rezepte/` — das ist gleichzeitig der
+Obsidian-Vault. Öffne den Ordner `kochbuch/` in Obsidian, um zu stöbern und zu
+verwalten.
+
+## Projektstruktur
+
+```
+kochbuch/          ← Obsidian-Vault = Datenbasis (Rezepte, Vorrat, Meta)
+src/               ← Astro-Website (liest aus dem Vault)
+  content.config.ts  Schema-Validierung (Zod)
+  lib/zutaten.ts     Zutaten-Parser & kanonische Verlinkung
+  pages/             Startseite, Rezept-, Zutaten-, Suchseite
+.claude/skills/    ← /neues-rezept und /review-rezept
+.github/workflows/ ← Build & Deploy auf GitHub Pages
+docs/              ← Konzept, Architektur, Roadmap
+```
 
 ## Dokumente
 

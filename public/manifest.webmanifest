@@ -1,0 +1,12 @@
+{
+  "name": "Unser Kochbuch",
+  "short_name": "Kochbuch",
+  "description": "Unser gemeinsames digitales Kochbuch",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#FBFAF7",
+  "theme_color": "#3D7A4E",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
