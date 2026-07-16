@@ -65,7 +65,11 @@ Je nach Typ:
 ### 3. Bilder ins Rezept holen
 Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze das.
 
-- **Titelbild:** das Foto des fertigen Gerichts.
+- **Titelbild:** **bevorzugt ein echtes Foto** des fertigen Gerichts, wenn die
+  Quelle eines hat (bei einem Kuchen z. B. ein appetitlicher Querschnitt). Die
+  Website rahmt das Titelbild in einem festen Seitenverhältnis (`object-fit:
+  cover`) — also nicht vorab verzerren/quetschen, lieber sauber **landscape**
+  zuschneiden. Nur wenn kein brauchbares Foto existiert, eine Illustration bauen.
   - *PDF:* die Foto-Region der Seite ausschneiden, z. B.
     `pdftoppm -jpeg -r 200 -f <seite> -l <seite> -x <X> -y <Y> -W <B> -H <H> -singlefile <scan.pdf> kochbuch/anhang/<slug>` (A4 @ 200 dpi ≈ 1654×2339 px).
     Den Ausschnitt mit dem Read-Tool prüfen und die Koordinaten anpassen, bis er sitzt.
