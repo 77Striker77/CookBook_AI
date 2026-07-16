@@ -4,7 +4,7 @@ name: Website bauen & deployen
 # sobald etwas auf main landet (also nach dem Merge eines Rezept-PRs).
 on:
   push:
-    branches: [main]
+    branches: [main, claude/cookbook-system-design-ajr3oy]
   workflow_dispatch:
 
 permissions:
