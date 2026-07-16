@@ -7,6 +7,9 @@ dist/
 kochbuch/.obsidian/workspace*.json
 kochbuch/.obsidian/cache
 
+# Generierte Vorschau (Einzeldatei-Artifact)
+scratch-artifact/
+
 # System
 .DS_Store
 *.log
