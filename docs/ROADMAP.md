@@ -38,23 +38,26 @@ GitHub Pages). Eigene Domain? Echte Lieblingsrezepte als Startbestand.
 Wenn du magst, sagst du in einer Session `/inbox` — die Rezepte werden erzeugt,
 geprüft und die Issues geschlossen. Kosten: nur dein Claude-Code-Abo.
 
-## Phase 3 — Königsdisziplin: Instagram-Reels ✅ *(schlank gebaut)*
+## Phase 3 — Königsdisziplin: Reels ✅ *(schlank gebaut)*
 
-Nur den Reel-Link einwerfen genügt. Eine Action (`reel-vorbereiten.yml`) holt
-auf GitHubs offenem Netz das Reel und bereitet es vor; das Rezept baust du dann
-per `/inbox` (kein API-Key, keine Kosten).
+Bei **Instagram/TikTok** genügt der Link. Eine Action (`reel-vorbereiten.yml`)
+holt auf GitHubs offenem Netz das Video und bereitet es vor; das Rezept baust du
+dann per `/inbox` (kein API-Key, keine Kosten).
 
 - [x] `reel-vorbereiten.yml`: yt-dlp-Download + ffmpeg (Standbilder) + Transkript
       (faster-whisper im Runner) → Material am Issue, committet nach `_reel-inbox/`
 - [x] `/inbox` verarbeitet Frames + Transkript + Caption → Rezept
-- [x] Fallback: Video-Datei bzw. Text direkt ans Issue anhängen
-- [x] YouTube & TikTok werden unterstützt; bei bot-/login-geschützten Quellen
-      wird — falls vorhanden — die **Beschreibung** als Textquelle genutzt
-      (`status: nur-beschreibung`), sonst eine plattform-genaue Anleitung gepostet
-- [ ] **Einmalig, nur falls nötig:** Cookies als Secret — `INSTAGRAM_COOKIES`
-      (Instagram/TikTok) bzw. `YOUTUBE_COOKIES` (YouTube). Öffentliche Reels gehen
-      oft ohne; YouTube blockt Server-IPs häufiger. Cookies laufen alle paar
-      Wochen ab.
+- [x] Plattform-genaue Fehlermeldung; Concurrency-Sperre gegen Doppelläufe
+- [x] **YouTube bewusst NICHT automatisch:** YouTube blockt Server-IPs (Bot-
+      Prüfung) und die öffentlichen Spiegel (Invidious/Piped) sind tot — ein
+      Auto-Lauf würde nur scheitern. YouTube lieferst du direkt am Issue:
+      **mp4 anhängen und/oder Beschreibung/Rezept einfügen**; `/inbox` verarbeitet
+      die mp4 in der Session (Standbilder, optional Transkript) und baut aus der
+      Beschreibung.
+- [ ] **Optional, falls YouTube doch automatisch werden soll:** einmalig
+      `YOUTUBE_COOKIES` als Secret hinterlegen und YouTube wieder in den Trigger
+      von `reel-vorbereiten.yml` aufnehmen. Cookies laufen alle paar Wochen ab.
+- [ ] **Nur falls nötig:** `INSTAGRAM_COOKIES` für login-pflichtige Reels.
 
 ## Phase 4 — Küchen-Hirn
 

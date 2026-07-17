@@ -8,19 +8,34 @@ body:
       value: |
         Wirf einfach einen **Link** rein *oder* lade ein **Foto/Scan** hoch — mehr musst du nicht tun.
         Das landet in der Rezept-Inbox und wird beim nächsten Durchgang eingearbeitet.
+
+        - **Instagram-Reel / TikTok:** nur den **Link** — der Rest passiert automatisch.
+        - **Blog / Webseite:** nur den **Link**.
+        - **YouTube:** bitte **nicht nur den Link** — YouTube blockt den automatischen Abruf.
+          Häng stattdessen das **Video (mp4)** unten an *und/oder* kopier die **Videobeschreibung
+          bzw. das Rezept** ins Textfeld. Daraus wird das Rezept gebaut.
+        - **Ausgedrucktes / Foto:** lad es als **Foto/Scan** hoch.
   - type: input
     id: link
     attributes:
-      label: "Link (Instagram-Reel, Blog, YouTube …)"
+      label: "Link (Instagram-Reel, TikTok, Blog …)"
       placeholder: "https://www.instagram.com/reel/…"
     validations:
       required: false
   - type: textarea
     id: bild
     attributes:
-      label: "… oder Foto / Scan"
-      description: "Zieh ein Foto vom ausgedruckten Rezept oder einen Screenshot hier hinein."
-      placeholder: "Bild hier ablegen (GitHub lädt es automatisch hoch)."
+      label: "… oder Foto / Scan / Video (mp4)"
+      description: "Foto vom ausgedruckten Rezept, Screenshot — oder bei YouTube die heruntergeladene mp4 hier hineinziehen."
+      placeholder: "Datei hier ablegen (GitHub lädt sie automatisch hoch)."
+    validations:
+      required: false
+  - type: textarea
+    id: text
+    attributes:
+      label: "… oder Rezept-Text / YouTube-Beschreibung"
+      description: "Bei YouTube: die Videobeschreibung hier einfügen (da steht das Rezept oft komplett). Sonst frei lassen."
+      placeholder: "Zutaten und Schritte hier einfügen …"
     validations:
       required: false
   - type: textarea

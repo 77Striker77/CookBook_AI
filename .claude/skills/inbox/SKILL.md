@@ -38,8 +38,9 @@ Body die Formular-Überschriften enthält (`### Link …`, `### … oder Foto / 
 stoppen. Zeig dem User kurz die Liste (Nummer + Titel), bevor du loslegst.
 
 ### 2. Quelle vollständig sichten
-Felder aus dem Issue-Body: „Link", „Foto / Scan", „Notiz". Die Notiz immer
-mitberücksichtigen (Portionen, Änderungen, Kontext).
+Felder aus dem Issue-Body: „Link", „Foto / Scan / Video (mp4)", „Rezept-Text /
+YouTube-Beschreibung", „Notiz". Die Notiz immer mitberücksichtigen (Portionen,
+Änderungen, Kontext).
 
 **Anhang herunterladen** (Foto/Scan/PDF): Die URL im Body zeigt auf
 `github.com/user-attachments/…`. Direktes `curl` blockt der Proxy — stattdessen
@@ -59,21 +60,32 @@ Je nach Typ:
 - **Web-Link:** Seite mit WebFetch holen; bevorzugt `Recipe`-JSON-LD
   (Schema.org), sonst Seitentext. Das **Titelfoto** der Seite (og:image oder
   Hauptbild) als Bild mitnehmen (siehe Schritt 3).
-- **Instagram-Reel / TikTok / YouTube / Video-Link:** Prüfe zuerst, ob die Reel-
-  Vorbereitung schon gelaufen ist — dann liegt (nach `git pull`) ein Ordner
-  `kochbuch/_reel-inbox/<nr>/` vor. Eine `status.txt` sagt, was drin ist:
+- **Instagram-Reel / TikTok:** Die Action `reel-vorbereiten.yml` läuft hier
+  automatisch. Prüfe (nach `git pull`), ob ein Ordner `kochbuch/_reel-inbox/<nr>/`
+  vorliegt. Eine `status.txt` sagt, was drin ist:
   - **`voll`** — `frames/*.jpg` (eingeblendete Texte/Zutaten — **mit dem Read-Tool
     ansehen**), `transkript.txt` (Tonspur) und `caption.txt`/`titel.txt`/`autor.txt`.
     Rezept aus **Bildern + Transkript + Caption gemeinsam** bauen.
-  - **`nur-beschreibung`** — kein Video/keine Frames (Quelle war bot-/login-
-    geschützt, typisch bei YouTube auf Server-IPs), aber `caption.txt` mit der
-    Beschreibung. Bei YouTube steht das Rezept dort oft komplett drin — daraus
-    bauen. Es gibt dann **keine Schritt-Bilder** (das ist ok); für ein Titelbild
-    ggf. eine Illustration bauen oder ohne Bild anlegen.
+  - **`nur-beschreibung`** — kein Video/keine Frames, aber `caption.txt`. Daraus
+    bauen; keine Schritt-Bilder (ok), Titelbild ggf. als Illustration oder weglassen.
   Nach dem Einarbeiten den Ordner `kochbuch/_reel-inbox/<nr>/` löschen
-  (`git rm -r`). Fehlt der Ordner ganz (Vorbereitung fehlgeschlagen), aus der
-  Caption/den Issue-Kommentaren arbeiten soweit vorhanden — sonst **nicht raten**,
-  Issue offen lassen.
+  (`git rm -r`).
+- **YouTube:** Die Action springt bei YouTube **bewusst nicht** an (YouTube
+  blockt Server-Abrufe, Spiegel-Dienste sind tot). Der User liefert daher direkt
+  am Issue: eine angehängte **`.mp4`** und/oder die **Videobeschreibung/Rezept**
+  als Text (Feld „Rezept-Text / YouTube-Beschreibung" bzw. als Kommentar).
+  - Ist eine **mp4** angehängt (URL `.../user-attachments/...` mit Video-Endung):
+    per WebFetch die signierte URL holen, mit `curl -sSL` nach `/tmp/<slug>.mp4`
+    laden, dann **in der Session** verarbeiten:
+    `ffmpeg -i /tmp/<slug>.mp4 -vf "select='gt(scene,0.2)+eq(n,0)',scale=720:-1" -vsync vfr -frames:v 30 /tmp/frames/f_%03d.jpg`
+    (Fallback `fps=1`), Frames mit dem Read-Tool ansehen → Titelbild + Schritt-
+    Bilder wie üblich (Schritt 3). Ton nur bei Bedarf: `ffmpeg … -ar 16000 a.wav`
+    und `pip install faster-whisper` → transkribieren.
+  - Den **Rezept-Text/die Beschreibung** aus Body/Kommentaren als Hauptquelle für
+    Zutaten und Schritte nehmen (bei Rezept-Kanälen meist vollständig).
+- **Sonstiger Video-Link ohne Material:** Gibt es weder Ordner noch mp4 noch
+  brauchbaren Text, **nicht raten** — Issue offen lassen und im Kommentar sagen,
+  was fehlt (mp4 anhängen / Beschreibung einfügen).
 
 ### 3. Bilder ins Rezept holen
 Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze das.

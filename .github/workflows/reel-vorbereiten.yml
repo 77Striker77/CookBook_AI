@@ -1,9 +1,14 @@
 name: Reel vorbereiten
 
 # Läuft auf GitHubs offenem Netz (nicht im gesperrten Session-Container) und
-# bereitet Video-Links (Instagram-Reel, TikTok, YouTube) für die Einarbeitung
-# vor: Videobilder + Ton-Transkript (oder bei YouTube notfalls die Beschreibung).
-# Nutzt nur freie Werkzeuge, KEINE Claude API. Das Rezept baust du danach per /inbox.
+# bereitet Video-Links (Instagram-Reel, TikTok) für die Einarbeitung vor:
+# Videobilder + Ton-Transkript. Nutzt nur freie Werkzeuge, KEINE Claude API.
+# Das Rezept baust du danach per /inbox.
+#
+# YouTube ist BEWUSST NICHT dabei: YouTube blockt Server-IPs (Bot-Prüfung) und
+# die öffentlichen Spiegel-Dienste sind tot — der Lauf würde nur unnötig
+# anstoßen und scheitern. YouTube-Rezepte lieferst du direkt am Issue (mp4
+# anhängen und/oder Beschreibung/Rezept reinschreiben); /inbox baut daraus.
 on:
   issues:
     types: [opened, labeled]
@@ -20,13 +25,13 @@ permissions:
 
 jobs:
   vorbereiten:
-    # Nur Briefkasten-Issues mit einem Video-Link.
+    # Nur Briefkasten-Issues mit einem Instagram-/TikTok-Link. YouTube absichtlich
+    # ausgenommen (s. Kopf) — sonst würde der Lauf bei jedem YouTube-Issue
+    # unnötig anspringen und scheitern.
     if: >-
       contains(github.event.issue.labels.*.name, 'import') &&
       (contains(github.event.issue.body, 'instagram.com') ||
-       contains(github.event.issue.body, 'tiktok.com') ||
-       contains(github.event.issue.body, 'youtube.com') ||
-       contains(github.event.issue.body, 'youtu.be'))
+       contains(github.event.issue.body, 'tiktok.com'))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +50,7 @@ jobs:
         env:
           BODY: ${{ github.event.issue.body }}
         run: |
-          URL=$(printf '%s' "$BODY" | grep -oE 'https?://[^ )]+' | grep -Ei 'instagram|tiktok|youtu' | head -1)
+          URL=$(printf '%s' "$BODY" | grep -oE 'https?://[^ )]+' | grep -Ei 'instagram|tiktok' | head -1)
           case "$URL" in
             *instagram.com*)          PLATFORM="instagram" ;;
             *tiktok.com*)             PLATFORM="tiktok" ;;
