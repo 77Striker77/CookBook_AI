@@ -71,6 +71,13 @@ const rezepte = alle.map((r) => ({
           <div class="thumb" style={`background:${verlauf(r.kategorie)}`}>
             {r.bild && <Image src={r.bild} alt={r.titel} widths={[260, 460]} sizes="260px" />}
             <span class="kat">{katLabel(r.kategorie)}</span>
+            <button
+              class="add-plan"
+              data-slug={r.slug}
+              data-basis={r.portionen}
+              aria-label="Zum Kochplan hinzufügen"
+              aria-pressed="false"
+            >+</button>
           </div>
           <div class="body">
             <span class="title">{r.titel}</span>
@@ -138,6 +145,26 @@ const rezepte = alle.map((r) => ({
       const pick = pool[Math.floor(Math.random() * pool.length)];
       if (pick) location.href = pick.getAttribute('href');
     });
+
+    // Schnell-Hinzufügen zum Kochplan direkt aus dem Grid (ohne das Rezept zu öffnen).
+    const addBtns = [...grid.querySelectorAll('.add-plan')];
+    function paintAdd() {
+      for (const b of addBtns) {
+        const on = window.WSPlan?.has(b.dataset.slug);
+        b.setAttribute('aria-pressed', String(!!on));
+        b.textContent = on ? '✓' : '+';
+      }
+    }
+    grid.addEventListener('click', (e) => {
+      const b = e.target.closest('.add-plan');
+      if (!b) return;
+      e.preventDefault();
+      e.stopPropagation();
+      window.WSPlan.toggle(b.dataset.slug, Number(b.dataset.basis) || 1);
+      paintAdd();
+    });
+    window.addEventListener('ws-plan-change', paintAdd);
+    paintAdd();
 
     apply();
   </script>

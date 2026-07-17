@@ -1,0 +1,213 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+import { parseZutaten } from '../lib/zutaten';
+import { katLabel } from '../lib/darstellung';
+
+// Katalog aller Rezepte inkl. geparster Zutaten – wird kompakt in die Seite
+// eingebettet, damit der Plan komplett offline (ohne Fetch) funktioniert.
+const rezepte = await getCollection('rezepte');
+const katalog = Object.fromEntries(
+  rezepte.map((r) => [
+    r.id,
+    {
+      titel: r.data.titel,
+      basis: r.data.portionen,
+      kategorie: katLabel(r.data.kategorie),
+      zutaten: parseZutaten(r.data.zutaten),
+    },
+  ]),
+);
+// `<` maskieren, damit ein "</script>" im Text den Block nicht vorzeitig schließt.
+const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
+---
+
+<Base titel="Kochplan" beschreibung="Dein Kochplan und die daraus erzeugte Einkaufsliste.">
+  <div class="wrap plan-wrap">
+    <p class="crumb"><a href={url('/')}>Rezepte</a> › Kochplan</p>
+    <h1>Kochplan &amp; Einkaufsliste</h1>
+    <p class="plan-intro">Wähle auf den Rezepten, was du kochen willst — hier landet der Plan und daraus wird automatisch die Einkaufsliste (Mengen auf deine Portionen skaliert und zusammengezählt).</p>
+
+    <div id="planLeer" class="plan-empty" hidden>
+      <p>Dein Kochplan ist noch leer.</p>
+      <p class="muted">Öffne ein Rezept und tippe auf <b>🛒 In den Kochplan</b> — oder nutze das <b>+</b> auf den Rezeptkarten.</p>
+      <a class="btn primary" href={url('/')}>Rezepte durchstöbern</a>
+    </div>
+
+    <div id="planInhalt" class="plan-layout" hidden>
+      <section class="plan-col">
+        <h2>Rezepte <span class="zahl" id="rezeptZahl"></span></h2>
+        <ul class="plan-recipes" id="planRecipes"></ul>
+      </section>
+
+      <section class="plan-col einkauf">
+        <div class="einkauf-head">
+          <h2>Einkaufsliste <span class="zahl" id="zutatZahl"></span></h2>
+          <div class="einkauf-tools">
+            <button class="btn small" id="btnKopieren">Kopieren</button>
+            <button class="btn small" id="btnTeilen" hidden>Teilen</button>
+            <button class="btn small" id="btnDrucken">Drucken</button>
+          </div>
+        </div>
+        <ul class="einkauf-list" id="einkaufList"></ul>
+        <div class="plan-foot">
+          <button class="btn small ghost" id="btnHakenReset">Haken zurücksetzen</button>
+          <button class="btn small ghost danger" id="btnLeeren">Plan leeren</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    import { aggregiere, alsText, CHECK_KEY } from '../lib/einkauf';
+
+    const katalog = JSON.parse(document.getElementById('katalog').textContent);
+    const leerEl = document.getElementById('planLeer');
+    const inhaltEl = document.getElementById('planInhalt');
+    const recipesEl = document.getElementById('planRecipes');
+    const listEl = document.getElementById('einkaufList');
+    const rezeptZahl = document.getElementById('rezeptZahl');
+    const zutatZahl = document.getElementById('zutatZahl');
+
+    let aktuelleZeilen = [];
+
+    function ladeHaken() {
+      try { return new Set(JSON.parse(localStorage.getItem(CHECK_KEY)) || []); } catch { return new Set(); }
+    }
+    function speichereHaken(set) { localStorage.setItem(CHECK_KEY, JSON.stringify([...set])); }
+
+    function render() {
+      const plan = window.WSPlan.read().filter((e) => katalog[e.slug]);
+      if (!plan.length) {
+        leerEl.hidden = false;
+        inhaltEl.hidden = true;
+        return;
+      }
+      leerEl.hidden = true;
+      inhaltEl.hidden = false;
+
+      // --- Rezeptliste ---
+      rezeptZahl.textContent = plan.length;
+      recipesEl.innerHTML = '';
+      for (const e of plan) {
+        const r = katalog[e.slug];
+        const li = document.createElement('li');
+        li.className = 'plan-recipe';
+        li.innerHTML = `
+          <div class="pr-main">
+            <a class="pr-titel" href="${planHref(e.slug)}">${escape(r.titel)}</a>
+            <span class="pr-kat">${escape(r.kategorie)}</span>
+          </div>
+          <div class="pr-stepper" data-slug="${e.slug}">
+            <button class="minus" aria-label="weniger">−</button>
+            <span class="pr-portion">${e.ziel}</span>
+            <span class="pr-lbl">Port.</span>
+            <button class="plus" aria-label="mehr">+</button>
+          </div>
+          <button class="pr-remove" data-slug="${e.slug}" aria-label="Entfernen">×</button>`;
+        recipesEl.appendChild(li);
+      }
+
+      // --- Einkaufsliste ---
+      const eintraege = plan.map((e) => ({
+        slug: e.slug,
+        titel: katalog[e.slug].titel,
+        basis: katalog[e.slug].basis,
+        ziel: e.ziel,
+        zutaten: katalog[e.slug].zutaten,
+      }));
+      aktuelleZeilen = aggregiere(eintraege);
+      zutatZahl.textContent = aktuelleZeilen.length;
+
+      // Haken nur für noch existierende Zeilen behalten.
+      const gueltig = new Set(aktuelleZeilen.map((z) => z.key));
+      const haken = ladeHaken();
+      for (const k of [...haken]) if (!gueltig.has(k)) haken.delete(k);
+      speichereHaken(haken);
+
+      listEl.innerHTML = '';
+      for (const z of aktuelleZeilen) {
+        const li = document.createElement('li');
+        li.className = 'ek-item' + (haken.has(z.key) ? ' ab' : '');
+        const herkunft = z.herkunft.length > 1 ? ` <span class="ek-herkunft">${z.herkunft.length} Rezepte</span>` : '';
+        li.innerHTML = `
+          <label>
+            <input type="checkbox" data-key="${escapeAttr(z.key)}" ${haken.has(z.key) ? 'checked' : ''} />
+            <span class="ek-name">${escape(z.kanonisch)}</span>
+            <span class="ek-menge${z.ungenau ? ' ungenau' : ''}">${escape(z.text)}</span>${herkunft}
+          </label>`;
+        listEl.appendChild(li);
+      }
+    }
+
+    function planHref(slug) {
+      const base = document.querySelector('link[rel="manifest"]').getAttribute('href').replace(/\/manifest\.webmanifest$/, '');
+      return `${base}/rezept/${slug}`;
+    }
+    function escape(s) {
+      return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+    }
+    function escapeAttr(s) { return escape(s).replace(/"/g, '&quot;'); }
+
+    // Portionen ändern / Rezept entfernen (Event-Delegation).
+    recipesEl.addEventListener('click', (ev) => {
+      const step = ev.target.closest('.pr-stepper');
+      if (step) {
+        const slug = step.dataset.slug;
+        const e = window.WSPlan.read().find((x) => x.slug === slug);
+        if (!e) return;
+        if (ev.target.classList.contains('plus')) window.WSPlan.setPortion(slug, e.ziel + 1);
+        else if (ev.target.classList.contains('minus') && e.ziel > 1) window.WSPlan.setPortion(slug, e.ziel - 1);
+        return;
+      }
+      const rm = ev.target.closest('.pr-remove');
+      if (rm) window.WSPlan.remove(rm.dataset.slug);
+    });
+
+    // Abhaken.
+    listEl.addEventListener('change', (ev) => {
+      const cb = ev.target.closest('input[type=checkbox]');
+      if (!cb) return;
+      const haken = ladeHaken();
+      if (cb.checked) haken.add(cb.dataset.key);
+      else haken.delete(cb.dataset.key);
+      speichereHaken(haken);
+      cb.closest('.ek-item')?.classList.toggle('ab', cb.checked);
+    });
+
+    // Werkzeuge.
+    document.getElementById('btnKopieren').addEventListener('click', async (ev) => {
+      const txt = 'Einkaufsliste\n' + alsText(aktuelleZeilen);
+      try {
+        await navigator.clipboard.writeText(txt);
+        blitz(ev.target, 'Kopiert ✓');
+      } catch {
+        blitz(ev.target, 'Ging nicht');
+      }
+    });
+    const teilenBtn = document.getElementById('btnTeilen');
+    if (navigator.share) {
+      teilenBtn.hidden = false;
+      teilenBtn.addEventListener('click', () => {
+        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(aktuelleZeilen) }).catch(() => {});
+      });
+    }
+    document.getElementById('btnDrucken').addEventListener('click', () => window.print());
+    document.getElementById('btnHakenReset').addEventListener('click', () => { speichereHaken(new Set()); render(); });
+    document.getElementById('btnLeeren').addEventListener('click', () => {
+      if (confirm('Kompletten Kochplan leeren?')) window.WSPlan.clear();
+    });
+
+    function blitz(el, text) {
+      const alt = el.textContent;
+      el.textContent = text;
+      setTimeout(() => { el.textContent = alt; }, 1400);
+    }
+
+    window.addEventListener('ws-plan-change', render);
+    render();
+  </script>
+
+  <script type="application/json" id="katalog" set:html={katalogJson}></script>
+</Base>

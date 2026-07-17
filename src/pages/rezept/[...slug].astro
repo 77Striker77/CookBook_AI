@@ -65,6 +65,9 @@ const quelleText: Record<string, string> = {
             <button id="plus" aria-label="mehr">+</button>
           </div>
         </div>
+        <button class="btn plan-btn" id="planBtn" data-slug={r.id} aria-pressed="false">
+          <span class="ic">🛒</span><span class="lbl">In den Kochplan</span>
+        </button>
         <ul class="zutaten">
           {anzeige.map((zeile) => zeile.typ === 'grp'
             ? <li class="grp">{zeile.text}</li>
@@ -124,8 +127,31 @@ const quelleText: Record<string, string> = {
         }
         pval.textContent = ziel;
       }
-      document.getElementById('plus').addEventListener('click', () => { ziel++; render(); });
-      document.getElementById('minus').addEventListener('click', () => { if (ziel > 1) { ziel--; render(); } });
+      document.getElementById('plus').addEventListener('click', () => { ziel++; render(); syncPlan(); });
+      document.getElementById('minus').addEventListener('click', () => { if (ziel > 1) { ziel--; render(); syncPlan(); } });
+
+      // Kochplan-Button: fügt dieses Rezept mit der aktuell gewählten Portionszahl
+      // hinzu bzw. entfernt es wieder. Ist es schon im Plan, spiegelt der Stepper
+      // die gemerkte Portionszahl.
+      const btn = document.getElementById('planBtn');
+      const slug = btn.dataset.slug;
+      const label = btn.querySelector('.lbl');
+
+      function drin() { return window.WSPlan?.has(slug); }
+      function paint() {
+        const on = drin();
+        btn.setAttribute('aria-pressed', String(on));
+        btn.classList.toggle('on', on);
+        label.textContent = on ? '✓ Im Kochplan' : 'In den Kochplan';
+      }
+      // Beim Laden gemerkte Portionszahl übernehmen, falls schon im Plan.
+      const vorhanden = (window.WSPlan?.read() || []).find((e) => e.slug === slug);
+      if (vorhanden) { ziel = vorhanden.ziel; render(); }
+      paint();
+
+      function syncPlan() { if (drin()) window.WSPlan.setPortion(slug, ziel); }
+      btn.addEventListener('click', () => { window.WSPlan.toggle(slug, ziel); paint(); });
+      window.addEventListener('ws-plan-change', paint);
     })();
   </script>
 </Base>

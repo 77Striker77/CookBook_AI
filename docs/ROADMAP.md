@@ -61,9 +61,16 @@ dann per `/inbox` (kein API-Key, keine Kosten).
 
 ## Phase 4 — Küchen-Hirn
 
+- [x] **Kochplan + Einkaufsliste direkt auf der Website:** „🛒 In den Kochplan“
+      auf jeder Rezeptseite (übernimmt die gewählte Portionszahl) und „+“ auf den
+      Grid-Karten. Seite `/plan` zeigt die gewählten Rezepte (Portions-Stepper,
+      Entfernen) und erzeugt daraus die Einkaufsliste: Mengen auf die Zielportionen
+      skaliert und über den kanonischen Namen + Einheit zusammengezählt, zum
+      Abhaken, mit Kopieren/Teilen/Drucken. Rein clientseitig (localStorage),
+      offline-tauglich, kein Backend. Aggregation in `src/lib/einkauf.ts`.
 - [ ] `vorrat/vorratskammer.md` + einfacher Pflege-Weg (auch mobil)
 - [ ] `/koch-was`: Vorrats-Abgleich, „dir fehlen nur 2 Zutaten“
-- [ ] `/wochenplan` + Einkaufsliste
+- [ ] `/wochenplan` als Skill (ausgewogener Wochenplan) — Einkaufsliste ✅ erledigt
 - [ ] Vorschlags-Seite auf der Website (wöchentlich generiert)
 
 ## Phase 5 — Kür

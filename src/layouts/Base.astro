@@ -26,6 +26,45 @@ const seitenTitel = titel ? `${titel} · Well Seasoned` : 'Well Seasoned';
         const t = localStorage.getItem('theme');
         if (t) document.documentElement.dataset.theme = t;
       })();
+
+      // Kochplan-Speicher (localStorage). Im <head> definiert, damit alle
+      // Seiten-Skripte (Rezept, Grid, Plan) ihn beim Laden schon nutzen können.
+      // Eintrag: { slug, ziel } (Zielportionen).
+      window.WSPlan = {
+        KEY: 'ws-plan',
+        read() {
+          try { return JSON.parse(localStorage.getItem(this.KEY)) || []; } catch { return []; }
+        },
+        write(list) {
+          localStorage.setItem(this.KEY, JSON.stringify(list));
+          this.updateBadge();
+          window.dispatchEvent(new CustomEvent('ws-plan-change'));
+        },
+        has(slug) { return this.read().some((e) => e.slug === slug); },
+        toggle(slug, ziel) {
+          const l = this.read();
+          const i = l.findIndex((e) => e.slug === slug);
+          if (i >= 0) l.splice(i, 1);
+          else l.push({ slug, ziel: ziel || 1 });
+          this.write(l);
+          return i < 0; // true = jetzt drin
+        },
+        setPortion(slug, ziel) {
+          const l = this.read();
+          const e = l.find((x) => x.slug === slug);
+          if (e) { e.ziel = Math.max(1, ziel); this.write(l); }
+        },
+        remove(slug) { this.write(this.read().filter((e) => e.slug !== slug)); },
+        clear() { this.write([]); },
+        count() { return this.read().length; },
+        updateBadge() {
+          const b = document.getElementById('planBadge');
+          if (!b) return;
+          const n = this.count();
+          b.textContent = n;
+          b.hidden = n === 0;
+        },
+      };
     </script>
   </head>
   <body>
@@ -35,6 +74,7 @@ const seitenTitel = titel ? `${titel} · Well Seasoned` : 'Well Seasoned';
         <nav class="nav">
           <a href={url('/')}>Rezepte</a>
           <a href={url('/suche')}>Suche</a>
+          <a href={url('/plan')} class="nav-plan">🛒 Plan<span class="badge" id="planBadge" hidden>0</span></a>
           <a class="nav-add" href="https://github.com/77Striker77/CookBook_AI/issues/new?template=neues-rezept.yml" target="_blank" rel="noreferrer">+ Rezept</a>
           <button class="theme-toggle" id="themeToggle" aria-label="Hell/Dunkel umschalten">◐</button>
         </nav>
@@ -61,6 +101,11 @@ const seitenTitel = titel ? `${titel} · Well Seasoned` : 'Well Seasoned';
         document.documentElement.dataset.theme = next;
         localStorage.setItem('theme', next);
       });
+
+      // Badge initial setzen und über Tabs hinweg synchron halten.
+      window.WSPlan?.updateBadge();
+      window.addEventListener('storage', (e) => { if (e.key === 'ws-plan') window.WSPlan?.updateBadge(); });
+      window.addEventListener('ws-plan-change', () => window.WSPlan?.updateBadge());
     </script>
   </body>
 </html>
