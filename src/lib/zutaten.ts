@@ -31,7 +31,7 @@ const EINHEITEN = [
   'Stück', 'Stk', 'Bund', 'Zweig', 'Zweige', 'Blatt', 'Blätter',
   'Zehe', 'Zehen', 'Dose', 'Dosen', 'Glas', 'Packung', 'Pck', 'Päckchen',
   'Handvoll', 'Scheibe', 'Scheiben', 'Tasse', 'Tassen', 'Kugel', 'Kugeln',
-  'Becher', 'Würfel', 'cm', 'Knolle',
+  'Becher', 'Würfel', 'cm', 'Knolle', 'Stange', 'Stangen',
 ];
 
 const OHNE_MENGE = /nach geschmack|nach belieben|etwas|n\.\s*b\.|zum \w+/i;
