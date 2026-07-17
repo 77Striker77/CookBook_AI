@@ -14,7 +14,7 @@ zutaten:
   - 1 TL Knoblauch, gehackt
   - 25 g Panko-Semmelbrösel
   - 1 TL Knoblauchgranulat
-  - 1 TL Paprikapulver, geräuchert
+  - 1 TL geräuchertes Paprikapulver
   - 1 Ei, mittelgroß, verquirlt
   - Salz
   - Pfeffer

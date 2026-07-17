@@ -17,7 +17,7 @@ zutaten:
   - 6-8 EL Öl
   - 2 TL Curry
   - 2 TL Paprikapulver, edelsüß
-  - 1 TL Paprikapulver, geräuchert
+  - 1 TL geräuchertes Paprikapulver
   - 0.5 TL Kreuzkümmel
   - 1 TL Cayennepfeffer
   - 2 TL Salz
