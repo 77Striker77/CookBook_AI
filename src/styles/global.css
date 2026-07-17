@@ -110,8 +110,10 @@ img { max-width: 100%; display: block; }
 .tag { font-size: .78rem; color: var(--muted); background: var(--surface); border-radius: 999px; padding: 3px 11px; text-decoration: none; }
 .tag:hover { color: var(--ink); }
 
-.hero-bild { margin: 22px 0 0; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); }
-.hero-bild img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Titelbild komplett zeigen (nichts abschneiden): zentriert, Höhe gedeckelt,
+   cremefarbene Füllung an den Seiten für hochformatige Fotos (z. B. Bowls). */
+.hero-bild { margin: 22px 0 0; display: flex; justify-content: center; align-items: center; background: var(--surface); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); }
+.hero-bild img { max-width: 100%; max-height: 480px; width: auto; height: auto; object-fit: contain; display: block; }
 .zubereitung img { width: 100%; max-width: 520px; height: auto; border-radius: 10px; border: 1px solid var(--line); background: #fff; margin: 8px 0; display: block; }
 .layout { display: grid; grid-template-columns: 320px 1fr; gap: 36px; margin-top: 26px; align-items: start; }
 @media (max-width: 780px) {
@@ -120,7 +122,7 @@ img { max-width: 100%; display: block; }
      Höhere Spezifität (.layout .zutaten-box), damit dieser Override die
      später im Datei-Fluss definierte sticky-Basisregel sicher schlägt. */
   .layout .zutaten-box { position: static; top: auto; }
-  .hero-bild { aspect-ratio: 16 / 10; }
+  .hero-bild img { max-height: 60vh; }
 }
 
 .zutaten-box { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); position: sticky; top: 76px; }
