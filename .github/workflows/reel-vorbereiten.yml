@@ -2,11 +2,17 @@ name: Reel vorbereiten
 
 # Läuft auf GitHubs offenem Netz (nicht im gesperrten Session-Container) und
 # bereitet Video-Links (Instagram-Reel, TikTok, YouTube) für die Einarbeitung
-# vor: Videobilder + Ton-Transkript. Nutzt nur freie Werkzeuge, KEINE Claude API.
-# Das eigentliche Rezept baust du danach per /inbox in einer Session.
+# vor: Videobilder + Ton-Transkript (oder bei YouTube notfalls die Beschreibung).
+# Nutzt nur freie Werkzeuge, KEINE Claude API. Das Rezept baust du danach per /inbox.
 on:
   issues:
     types: [opened, labeled]
+
+# Formulare vergeben das Label direkt beim Anlegen -> `opened` und `labeled`
+# feuern fast gleichzeitig. Ohne das hier liefe der Job doppelt (zwei Kommentare).
+concurrency:
+  group: reel-${{ github.event.issue.number }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -34,19 +40,35 @@ jobs:
           sudo apt-get update && sudo apt-get install -y ffmpeg
           pip install -q --upgrade yt-dlp faster-whisper
 
-      - name: Link aus dem Issue ziehen
+      - name: Link & Plattform aus dem Issue ziehen
         id: link
         env:
           BODY: ${{ github.event.issue.body }}
         run: |
           URL=$(printf '%s' "$BODY" | grep -oE 'https?://[^ )]+' | grep -Ei 'instagram|tiktok|youtu' | head -1)
+          case "$URL" in
+            *instagram.com*)          PLATFORM="instagram" ;;
+            *tiktok.com*)             PLATFORM="tiktok" ;;
+            *youtube.com*|*youtu.be*) PLATFORM="youtube" ;;
+            *)                        PLATFORM="sonstige" ;;
+          esac
           echo "url=$URL" >> "$GITHUB_OUTPUT"
-          echo "Gefundener Link: $URL"
+          echo "platform=$PLATFORM" >> "$GITHUB_OUTPUT"
+          echo "Gefundener Link: $URL  (Plattform: $PLATFORM)"
 
-      - name: Cookies bereitstellen (optional)
+      - name: Cookies bereitstellen (optional, je Plattform)
         env:
-          COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
-        run: printf '%s' "$COOKIES" > /tmp/cookies.txt
+          # YouTube und Instagram brauchen je eigene Cookies; wir schreiben die
+          # zur erkannten Plattform passenden in die Datei, die das Skript nutzt.
+          IG_COOKIES: ${{ secrets.INSTAGRAM_COOKIES }}
+          YT_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
+          PLATFORM: ${{ steps.link.outputs.platform }}
+        run: |
+          if [ "$PLATFORM" = "youtube" ]; then
+            printf '%s' "$YT_COOKIES" > /tmp/cookies.txt
+          else
+            printf '%s' "$IG_COOKIES" > /tmp/cookies.txt
+          fi
 
       - name: Reel vorbereiten
         id: prep
@@ -81,24 +103,49 @@ jobs:
       - name: Ergebnis am Issue melden
         if: always()
         uses: actions/github-script@v7
+        env:
+          PLATFORM: ${{ steps.link.outputs.platform }}
         with:
           script: |
             const fs = require('fs');
             const dir = `kochbuch/_reel-inbox/${context.issue.number}`;
-            const ok = '${{ steps.prep.outputs.ok }}' === '1' && fs.existsSync(`${dir}/transkript.txt`);
+            const platform = process.env.PLATFORM || 'sonstige';
+            const read = (f) => { try { return fs.readFileSync(`${dir}/${f}`, 'utf8').trim(); } catch { return ''; } };
+            const status = read('status.txt'); // voll | nur-beschreibung | fehlgeschlagen | ''
+
+            // Plattform-spezifischer Hinweis, wenn Login/Bot-Prüfung greift.
+            const cookieHinweis = {
+              youtube: 'YouTube blockt die Server-IPs von GitHub gern mit „Sign in to confirm you\'re not a bot". ' +
+                       'Dauerhafte Lösung: eingeloggte **YouTube**-Cookies exportieren und als Repository-Secret **`YOUTUBE_COOKIES`** hinterlegen.',
+              instagram: 'Instagram verlangt für viele Reels einen Login. Dauerhafte Lösung: eingeloggte **Instagram**-Cookies ' +
+                         'exportieren und als Repository-Secret **`INSTAGRAM_COOKIES`** hinterlegen.',
+              tiktok: 'TikTok blockt gelegentlich Server-IPs. Du kannst TikTok-Cookies als **`INSTAGRAM_COOKIES`** hinterlegen (die Datei wird als generische Cookie-Quelle genutzt).',
+              sonstige: 'Die Quelle verlangt vermutlich einen Login oder blockt Server-IPs.',
+            }[platform] || 'Die Quelle verlangt vermutlich einen Login oder blockt Server-IPs.';
+
             let body;
-            if (ok) {
-              const transkript = fs.readFileSync(`${dir}/transkript.txt`, 'utf8').trim();
+            if (status === 'voll') {
+              const transkript = read('transkript.txt');
               const nFrames = fs.existsSync(`${dir}/frames`) ? fs.readdirSync(`${dir}/frames`).length : 0;
               const preview = transkript.slice(0, 1500).replace(/\n/g, '\n> ');
-              body = `🎬 **Reel vorbereitet** — ${nFrames} Videobilder + Ton-Transkript liegen unter \`${dir}\`.\n\n` +
+              body = `🎬 **Video vorbereitet** — ${nFrames} Videobilder + Ton-Transkript liegen unter \`${dir}\`.\n\n` +
                      `**Transkript (Ton):**\n> ${preview || '(kein Ton erkannt)'}\n\n` +
                      `Sag jetzt **\`/inbox\`** in einer Session — dann werte ich Bilder + Transkript aus und lege das Rezept an.`;
+            } else if (status === 'nur-beschreibung') {
+              const caption = read('caption.txt');
+              const preview = caption.slice(0, 1500).replace(/\n/g, '\n> ');
+              body = `📝 **Video ließ sich nicht laden, aber die Beschreibung ist da** (unter \`${dir}\`).\n\n` +
+                     `${cookieHinweis}\n\n` +
+                     `Bei YouTube steht das Rezept oft komplett in der Beschreibung — das reicht meist:\n\n` +
+                     `**Beschreibung:**\n> ${preview || '(leer)'}\n\n` +
+                     `Sag **\`/inbox\`** — ich baue das Rezept aus der Beschreibung. Für Schritt-Bilder bräuchte ich das Video (Cookies s. o.).`;
             } else {
-              body = `⚠️ **Reel konnte nicht geladen werden** (Instagram verlangt vermutlich Login).\n\n` +
-                     `So klappt es doch:\n` +
-                     `1. **Cookies hinterlegen** (dauerhafte Lösung): eingeloggte Instagram-Cookies als \`cookies.txt\` exportieren und als Repository-Secret **\`INSTAGRAM_COOKIES\`** speichern. Danach dieses Issue kurz schließen und neu öffnen (oder Label neu setzen).\n` +
-                     `2. **Oder** das Video als \`.mp4\` hier anhängen bzw. die Zutaten/Schritte als Kommentar reinschreiben.`;
+              body = `⚠️ **Video konnte nicht geladen werden** (Plattform: ${platform}).\n\n` +
+                     `${cookieHinweis}\n\n` +
+                     `**Sofort-Alternativen:**\n` +
+                     `1. Das Video als \`.mp4\` hier ans Issue anhängen.\n` +
+                     `2. Oder Zutaten + Schritte (bei YouTube: die Videobeschreibung) als Kommentar reinschreiben.\n\n` +
+                     `Danach das Issue kurz schließen und neu öffnen (oder das Label neu setzen), dann versuche ich es erneut.`;
             }
             await github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo,

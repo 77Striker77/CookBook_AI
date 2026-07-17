@@ -59,15 +59,21 @@ Je nach Typ:
 - **Web-Link:** Seite mit WebFetch holen; bevorzugt `Recipe`-JSON-LD
   (Schema.org), sonst Seitentext. Das **Titelfoto** der Seite (og:image oder
   Hauptbild) als Bild mitnehmen (siehe Schritt 3).
-- **Instagram-Reel / Video-Link:** Prüfe zuerst, ob die Reel-Vorbereitung schon
-  gelaufen ist — dann liegt (nach `git pull`) ein Ordner
-  `kochbuch/_reel-inbox/<nr>/` vor mit `frames/*.jpg` (eingeblendete Texte/
-  Zutaten — **mit dem Read-Tool ansehen**), `transkript.txt` (Tonspur) und
-  `caption.txt`/`titel.txt`/`autor.txt`. Das Rezept aus **Bildern + Transkript +
-  Caption gemeinsam** bauen. Nach dem Einarbeiten den Ordner
-  `kochbuch/_reel-inbox/<nr>/` löschen (`git rm -r`). Fehlt der Ordner (Reel
-  nicht ladbar / Login), aus der Caption arbeiten soweit vorhanden — sonst
-  **nicht raten**, Issue offen lassen.
+- **Instagram-Reel / TikTok / YouTube / Video-Link:** Prüfe zuerst, ob die Reel-
+  Vorbereitung schon gelaufen ist — dann liegt (nach `git pull`) ein Ordner
+  `kochbuch/_reel-inbox/<nr>/` vor. Eine `status.txt` sagt, was drin ist:
+  - **`voll`** — `frames/*.jpg` (eingeblendete Texte/Zutaten — **mit dem Read-Tool
+    ansehen**), `transkript.txt` (Tonspur) und `caption.txt`/`titel.txt`/`autor.txt`.
+    Rezept aus **Bildern + Transkript + Caption gemeinsam** bauen.
+  - **`nur-beschreibung`** — kein Video/keine Frames (Quelle war bot-/login-
+    geschützt, typisch bei YouTube auf Server-IPs), aber `caption.txt` mit der
+    Beschreibung. Bei YouTube steht das Rezept dort oft komplett drin — daraus
+    bauen. Es gibt dann **keine Schritt-Bilder** (das ist ok); für ein Titelbild
+    ggf. eine Illustration bauen oder ohne Bild anlegen.
+  Nach dem Einarbeiten den Ordner `kochbuch/_reel-inbox/<nr>/` löschen
+  (`git rm -r`). Fehlt der Ordner ganz (Vorbereitung fehlgeschlagen), aus der
+  Caption/den Issue-Kommentaren arbeiten soweit vorhanden — sonst **nicht raten**,
+  Issue offen lassen.
 
 ### 3. Bilder ins Rezept holen
 Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze das.

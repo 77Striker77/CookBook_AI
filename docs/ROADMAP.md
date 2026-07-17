@@ -48,9 +48,13 @@ per `/inbox` (kein API-Key, keine Kosten).
       (faster-whisper im Runner) → Material am Issue, committet nach `_reel-inbox/`
 - [x] `/inbox` verarbeitet Frames + Transkript + Caption → Rezept
 - [x] Fallback: Video-Datei bzw. Text direkt ans Issue anhängen
-- [ ] **Einmalig, nur falls nötig:** Instagram-Cookies als Secret
-      `INSTAGRAM_COOKIES` (öffentliche Reels gehen oft ohne). Cookies laufen
-      alle paar Wochen ab.
+- [x] YouTube & TikTok werden unterstützt; bei bot-/login-geschützten Quellen
+      wird — falls vorhanden — die **Beschreibung** als Textquelle genutzt
+      (`status: nur-beschreibung`), sonst eine plattform-genaue Anleitung gepostet
+- [ ] **Einmalig, nur falls nötig:** Cookies als Secret — `INSTAGRAM_COOKIES`
+      (Instagram/TikTok) bzw. `YOUTUBE_COOKIES` (YouTube). Öffentliche Reels gehen
+      oft ohne; YouTube blockt Server-IPs häufiger. Cookies laufen alle paar
+      Wochen ab.
 
 ## Phase 4 — Küchen-Hirn
 
