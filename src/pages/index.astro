@@ -25,11 +25,18 @@ const rezepte = alle.map((r) => ({
 }));
 ---
 
-<Base beschreibung="Unser gemeinsames digitales Kochbuch.">
-  <section class="wrap hero">
-    <p class="eyebrow">Unser Kochbuch</p>
-    <h1>Was kochen wir heute?</h1>
-    <p>{alle.length} Rezepte, gemeinsam gesammelt. Filtern, stöbern oder überraschen lassen.</p>
+<Base beschreibung="Well Seasoned — unser gemeinsam gesammeltes digitales Kochbuch.">
+  <section class="hero-band">
+    <div class="wrap hero">
+      <p class="eyebrow">Gemeinsam gesammelt</p>
+      <h1>Well <span class="accent">Seasoned</span></h1>
+      <p class="hero-sub">Erprobte Lieblingsrezepte, über die Zeit zusammengekocht. Stöbern, filtern oder einfach überraschen lassen.</p>
+      <div class="hero-stats">
+        <span><b>{alle.length}</b> Rezepte</span>
+        <span class="dot" aria-hidden="true">·</span>
+        <span><b>{kategorien.length}</b> Kategorien</span>
+      </div>
+    </div>
   </section>
 
   <div class="wrap">

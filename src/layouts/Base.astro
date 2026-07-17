@@ -7,7 +7,7 @@ interface Props {
   beschreibung?: string;
 }
 const { titel, beschreibung } = Astro.props;
-const seitenTitel = titel ? `${titel} · Unser Kochbuch` : 'Unser Kochbuch';
+const seitenTitel = titel ? `${titel} · Well Seasoned` : 'Well Seasoned';
 ---
 
 <!doctype html>
@@ -31,7 +31,7 @@ const seitenTitel = titel ? `${titel} · Unser Kochbuch` : 'Unser Kochbuch';
   <body>
     <header class="site-header">
       <div class="wrap bar">
-        <a class="logo" href={url('/')}>Unser <span>Kochbuch</span></a>
+        <a class="logo" href={url('/')}>Well <span>Seasoned</span></a>
         <nav class="nav">
           <a href={url('/')}>Rezepte</a>
           <a href={url('/suche')}>Suche</a>
@@ -47,7 +47,7 @@ const seitenTitel = titel ? `${titel} · Unser Kochbuch` : 'Unser Kochbuch';
 
     <footer class="site">
       <div class="wrap">
-        <span>Unser Kochbuch · gemeinsam gesammelt</span>
+        <span>Well Seasoned · gemeinsam gesammelt</span>
         <span>{new Date().getFullYear()}</span>
       </div>
     </footer>

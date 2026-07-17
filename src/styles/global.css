@@ -70,12 +70,23 @@ img { max-width: 100%; display: block; }
 .theme-toggle { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; width: 38px; height: 38px; cursor: pointer; font-size: 1rem; }
 
 /* ---- Startseite ---- */
-.hero { padding: 40px 0 8px; }
-.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .72rem; font-weight: 650; color: var(--green); margin: 0 0 .3rem; }
-.hero h1 { font-size: clamp(2rem, 5vw, 2.8rem); margin: 0 0 .3rem; font-weight: 600; }
-.hero p { color: var(--muted); margin: 0; max-width: 56ch; }
+.hero-band {
+  background:
+    radial-gradient(115% 130% at 6% -20%, var(--green-soft), transparent 55%),
+    radial-gradient(90% 120% at 102% -30%, var(--saffron-soft), transparent 55%);
+  border-bottom: 1px solid var(--line);
+}
+.hero { padding: 62px 0 46px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; text-transform: uppercase; letter-spacing: .16em; font-size: .72rem; font-weight: 650; color: var(--green); margin: 0 0 .55rem; }
+.eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--green); border-radius: 2px; }
+.hero h1 { font-size: clamp(2.4rem, 6.5vw, 3.6rem); margin: 0 0 .5rem; font-weight: 600; letter-spacing: -.015em; }
+.hero h1 .accent { color: var(--green); }
+.hero-sub { color: var(--muted); margin: 0; max-width: 52ch; font-size: 1.06rem; }
+.hero-stats { display: flex; align-items: center; gap: 12px; margin-top: 22px; color: var(--muted); font-size: .9rem; }
+.hero-stats b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.hero-stats .dot { color: var(--line); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 26px 0 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 30px 0 8px; }
 .searchfield { flex: 1 1 260px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; }
 .searchfield input { border: 0; background: transparent; color: var(--ink); font-size: .95rem; width: 100%; outline: none; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }

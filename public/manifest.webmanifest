@@ -1,7 +1,7 @@
 {
-  "name": "Unser Kochbuch",
-  "short_name": "Kochbuch",
-  "description": "Unser gemeinsames digitales Kochbuch",
+  "name": "Well Seasoned",
+  "short_name": "Well Seasoned",
+  "description": "Well Seasoned — unser gemeinsam gesammeltes digitales Kochbuch",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#FBFAF7",
