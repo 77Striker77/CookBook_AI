@@ -59,10 +59,25 @@ High-Protein-Bowl im Gyros-Stil: mariniertes Hähnchen, würzige Airfryer-Kartof
 ## Zubereitung
 
 1. **Hähnchen marinieren:** Hähnchenbrust mit Joghurt, Zitronensaft, Olivenöl und den Gewürzen (Knoblauch, Oregano, Paprikapulver, Salz, Pfeffer) vermengen und **mindestens 30 Minuten** marinieren (gern länger).
+
+   ![Hähnchen mit Joghurt und Gewürzen mariniert](../anhang/greek-chicken-bowl-marinieren.jpg)
+
 2. **Kartoffeln:** Kartoffeln würfeln, mit den Gewürzen und etwas Olivenölspray vermischen und bei **180 °C ca. 30 Minuten im Airfryer** garen. Nach der Hälfte der Zeit einmal durchschütteln, anschließend mit Zitronensaft beträufeln.
-3. **Hähnchen garen:** Im Ofen bei **200 °C ca. 20 Minuten** garen. Danach mit einer Mischung aus Sriracha und 1 TL Olivenöl bepinseln. *(Alternativ im Airfryer oder in der Pfanne.)*
+
+   ![Gewürfelte, gewürzte Kartoffeln](../anhang/greek-chicken-bowl-kartoffeln.jpg)
+
+3. **Hähnchen garen:** Im Ofen bei **200 °C ca. 20 Minuten** garen (im Reel als Spieße). Danach mit einer Mischung aus Sriracha und 1 TL Olivenöl bepinseln. *(Alternativ im Airfryer oder in der Pfanne.)*
+
+   ![Marinierte Hähnchenspieße auf dem Blech](../anhang/greek-chicken-bowl-spiesse.jpg)
+
 4. **Griechischer Salat:** Gurke, Tomaten, rote Zwiebel und Petersilie klein schneiden und mit Zitronensaft und einer Prise Salz vermengen.
+
+   ![Frischer griechischer Salat](../anhang/greek-chicken-bowl-salat.jpg)
+
 5. **Tzatziki:** Die geriebene Gurke gut ausdrücken und mit Joghurt, Knoblauch, Zitronensaft, Salz, Pfeffer und optional etwas Dill verrühren.
+
+   ![Fertiges Tzatziki](../anhang/greek-chicken-bowl-tzatziki.jpg)
+
 6. Alles zusammen anrichten und genießen.
 
 ## Notizen & Varianten

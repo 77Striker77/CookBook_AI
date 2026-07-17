@@ -76,7 +76,23 @@ Rezepte zeigen `bild` (Titel) und Bilder im Text auf der Website an — nutze da
   Quelle eines hat (bei einem Kuchen z. B. ein appetitlicher Querschnitt). Die
   Website rahmt das Titelbild in einem festen Seitenverhältnis (`object-fit:
   cover`) — also nicht vorab verzerren/quetschen, lieber sauber **landscape**
-  zuschneiden. Nur wenn kein brauchbares Foto existiert, eine Illustration bauen.
+  zuschneiden (Text-Overlays aus Reels wegschneiden). Gibt es **mehrere gute
+  Kandidaten** (z. B. viele Video-Frames), 3–4 zugeschnittene Optionen bauen,
+  dem User per SendUserFile zeigen und **per AskUserQuestion auswählen lassen** —
+  nicht einfach eines festlegen. Nur wenn kein brauchbares Foto existiert, eine
+  Illustration bauen.
+- **Schritt-Bilder:** Passt ein Bild/Frame zu einem Zubereitungsschritt
+  (Marinieren, Anbraten, Schichten, fertige Komponente …), **einbetten** —
+  eingerückt unter dem jeweiligen Listenpunkt, damit die Nummerierung durchläuft:
+  ```
+  1. Schritt-Text …
+
+     ![kurze Beschreibung](../anhang/<slug>-<name>.jpg)
+
+  2. Nächster Schritt …
+  ```
+  Lieber ein paar aussagekräftige Bilder als gar keine — aber nur, wo sie den
+  Schritt wirklich illustrieren.
   - *PDF:* die Foto-Region der Seite ausschneiden, z. B.
     `pdftoppm -jpeg -r 200 -f <seite> -l <seite> -x <X> -y <Y> -W <B> -H <H> -singlefile <scan.pdf> kochbuch/anhang/<slug>` (A4 @ 200 dpi ≈ 1654×2339 px).
     Den Ausschnitt mit dem Read-Tool prüfen und die Koordinaten anpassen, bis er sitzt.
