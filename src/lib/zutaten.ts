@@ -67,6 +67,9 @@ export function slugify(s: string): string {
   return s
     .toLowerCase()
     .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    // Restliche Diakritika strippen (è→e, î→i, ç→c …) — erst nach der
+    // deutschen Ersetzung, damit ä→ae bleibt und nicht zu a wird.
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
