@@ -49,9 +49,31 @@ const STUECKWEISE = new Set([
 
 const EPS = 1e-6;
 
+// Manche Zutaten kauft man nicht einzeln: Eigelb und Eiweiß gibt es nur als
+// ganzes Ei. Fürs Einkaufen werden sie auf "Ei" zusammengefasst und mitgezählt
+// (1 Ei + 2 Eigelb = 3 Eier). Nur bei stückweisen Angaben — "50 g Eigelb"
+// bleibt getrennt.
+const EINKAUF_GRUPPE: Record<string, string> = {
+  Eigelb: 'Ei',
+  Eidotter: 'Ei',
+  Eiweiß: 'Ei',
+  Eiweiss: 'Ei',
+  Eiklar: 'Ei',
+};
+
+function istStueckweise(einheit: string | null): boolean {
+  return einheit === null || STUECKWEISE.has(einheit);
+}
+
+/** Einkaufs-Name: fasst z. B. Eigelb/Eiweiß auf "Ei" zusammen (nur stückweise). */
+function einkaufsname(kanonisch: string, einheit: string | null): string {
+  if (istStueckweise(einheit) && EINKAUF_GRUPPE[kanonisch]) return EINKAUF_GRUPPE[kanonisch];
+  return kanonisch;
+}
+
 /** Rundet stückweise Mengen zum Einkaufen auf die nächste ganze Einheit auf. */
 function aufrunden(wert: number, einheit: string | null): number {
-  if (einheit === null || STUECKWEISE.has(einheit)) return Math.ceil(wert - EPS);
+  if (istStueckweise(einheit)) return Math.ceil(wert - EPS);
   return wert;
 }
 
@@ -64,18 +86,20 @@ export function aggregiere(eintraege: PlanEintrag[]): EinkaufZeile[] {
     const faktor = e.basis ? e.ziel / e.basis : 1;
     for (const z of e.zutaten) {
       if (z.skalierbar && z.menge !== null) {
-        const key = `${z.kanonisch}|${z.einheit ?? ''}`;
+        const kanonisch = einkaufsname(z.kanonisch, z.einheit);
+        const key = `${kanonisch}|${z.einheit ?? ''}`;
         let rec = mitMenge.get(key);
         if (!rec) {
-          rec = { kanonisch: z.kanonisch, einheit: z.einheit ?? null, min: 0, max: 0, herkunft: new Set() };
+          rec = { kanonisch, einheit: z.einheit ?? null, min: 0, max: 0, herkunft: new Set() };
           mitMenge.set(key, rec);
         }
         rec.min += z.menge * faktor;
         rec.max += (z.mengeMax ?? z.menge) * faktor;
         rec.herkunft.add(e.titel);
       } else {
-        let herkunft = ohneMenge.get(z.kanonisch);
-        if (!herkunft) ohneMenge.set(z.kanonisch, (herkunft = new Set()));
+        const kanonisch = einkaufsname(z.kanonisch, z.einheit);
+        let herkunft = ohneMenge.get(kanonisch);
+        if (!herkunft) ohneMenge.set(kanonisch, (herkunft = new Set()));
         herkunft.add(e.titel);
       }
     }
