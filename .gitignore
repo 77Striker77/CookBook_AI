@@ -15,3 +15,6 @@ scratch-artifact/
 *.log
 .env
 .env.*
+
+# Claude Code – persönliche lokale Einstellungen
+.claude/settings.local.json
