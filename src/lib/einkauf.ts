@@ -80,27 +80,31 @@ function aufrunden(wert: number, einheit: string | null): number {
 /** Führt die Zutaten aller Plan-Einträge zu einer summierten Einkaufsliste zusammen. */
 export function aggregiere(eintraege: PlanEintrag[]): EinkaufZeile[] {
   const mitMenge = new Map<string, MitMenge>();
-  const ohneMenge = new Map<string, Set<string>>();
+  const ohneMenge = new Map<string, { herkunft: Set<string>; noten: Set<string> }>();
 
   for (const e of eintraege) {
     const faktor = e.basis ? e.ziel / e.basis : 1;
     for (const z of e.zutaten) {
-      if (z.skalierbar && z.menge !== null) {
-        const kanonisch = einkaufsname(z.kanonisch, z.einheit);
+      const kanonisch = einkaufsname(z.kanonisch, z.einheit);
+      if (z.menge !== null) {
+        // Menge vorhanden → mit Menge listen. Nur skalieren, wenn skalierbar;
+        // feste Angaben (z. B. "zum Anbraten") gehen unskaliert (Faktor 1) ein.
+        const f = z.skalierbar ? faktor : 1;
         const key = `${kanonisch}|${z.einheit ?? ''}`;
         let rec = mitMenge.get(key);
         if (!rec) {
           rec = { kanonisch, einheit: z.einheit ?? null, min: 0, max: 0, herkunft: new Set() };
           mitMenge.set(key, rec);
         }
-        rec.min += z.menge * faktor;
-        rec.max += (z.mengeMax ?? z.menge) * faktor;
+        rec.min += z.menge * f;
+        rec.max += (z.mengeMax ?? z.menge) * f;
         rec.herkunft.add(e.titel);
       } else {
-        const kanonisch = einkaufsname(z.kanonisch, z.einheit);
-        let herkunft = ohneMenge.get(kanonisch);
-        if (!herkunft) ohneMenge.set(kanonisch, (herkunft = new Set()));
-        herkunft.add(e.titel);
+        // Wirklich ohne Zahl (z. B. "Salz nach Geschmack"): Rezept-Notiz merken.
+        let rec = ohneMenge.get(kanonisch);
+        if (!rec) ohneMenge.set(kanonisch, (rec = { herkunft: new Set(), noten: new Set() }));
+        rec.herkunft.add(e.titel);
+        if (z.notiz) rec.noten.add(z.notiz);
       }
     }
   }
@@ -125,14 +129,17 @@ export function aggregiere(eintraege: PlanEintrag[]): EinkaufZeile[] {
   // ist (dann kauft man sie ohnehin) — z. B. "Salz nach Geschmack" fällt weg,
   // wenn ein Rezept "1 TL Salz" beisteuert.
   const schonGelistet = new Set(zeilen.map((z) => z.kanonisch));
-  for (const [kanonisch, herkunft] of ohneMenge) {
+  for (const [kanonisch, rec] of ohneMenge) {
     if (schonGelistet.has(kanonisch)) continue;
+    // Statt eines erfundenen "nach Bedarf" die echte Rezept-Notiz zeigen
+    // (z. B. "nach Geschmack", "optional") — nur wenn eindeutig, sonst leer.
+    const noten = [...rec.noten];
     zeilen.push({
       key: `${kanonisch}|~`,
       kanonisch,
       einheit: null,
-      text: 'nach Bedarf',
-      herkunft: [...herkunft],
+      text: noten.length === 1 ? noten[0] : '',
+      herkunft: [...rec.herkunft],
       ungenau: true,
     });
   }

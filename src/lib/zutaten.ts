@@ -38,7 +38,6 @@ const EINHEITEN = [
   'Becher', 'Würfel', 'cm', 'Knolle', 'Stange', 'Stangen',
 ];
 
-const OHNE_MENGE = /nach geschmack|nach belieben|etwas|n\.\s*b\.|zum \w+/i;
 
 let synonymeCache: Map<string, string> | null = null;
 
@@ -139,7 +138,11 @@ export function parseZeile(zeile: string, gruppe: string | null = null): ParsedZ
     notiz = [prefix[1].trim(), notiz].filter(Boolean).join(', ');
   }
 
-  const skalierbar = menge !== null && !OHNE_MENGE.test(roh);
+  // Hat die Zeile eine Menge, wird sie skaliert. Fehlt die Zahl komplett
+  // ("Salz nach Geschmack"), ist sie nicht skalierbar. Ein "zum …/etwas" in
+  // Notiz oder Produktname (z. B. "Vanillesoße zum Kochen") darf eine echte
+  // Menge NICHT entwerten.
+  const skalierbar = menge !== null;
   const kanonisch = ladeSynonyme().get(normalisiere(name)) ?? titelCase(name);
 
   return {
