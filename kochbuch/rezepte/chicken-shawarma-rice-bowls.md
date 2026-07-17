@@ -50,7 +50,7 @@ zutaten:
   - 1 EL Olivenöl
 quelle:
   typ: instagram
-  url: https://www.instagram.com/reel/
+  url: https://www.instagram.com/reel/DZephwYOARM/
   autor: "@recipeincaption"
 bild: ../anhang/chicken-shawarma-rice-bowls.jpg
 gekocht: []
