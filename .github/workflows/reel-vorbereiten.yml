@@ -108,51 +108,58 @@ jobs:
       - name: Ergebnis am Issue melden
         if: always()
         uses: actions/github-script@v7
-        env:
-          PLATFORM: ${{ steps.link.outputs.platform }}
         with:
           script: |
             const fs = require('fs');
             const dir = `kochbuch/_reel-inbox/${context.issue.number}`;
-            const platform = process.env.PLATFORM || 'sonstige';
             const read = (f) => { try { return fs.readFileSync(`${dir}/${f}`, 'utf8').trim(); } catch { return ''; } };
             const status = read('status.txt'); // voll | nur-beschreibung | fehlgeschlagen | ''
 
-            // Plattform-spezifischer Hinweis, wenn Login/Bot-Prüfung greift.
-            const cookieHinweis = {
-              youtube: 'YouTube blockt die Server-IPs von GitHub gern mit „Sign in to confirm you\'re not a bot". ' +
-                       'Dauerhafte Lösung: eingeloggte **YouTube**-Cookies exportieren und als Repository-Secret **`YOUTUBE_COOKIES`** hinterlegen.',
-              instagram: 'Instagram verlangt für viele Reels einen Login. Dauerhafte Lösung: eingeloggte **Instagram**-Cookies ' +
-                         'exportieren und als Repository-Secret **`INSTAGRAM_COOKIES`** hinterlegen.',
-              tiktok: 'TikTok blockt gelegentlich Server-IPs. Du kannst TikTok-Cookies als **`INSTAGRAM_COOKIES`** hinterlegen (die Datei wird als generische Cookie-Quelle genutzt).',
-              sonstige: 'Die Quelle verlangt vermutlich einen Login oder blockt Server-IPs.',
-            }[platform] || 'Die Quelle verlangt vermutlich einen Login oder blockt Server-IPs.';
+            const setLabels = async (add, remove = []) => {
+              for (const name of remove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    ...context.repo, issue_number: context.issue.number, name,
+                  });
+                } catch (e) { /* Label war nicht dran — egal */ }
+              }
+              if (add.length) {
+                await github.rest.issues.addLabels({
+                  ...context.repo, issue_number: context.issue.number, labels: add,
+                });
+              }
+            };
+            const comment = (body) => github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number, body,
+            });
 
-            let body;
             if (status === 'voll') {
               const transkript = read('transkript.txt');
               const nFrames = fs.existsSync(`${dir}/frames`) ? fs.readdirSync(`${dir}/frames`).length : 0;
               const preview = transkript.slice(0, 1500).replace(/\n/g, '\n> ');
-              body = `🎬 **Video vorbereitet** — ${nFrames} Videobilder + Ton-Transkript liegen unter \`${dir}\`.\n\n` +
-                     `**Transkript (Ton):**\n> ${preview || '(kein Ton erkannt)'}\n\n` +
-                     `Sag jetzt **\`/inbox\`** in einer Session — dann werte ich Bilder + Transkript aus und lege das Rezept an.`;
+              await setLabels(['bereit'], ['braucht-material', 'unklar']);
+              await comment(
+                `🎬 **Video vorbereitet** — ${nFrames} Videobilder + Ton-Transkript liegen unter \`${dir}\`.\n\n` +
+                `**Transkript (Ton):**\n> ${preview || '(kein Ton erkannt)'}\n\n` +
+                `Sag jetzt **\`/inbox\`** in einer Session — dann werte ich Bilder + Transkript aus und lege das Rezept an.`
+              );
             } else if (status === 'nur-beschreibung') {
               const caption = read('caption.txt');
               const preview = caption.slice(0, 1500).replace(/\n/g, '\n> ');
-              body = `📝 **Video ließ sich nicht laden, aber die Beschreibung ist da** (unter \`${dir}\`).\n\n` +
-                     `${cookieHinweis}\n\n` +
-                     `Bei YouTube steht das Rezept oft komplett in der Beschreibung — das reicht meist:\n\n` +
-                     `**Beschreibung:**\n> ${preview || '(leer)'}\n\n` +
-                     `Sag **\`/inbox\`** — ich baue das Rezept aus der Beschreibung. Für Schritt-Bilder bräuchte ich das Video (Cookies s. o.).`;
+              await setLabels(['bereit'], ['braucht-material', 'unklar']);
+              await comment(
+                `📝 **Video ließ sich nicht laden, aber die Beschreibung ist da** (unter \`${dir}\`).\n\n` +
+                `**Beschreibung:**\n> ${preview || '(leer)'}\n\n` +
+                `Sag **\`/inbox\`** — ich baue das Rezept aus der Beschreibung. Für Schritt-Bilder bräuchte ich das Video.`
+              );
             } else {
-              body = `⚠️ **Video konnte nicht geladen werden** (Plattform: ${platform}).\n\n` +
-                     `${cookieHinweis}\n\n` +
-                     `**Sofort-Alternativen:**\n` +
-                     `1. Das Video als \`.mp4\` hier ans Issue anhängen.\n` +
-                     `2. Oder Zutaten + Schritte (bei YouTube: die Videobeschreibung) als Kommentar reinschreiben.\n\n` +
-                     `Danach das Issue kurz schließen und neu öffnen (oder das Label neu setzen), dann versuche ich es erneut.`;
+              // Fehlschlag: KEINE Cookie-Lecture, kein "schließen & neu öffnen" —
+              // nur ein kurzer, umsetzbarer Hinweis + Label, damit du es siehst.
+              await setLabels(['braucht-material'], ['bereit']);
+              await comment(
+                `Konnte das Reel nicht automatisch laden. Damit ich es einpflegen kann, liefer bitte eins nach:\n` +
+                `- die **mp4** hier anhängen, **oder**\n` +
+                `- **Zutaten + Schritte** als Kommentar reinschreiben.\n\n` +
+                `Danach sag **\`/inbox\`** in einer Session.`
+              );
             }
-            await github.rest.issues.createComment({
-              owner: context.repo.owner, repo: context.repo.repo,
-              issue_number: context.issue.number, body,
-            });

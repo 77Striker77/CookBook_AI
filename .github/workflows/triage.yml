@@ -1,0 +1,128 @@
+name: Eingang triagieren
+
+# Sortiert jedes Briefkasten-Issue (Label "import") sofort ein und gibt dem
+# Einwerfer EINE klare Rueckmeldung. Nutzt nur github-script — keine schweren
+# Tools, kein Download, also kein Compute-Spam. Das eigentliche Einpflegen
+# passiert weiterhin manuell per /inbox.
+#
+# Vergebene Labels (Statusanzeige fuer dich):
+#   bereit           -> kann per /inbox eingepflegt werden
+#   braucht-material -> Nutzer muss mp4/Beschreibung nachliefern (kein Textrezept)
+#   unklar           -> es wurde nichts Brauchbares eingereicht
+on:
+  issues:
+    types: [opened, labeled, edited]
+
+# opened + labeled feuern beim Formular fast gleichzeitig -> sonst doppelt.
+concurrency:
+  group: triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    if: contains(github.event.issue.labels.*.name, 'import')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+            const isOpened = context.payload.action === 'opened';
+
+            // --- Quelle im Body erkennen ---------------------------------
+            const urls = body.match(/https?:\/\/[^\s)]+/g) || [];
+            const isAttachmentUrl = (u) =>
+              /user-attachments|githubusercontent\.com|\/assets\//.test(u);
+            const sourceLinks = urls.filter((u) => !isAttachmentUrl(u));
+            const hasAttachment =
+              urls.some(isAttachmentUrl) || /!\[[^\]]*\]\(/.test(body);
+
+            const firstLink = sourceLinks[0] || '';
+            const platform =
+              /instagram\.com/i.test(firstLink) ? 'instagram' :
+              /tiktok\.com/i.test(firstLink)    ? 'tiktok' :
+              /youtube\.com|youtu\.be/i.test(firstLink) ? 'youtube' :
+              firstLink ? 'web' : 'kein-link';
+
+            // Freitext grob schaetzen: Formular-Header, "_No response_",
+            // Links und Bild-Markdown herausrechnen.
+            const freitext = body
+              .replace(/^###.*$/gm, '')
+              .replace(/_No response_/g, '')
+              .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+              .replace(/https?:\/\/\S+/g, '')
+              .replace(/\s+/g, ' ')
+              .trim();
+            const hasText = freitext.length >= 30;
+
+            // --- Kategorie bestimmen -------------------------------------
+            let kategorie;
+            if (platform === 'instagram' || platform === 'tiktok') kategorie = 'reel';
+            else if (platform === 'youtube') kategorie = 'youtube';
+            else if (platform === 'web')     kategorie = 'web';
+            else if (hasAttachment)          kategorie = 'anhang';
+            else if (hasText)                kategorie = 'text';
+            else                             kategorie = 'leer';
+
+            // --- Helfer --------------------------------------------------
+            const setLabels = async (add, remove = []) => {
+              for (const name of remove) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    ...context.repo, issue_number: context.issue.number, name,
+                  });
+                } catch (e) { /* Label war nicht dran — egal */ }
+              }
+              if (add.length) {
+                await github.rest.issues.addLabels({
+                  ...context.repo, issue_number: context.issue.number, labels: add,
+                });
+              }
+            };
+            const comment = (b) => github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number, body: b,
+            });
+
+            // --- Handeln je Kategorie ------------------------------------
+            if (kategorie === 'leer') {
+              await setLabels(['unklar'], ['bereit', 'braucht-material']);
+              if (isOpened) {
+                await comment(
+                  'Damit kann ich noch nichts anfangen 🙈 — ich brauche **eins** von diesen dreien:\n' +
+                  '- einen **Link** (Instagram-Reel, TikTok, Blog, YouTube …),\n' +
+                  '- ein **Foto / Scan / PDF** (oben ins Upload-Feld ziehen), **oder**\n' +
+                  '- den **Rezept-Text** direkt eingefuegt.\n\n' +
+                  'Ergaenz einfach das Issue — dann sortiere ich es neu ein.'
+                );
+              }
+              return;
+            }
+
+            // Alles Uebrige ist grundsaetzlich verarbeitbar.
+            await setLabels(['bereit'], ['unklar', 'braucht-material']);
+
+            // Instagram/TikTok: die Reel-Action meldet sich selbst -> hier
+            // nicht doppelt kommentieren.
+            if (kategorie === 'reel') return;
+
+            // Bei spaeteren Edits nur Labels pflegen, nicht erneut kommentieren.
+            if (!isOpened) return;
+
+            if (kategorie === 'youtube') {
+              await comment(
+                '🎬 **YouTube erkannt.** Beim Einpflegen (`/inbox`) hole ich zuerst die ' +
+                '**Videobeschreibung / ein verlinktes Rezept** — bei Rezept-Kanaelen reicht das meist.\n\n' +
+                'Falls dieses Video **kein geschriebenes Rezept** hat, liefer bitte eins nach:\n' +
+                '- die **mp4** hier anhaengen, **oder**\n' +
+                '- **Zutaten + Schritte** als Kommentar reinschreiben.\n\n' +
+                '_(Automatisch von YouTube herunterladen geht serverseitig nicht — YouTube blockt das.)_'
+              );
+            } else {
+              await comment(
+                'Angenommen ✅ — liegt in der Inbox und wird beim naechsten `/inbox` eingepflegt. ' +
+                'Nach dem Gegenlesen geht es live.'
+              );
+            }
