@@ -28,6 +28,17 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
       <p class="ek-fortschritt" id="ekFortschritt" aria-live="polite"></p>
     </div>
 
+    {/* Geteilte Liste: wird angeboten, nie ungefragt übernommen — sonst
+        überschreibt ein alter Link den aktuellen Einkauf. */}
+    <div class="geteilt" id="ekGeteilt" hidden>
+      <p class="eg-kopf">Geteilte Liste</p>
+      <p id="egText"></p>
+      <div class="eg-knoepfe">
+        <button class="btn primary" id="egUebernehmen">Übernehmen</button>
+        <button class="btn ghost" id="egVerwerfen">Verwerfen</button>
+      </div>
+    </div>
+
     <div id="ekLeer" class="leer-box" hidden>
       <p>Noch keine Gerichte gewählt.</p>
       <p class="muted">Tippe bei einem Rezept auf das <b>+</b> — die Zutaten sammeln sich hier.</p>
@@ -209,12 +220,71 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
       try { await navigator.clipboard.writeText('Einkaufsliste\n' + alsText(zeilen)); blitz(ev.target, 'Kopiert ✓'); }
       catch { blitz(ev.target, 'Ging nicht'); }
     });
-    const teilen = document.getElementById('ekTeilen');
-    if (navigator.share) {
-      teilen.hidden = false;
-      teilen.addEventListener('click', () =>
-        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(zeilen) }).catch(() => {}));
+    /* ------------------------------------------------------------------
+       Teilen zwischen zwei Geräten.
+
+       Der Plan liegt in localStorage — also auf EINEM Gerät. Bei einem Paar
+       heißt das: Einer stellt am Desktop die Woche zusammen, der andere steht
+       im Laden ohne Liste. Das bricht den Kernkreislauf in der Mitte.
+
+       Ohne Backend lösbar, indem der Plan in den URL-Hash wandert. Der Hash
+       wird nie an den Server geschickt, bleibt also auch bei GitHub Pages
+       privat. Bewusst lesbar statt base64 — man sieht, was man verschickt.
+       ------------------------------------------------------------------ */
+    function teilenUrl() {
+      const plan = window.WSPlan.read().filter((e) => katalog[e.slug]);
+      const teile = [];
+      if (plan.length) teile.push('plan=' + plan.map((e) => `${e.slug}:${e.ziel}`).join(','));
+      const eigen = ladeEigen();
+      if (eigen.length) teile.push('extra=' + eigen.map(encodeURIComponent).join('~'));
+      return location.origin + location.pathname + (teile.length ? '#' + teile.join('&') : '');
     }
+
+    const teilen = document.getElementById('ekTeilen');
+    teilen.hidden = false;
+    teilen.addEventListener('click', async (ev) => {
+      const url = teilenUrl();
+      const text = 'Einkaufsliste\n' + alsText(zeilen);
+      if (navigator.share) {
+        try { await navigator.share({ title: 'Einkaufsliste', text, url }); return; } catch { /* abgebrochen */ }
+      }
+      try { await navigator.clipboard.writeText(url); blitz(ev.target, 'Link kopiert ✓'); }
+      catch { blitz(ev.target, 'Ging nicht'); }
+    });
+
+    /** Geteilten Plan aus dem Hash lesen — aber nie ungefragt übernehmen. */
+    function geteiltenPlanPruefen() {
+      const hash = location.hash.slice(1);
+      if (!hash) return;
+      const p = new URLSearchParams(hash);
+      const roh = p.get('plan') ?? '';
+      const gerichte = roh.split(',').filter(Boolean).map((t) => {
+        const [slug, ziel] = t.split(':');
+        return { slug, ziel: Math.max(1, Number(ziel) || 1), tag: 0 };
+      }).filter((e) => katalog[e.slug]);
+      const extra = (p.get('extra') ?? '').split('~').filter(Boolean).map(decodeURIComponent);
+      if (!gerichte.length && !extra.length) return;
+
+      const kasten = document.getElementById('ekGeteilt');
+      document.getElementById('egText').textContent =
+        `${gerichte.length} ${gerichte.length === 1 ? 'Gericht' : 'Gerichte'}` +
+        (extra.length ? ` und ${extra.length} eigene ${extra.length === 1 ? 'Zeile' : 'Zeilen'}` : '') +
+        ' aus einer geteilten Liste.';
+      kasten.hidden = false;
+
+      document.getElementById('egUebernehmen').addEventListener('click', () => {
+        window.WSPlan.write(gerichte);
+        speichereEigen([...new Set([...ladeEigen(), ...extra])]);
+        history.replaceState(null, '', location.pathname);
+        kasten.hidden = true;
+        render();
+      });
+      document.getElementById('egVerwerfen').addEventListener('click', () => {
+        history.replaceState(null, '', location.pathname);
+        kasten.hidden = true;
+      });
+    }
+    geteiltenPlanPruefen();
     document.getElementById('ekDrucken').addEventListener('click', () => window.print());
     document.getElementById('ekHaken').addEventListener('click', () => { speichereHaken(new Set()); render(); });
     document.getElementById('ekLeeren').addEventListener('click', () => {

@@ -119,6 +119,11 @@ navigierbar“. Zwei Web-Recherchen gaben dem recht.
 
 - [ ] Mobil liegen Zutaten und Zubereitung auf der Rezeptseite untereinander.
       Der Kochmodus löst das fürs Kochen, die Leseseite nicht.
-- [ ] Zwei-Geräte-Problem: Der Plan liegt in localStorage auf **einem** Gerät.
-      Wer plant, ist nicht wer einkauft. Ohne Backend lösbar über den Plan im
-      URL-Hash plus `navigator.share`.
+- [x] **Zwei-Geräte-Problem gelöst.** Der Plan liegt in localStorage, also auf
+      einem Gerät — einer plant am Desktop, der andere steht im Laden ohne
+      Liste. Der Teilen-Knopf erzeugt jetzt einen Link, der Gerichte samt
+      Portionszahl und eigene Zeilen im URL-Hash trägt (`#plan=slug:4,…`).
+      Der Hash geht nie an den Server, bleibt also auch auf GitHub Pages
+      privat. Beim Öffnen wird die Liste **angeboten**, nie stillschweigend
+      übernommen — sonst überschreibt ein alter Link den aktuellen Einkauf.
+      Ohne `navigator.share` fällt der Knopf auf „Link kopieren" zurück.
