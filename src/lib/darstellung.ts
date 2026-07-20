@@ -70,9 +70,16 @@ export const WARTE_KURZ: Record<Warteklasse, string> = {
  * Die Komponenten verteilen sich auf 4/1/4/4/4/1 und beantworten die Frage,
  * die am Feierabend wirklich zählt — ein Topf und eine Sache, oder Hähnchen
  * plus Reis plus Salat plus Sauce gleichzeitig?
+ *
+ * `##` zählt bewusst nicht mit. Eine Zutatenliste braucht zwei verschiedene
+ * Überschriften, und vorher trugen beide dasselbe Zeichen: Neben echten
+ * Komponenten („Tzatziki", „Reis") standen Resterubriken wie „Zum Belegen",
+ * „Deko" oder „Extra" — Salatblatt und Brötchen sind aber nichts, was man
+ * *nebenher fertigkriegen* muss. Sie haben die Zahl in 6 von 15 Rezepten
+ * aufgebläht. Jetzt gilt: `#` ist eine Komponente, `##` gliedert nur.
  */
 export function komponenten(zutaten: string[]): number {
-  return zutaten.filter((z) => z.trim().startsWith('#')).length || 1;
+  return zutaten.filter((z) => /^#(?!#)/.test(z.trim())).length || 1;
 }
 
 export function komponentenLabel(n: number): string | null {

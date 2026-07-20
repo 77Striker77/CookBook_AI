@@ -17,7 +17,7 @@ zutaten:
   - Butter-Vanille-Aroma, 5 Tropfen
   - "# Füllung"
   - 200-250 g Blaubeermarmelade
-  - "# Deko"
+  - "## Deko"
   - Puderzucker
 quelle:
   typ: instagram

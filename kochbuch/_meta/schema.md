@@ -44,24 +44,31 @@ zutaten:
   - "# Für die Sauce"                      # Komponente (mit #)
 ```
 
-### `#`-Zeilen sind keine Dekoration
+### `#` zählt, `##` gliedert nur
 
-Jede `#`-Zeile zählt als **Komponente**. Die Anzahl steht auf der Rezeptkarte
-(„4 Komponenten") und beantwortet die Frage: *Wie viele Sachen muss ich
-gleichzeitig fertigkriegen?* Sie hat `schwierigkeit` als Sortierkriterium
-abgelöst, weil die nichts getrennt hat.
+Es gibt zwei Sorten Überschrift, und sie sehen absichtlich verschieden aus:
 
-Eine Überschrift setzen heißt also: **Das ist eine eigene Sache, die separat
-zubereitet und erst am Ende zusammengeführt wird.** Hähnchen, Reis, Salat und
-Sauce einer Bowl — vier Komponenten. Drei Füllungen eines Schichtkuchens —
-drei Komponenten.
+| Zeile | Bedeutung | Auf der Karte |
+|---|---|---|
+| `"# Tzatziki"` | **Komponente** — wird separat zubereitet und erst am Ende zusammengeführt | zählt mit |
+| `"## Zum Belegen"` | **Gliederung** — sortiert nur die Liste | zählt nicht |
 
-**Nicht** dafür gedacht: eine lange Zutatenliste optisch sortieren. „Gemüse",
-„Gewürze", „Zum Servieren" sind Etiketten, keine Komponenten. Wer so gliedert,
-lässt einen Salat auf der Karte so aufwendig aussehen wie ein Vier-Gänge-Blech.
+Die Komponenten-Zahl steht auf der Rezeptkarte („4 Komponenten") und
+beantwortet die Frage: *Wie viele Sachen muss ich gleichzeitig fertigkriegen?*
+Sie hat `schwierigkeit` als Sortierkriterium abgelöst, weil die nichts
+getrennt hat. Angezeigt werden **beide** Sorten gleich — der Unterschied
+betrifft nur die Zählung.
 
-Im Zweifel: **keine Überschrift.** Ein Rezept ohne `#`-Zeilen zählt als eine
-Komponente und zeigt gar kein Label.
+Faustregel: Steht die Überschrift für etwas, das **Zeit und Aufmerksamkeit am
+Herd** kostet, ist es `#`. Sammelt sie nur ein, was am Schluss dazukommt, ist
+es `##`. Salatblatt und Brötchen unter „Zum Belegen" sind nichts, was man
+nebenher fertigkriegen muss.
+
+`npm run pruefen` bricht ab, wenn eine Sammelrubrik („Zum Belegen", „Deko",
+„Extra", „Außerdem", „Toppings", …) mit einem einzelnen `#` geschrieben ist.
+
+Und wenn gar nichts separat läuft: **keine Überschrift.** Ein Rezept ohne
+`#`-Zeilen zählt als eine Komponente und zeigt gar kein Label.
 
 - **Mengen:** ganze Zahlen, Dezimal (`1.5` oder `1,5`), Brüche (`1/2`),
   gemischt (`1 1/2`) oder Bereiche (`6-8`).

@@ -21,7 +21,7 @@ zutaten:
   - 40 g Mayonnaise, fettarm
   - 15 g Sweet-Chili-Sauce
   - 1 TL Sriracha
-  - "# Zum Belegen"
+  - "## Zum Belegen"
   - 2 Briochebrötchen
   - 2 Scheiben Cheddar, halbfett
   - 1 Handvoll Eisbergsalat, in Streifen

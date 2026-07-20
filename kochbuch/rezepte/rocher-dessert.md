@@ -13,7 +13,7 @@ zutaten:
   - 1 EL Backkakao
   - 3 EL Zucker
   - 2 EL Speisestärke
-  - "# Außerdem"
+  - "## Außerdem"
   - 12 Ferrero Rocher
   - 400 g Sahne
   - 2 Pck. Sahnesteif

@@ -21,7 +21,7 @@ zutaten:
   - Senf
   - Salz
   - Pfeffer
-  - "# Zum Belegen"
+  - "## Zum Belegen"
   - 2 Burger Buns
   - Salat
   - Sauergurken
