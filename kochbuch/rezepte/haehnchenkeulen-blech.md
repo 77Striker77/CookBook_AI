@@ -2,11 +2,10 @@
 titel: Hähnchenkeulen vom Blech mit Kartoffeln & Möhren
 kategorie: hauptgericht
 küche: deutsch
-tags: [hähnchen, one-pan, blech, feierabend, familienessen]
+tags: [hähnchen, one-pan, feierabend, familienessen]
 portionen: 4
 zeit_aktiv: 15
 zeit_gesamt: 60
-schwierigkeit: einfach
 zutaten:
   - 6 Stück Hähnchenkeulen, am besten Maishähnchen
   - 5 Möhren
@@ -29,6 +28,8 @@ quelle:
 bild: ../anhang/haehnchenkeulen-blech.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Ein Kindheitsgericht als einfaches Blech: würzig marinierte Hähnchenkeulen auf Kartoffelspalten, Möhren und Zwiebeln — alles zusammen auf einem Blech gebacken. Perfektes Feierabendgericht.

@@ -2,11 +2,10 @@
 titel: Honey Smokey Air-Fryer-Hähnchen
 kategorie: hauptgericht
 küche: amerikanisch
-tags: [hähnchen, air-fryer, heißluftfritteuse, schnell, honig]
+tags: [hähnchen, schnell, honig]
 portionen: 2
 zeit_aktiv: 10
 zeit_gesamt: 30
-schwierigkeit: einfach
 zutaten:
   - 400 g Hähnchenoberschenkel, ohne Knochen und Haut
   - 0.5 TL Salz
@@ -30,6 +29,8 @@ quelle:
 bild: ../anhang/honig-smokey-haehnchen.jpg
 gekocht: []
 status: entwurf
+geraete: [airfryer]
+hinzugefuegt: 2026-07-17
 ---
 
 Klebrig-glänzendes Honig-Hähnchen mit rauchig-warmer Gewürzmischung — in nur 16 Minuten aus der Heißluftfritteuse. Aus der Reihe „Chicken you'll actually make", Folge 7, von **afterdarkkitchen**.

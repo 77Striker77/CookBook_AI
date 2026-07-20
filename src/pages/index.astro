@@ -1,176 +1,189 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import Rezeptkarte from '../components/Rezeptkarte.astro';
+import Kartenlogik from '../components/Kartenlogik.astro';
 import { url } from '../lib/url';
-import { katLabel, zeitLabel } from '../lib/darstellung';
 
-const alle = (await getCollection('rezepte')).sort((a, b) =>
-  a.data.titel.localeCompare(b.data.titel, 'de'),
-);
+const alle = await getCollection('rezepte');
 
-// Kategorien und Tags fürs Filtern einsammeln.
-const kategorien = [...new Set(alle.map((r) => r.data.kategorie))].sort();
-const topTags = [...new Set(alle.flatMap((r) => r.data.tags))].sort().slice(0, 8);
+// Kandidaten für „Heute Abend": alles, was höchstens 35 Minuten Arbeit
+// kostet. Die endgültige Auswahl trifft der Browser — er kennt den
+// Kochverlauf, der Build nicht.
+const schnell = alle
+  .filter((r) => (r.data.zeit_aktiv ?? 999) <= 35)
+  .sort((a, b) => (a.data.zeit_aktiv ?? 0) - (b.data.zeit_aktiv ?? 0));
 
-const rezepte = alle.map((r) => ({
-  slug: r.id,
-  titel: r.data.titel,
-  kategorie: r.data.kategorie,
-  tags: r.data.tags,
-  zeit: r.data.zeit_gesamt ?? 0,
-  portionen: r.data.portionen,
-  bild: r.data.bild,
-}));
+// Neu im Kochbuch — der Rückkanal aus dem Briefkasten.
+const neu = [...alle]
+  .filter((r) => r.data.hinzugefuegt)
+  .sort((a, b) => +new Date(b.data.hinzugefuegt!) - +new Date(a.data.hinzugefuegt!))
+  .slice(0, 3);
+
+// Pool für „Lange nicht gekocht": ohne Verlauf zeigt der Browser hieraus
+// eine wechselnde Auswahl, mit Verlauf sortiert er selbst.
+const pool = [...alle].sort((a, b) => a.data.titel.localeCompare(b.data.titel, 'de'));
+
+const zeitEinstiege = [
+  { v: '20', titel: '20 Minuten', unter: 'Arbeit, dann steht es' },
+  { v: '35', titel: '35 Minuten', unter: 'ein normaler Abend' },
+];
 ---
 
 <Base beschreibung="Well Seasoned — unser gemeinsam gesammeltes digitales Kochbuch.">
-  <section class="hero-band">
-    <div class="wrap hero">
-      <p class="eyebrow">Gemeinsam gesammelt</p>
-      <h1><span>Well</span><span class="accent">Seasoned</span></h1>
-      <div class="hero-foot">
-        <p class="hero-sub">Erprobte Lieblingsrezepte, über die Zeit zusammengekocht. Stöbern, filtern oder einfach überraschen lassen.</p>
-        <p class="hero-stats">
-          <span><b>{alle.length}</b> Rezepte</span>
-          <span class="dot" aria-hidden="true">·</span>
-          <span><b>{kategorien.length}</b> Kategorien</span>
-        </p>
+  <div class="wrap start">
+    <!-- 1 · Steht ein Plan, ist er die Antwort auf den häufigsten Aufruf.
+            Wird nur eingeblendet, wenn tatsächlich etwas drinsteht. -->
+    <section class="s-plan" id="sPlan" hidden>
+      <p class="eyebrow">Diese Woche</p>
+      <div class="s-plan-zeile">
+        <p class="s-plan-text" id="sPlanText"></p>
+        <span class="s-plan-links">
+          <a class="btn" href={url('/plan')}>Plan öffnen</a>
+        </span>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <div class="wrap">
-    <div class="controls">
-      <label class="searchfield">
-        <span aria-hidden="true">🔍</span>
-        <input type="search" id="q" placeholder="Rezept suchen …" autocomplete="off" aria-label="Rezepte nach Titel filtern" />
-      </label>
-      <button class="btn" id="random">🎲 Überrasch mich</button>
-    </div>
-
-    <div class="chips" id="katChips" role="group" aria-label="Nach Kategorie filtern">
-      <button class="chip" data-kat="" aria-pressed="true">Alle</button>
-      {kategorien.map((k) => <button class="chip" data-kat={k} aria-pressed="false">{katLabel(k)}</button>)}
-    </div>
-    <div class="chips" id="tagChips" role="group" aria-label="Nach Merkmal filtern">
-      {topTags.map((t) => <button class="chip" data-tag={t} aria-pressed="false">{t}</button>)}
-      <button class="chip" data-time="30" aria-pressed="false">≤ 30 min</button>
-    </div>
-
-    <p class="count" id="count" aria-live="polite"></p>
-
-    <div class="grid" id="grid">
-      {rezepte.map((r, i) => (
-        <article
-          class="rcard"
-          data-pos={i % 6}
-          data-titel={r.titel.toLowerCase()}
-          data-kat={r.kategorie}
-          data-tags={r.tags.join(' ')}
-          data-zeit={r.zeit}
-        >
-          <div class="thumb">
-            {/* alt bleibt leer: der Titel direkt daneben benennt das Gericht
-                bereits, sonst liest der Screenreader alles doppelt. */}
-            {r.bild && <Image src={r.bild} alt="" widths={[320, 560, 900]} sizes="(max-width: 780px) 100vw, 45vw" loading={i < 3 ? 'eager' : 'lazy'} />}
+    <!-- 2 · Der häufigste Anlass: Feierabend, wenig Energie, was geht? -->
+    <section class="s-block s-heute">
+      <div class="s-kopf">
+        <h1 class="s-titel">Heute Abend</h1>
+        <button class="s-wuerfel" id="sWuerfel" aria-label="Andere Vorschläge">🎲 andere</button>
+      </div>
+      <p class="s-unter">Höchstens 35 Minuten Arbeit — was am längsten nicht dran war, zuerst.</p>
+      <div class="raster-3" id="sHeute">
+        {schnell.slice(0, 6).map((r, i) => (
+          <div class="s-kandidat" data-kandidat hidden={i >= 3}>
+            <Rezeptkarte r={r} form="normal" eager={i < 3} />
           </div>
-          <div class="body">
-            <span class="nr" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <span class="kat">{katLabel(r.kategorie)}</span>
-            <a class="title" href={url(`/rezept/${r.slug}`)}>{r.titel}</a>
-            <span class="meta">
-              {zeitLabel(r.zeit) && <span>{zeitLabel(r.zeit)}</span>}
-              <span>{r.portionen} Portionen</span>
-            </span>
+        ))}
+      </div>
+    </section>
+
+    <!-- 3 · Zeit ist die einzige Achse, die bei 18 wie bei 100 Rezepten
+            trägt. Deshalb steht sie hier und nicht die Kategorie. -->
+    <section class="s-block">
+      <h2 class="s-h2">Wie viel Zeit hast du?</h2>
+      <div class="s-zeit">
+        {zeitEinstiege.map((z) => (
+          <a class="s-zeit-feld" href={url(`/alle?zeit=${z.v}`)}>
+            <span class="s-zeit-gross">{z.titel}</span>
+            <span class="s-zeit-klein">{z.unter}</span>
+          </a>
+        ))}
+        <a class="s-zeit-feld s-zeit-lang" href={url('/alle?warte=einplanen')}>
+          <span class="s-zeit-gross">Läuft von allein</span>
+          <span class="s-zeit-klein">wenig Arbeit, lange Wartezeit</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- 4 · Gegen die Monotonie: 8 von 18 Rezepten sind Hähnchen, und ohne
+            Gedächtnis kocht man immer dieselben drei. -->
+    <section class="s-block" id="sLangeBlock">
+      <h2 class="s-h2" id="sLangeTitel">Noch nie gekocht</h2>
+      <p class="s-unter" id="sLangeUnter">Aus dem Kochbuch, aber noch nie auf dem Tisch.</p>
+      <div class="raster-3" id="sLange">
+        {pool.map((r) => (
+          <div class="s-pool" data-pool data-slug={r.id} hidden>
+            <Rezeptkarte r={r} form="normal" />
           </div>
-          <button
-            class="add-plan"
-            data-slug={r.slug}
-            data-basis={r.portionen}
-            aria-label={`„${r.titel}" zum Kochplan hinzufügen`}
-            aria-pressed="false"
-          >+</button>
-        </article>
-      ))}
-      <p class="empty" id="empty" hidden>Nichts gefunden — Filter zurücksetzen?</p>
-    </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- 5 · Was der Briefkasten zuletzt gebracht hat -->
+    {neu.length > 0 && (
+      <section class="s-block">
+        <h2 class="s-h2">Neu im Kochbuch</h2>
+        <div class="raster-3">
+          {neu.map((r) => <Rezeptkarte r={r} form="normal" />)}
+        </div>
+      </section>
+    )}
+
+    <!-- 6 · Der Katalog ist ein Link, kein Bildschirm voller Kacheln -->
+    <section class="s-alle">
+      <a class="s-alle-link" href={url('/alle')}>
+        Alle {alle.length} Rezepte
+        <span class="s-alle-pfeil" aria-hidden="true">→</span>
+      </a>
+    </section>
   </div>
 
-  <script is:inline>
-    const grid = document.getElementById('grid');
-    const cards = [...grid.querySelectorAll('.rcard')];
-    const q = document.getElementById('q');
-    const count = document.getElementById('count');
-    const empty = document.getElementById('empty');
-    const state = { text: '', kat: '', tag: '', time: 0 };
+  <Kartenlogik />
 
-    // Das Editorial-Raster hat einen Rhythmus von sechs Karten in drei Größen:
-    // volle Breite, zwei Hälften, drei Drittel. Position nach jedem Filtern neu —
-    // sonst zählt CSS die versteckten Karten mit und der Rhythmus zerfällt.
-    function apply() {
-      let n = 0;
-      for (const c of cards) {
-        const okText = !state.text || c.dataset.titel.includes(state.text);
-        const okKat = !state.kat || c.dataset.kat === state.kat;
-        const okTag = !state.tag || c.dataset.tags.split(' ').includes(state.tag);
-        const okTime = !state.time || (Number(c.dataset.zeit) > 0 && Number(c.dataset.zeit) <= state.time);
-        const show = okText && okKat && okTag && okTime;
-        c.hidden = !show;
-        if (show) {
-          c.dataset.pos = n % 6;
-          c.querySelector('.nr').textContent = String(n + 1).padStart(2, '0');
-          n++;
+  <script is:inline>
+    (() => {
+      /* --- Plan-Streifen --- */
+      const planBox = document.getElementById('sPlan');
+      const planText = document.getElementById('sPlanText');
+      function planZeichnen() {
+        const p = window.WSPlan?.read() ?? [];
+        planBox.hidden = p.length === 0;
+        if (p.length) {
+          planText.textContent =
+            p.length === 1 ? '1 Rezept steht im Plan.' : `${p.length} Rezepte stehen im Plan.`;
         }
       }
-      count.textContent = n === cards.length ? `${n} Rezepte` : `${n} von ${cards.length} Rezepten`;
-      empty.hidden = n > 0;
-    }
+      window.addEventListener('ws-plan-change', planZeichnen);
+      planZeichnen();
 
-    q.addEventListener('input', () => { state.text = q.value.trim().toLowerCase(); apply(); });
-
-    document.getElementById('katChips').addEventListener('click', (e) => {
-      const b = e.target.closest('[data-kat]'); if (!b) return;
-      state.kat = b.dataset.kat;
-      for (const c of e.currentTarget.children) c.setAttribute('aria-pressed', String(c === b));
-      apply();
-    });
-
-    document.getElementById('tagChips').addEventListener('click', (e) => {
-      const b = e.target.closest('button'); if (!b) return;
-      const pressed = b.getAttribute('aria-pressed') === 'true';
-      for (const c of e.currentTarget.children) c.setAttribute('aria-pressed', 'false');
-      if ('time' in b.dataset) { state.tag = ''; state.time = pressed ? 0 : Number(b.dataset.time); }
-      else { state.time = 0; state.tag = pressed ? '' : b.dataset.tag; }
-      if (!pressed) b.setAttribute('aria-pressed', 'true');
-      apply();
-    });
-
-    document.getElementById('random').addEventListener('click', () => {
-      const sichtbar = cards.filter((c) => !c.hidden);
-      const pool = sichtbar.length ? sichtbar : cards;
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      if (pick) location.href = pick.querySelector('.title').getAttribute('href');
-    });
-
-    // Schnell-Hinzufügen direkt aus dem Raster, ohne das Rezept zu öffnen.
-    const addBtns = [...grid.querySelectorAll('.add-plan')];
-    function paintAdd() {
-      for (const b of addBtns) {
-        const on = window.WSPlan?.has(b.dataset.slug);
-        b.setAttribute('aria-pressed', String(!!on));
-        b.textContent = on ? '✓' : '+';
+      /* --- „Heute Abend": rotiert täglich, bevorzugt lange nicht Gekochtes ---
+         Der Tagesanteil sorgt dafür, dass die Vorschläge sich ändern, aber
+         innerhalb eines Tages stabil bleiben — sonst wirkt die Seite bei
+         jedem Aufruf zufällig statt kuratiert. */
+      const kandidaten = [...document.querySelectorAll('[data-kandidat]')];
+      let versatz = 0;
+      function heuteZeichnen() {
+        const bewertet = kandidaten.map((el, k) => {
+          const slug = el.querySelector('.rk')?.dataset.slug;
+          const tage = window.WSKoch?.tageSeit(slug);
+          return { el, k, tage: tage === null || tage === undefined ? 9999 : tage };
+        });
+        const tagesZahl = Math.floor(Date.now() / 86400000) + versatz;
+        bewertet.sort((a, b) => b.tage - a.tage || ((a.k + tagesZahl) % 7) - ((b.k + tagesZahl) % 7));
+        bewertet.forEach((x, rang) => { x.el.hidden = rang >= 3; });
       }
-    }
-    grid.addEventListener('click', (e) => {
-      const b = e.target.closest('.add-plan');
-      if (!b) return;
-      window.WSPlan.toggle(b.dataset.slug, Number(b.dataset.basis) || 1);
-      paintAdd();
-    });
-    window.addEventListener('ws-plan-change', paintAdd);
-    paintAdd();
+      document.getElementById('sWuerfel').addEventListener('click', () => {
+        versatz += 1 + Math.floor(Math.random() * 3);
+        heuteZeichnen();
+      });
+      window.addEventListener('ws-koch-change', heuteZeichnen);
+      heuteZeichnen();
 
-    apply();
+      /* --- „Lange nicht gekocht" bzw. „Noch nie gekocht" ---
+         Ohne Verlauf ist jedes Rezept „noch nie gekocht"; dann rotiert eine
+         Auswahl. Mit Verlauf zählt, was am längsten her ist. */
+      const poolEl = [...document.querySelectorAll('[data-pool]')];
+      const titel = document.getElementById('sLangeTitel');
+      const unter = document.getElementById('sLangeUnter');
+      function langeZeichnen() {
+        const mitVerlauf = poolEl
+          .map((el) => ({ el, slug: el.dataset.slug, tage: window.WSKoch?.tageSeit(el.dataset.slug) }))
+          .filter((x) => x.tage !== null && x.tage !== undefined);
+
+        let auswahl;
+        if (mitVerlauf.length >= 3) {
+          titel.textContent = 'Lange nicht gekocht';
+          unter.textContent = 'Schon einmal auf dem Tisch gewesen — aber es ist eine Weile her.';
+          auswahl = mitVerlauf.sort((a, b) => b.tage - a.tage).slice(0, 3).map((x) => x.el);
+        } else {
+          titel.textContent = 'Noch nie gekocht';
+          unter.textContent = 'Steht im Kochbuch, war aber noch nie dran.';
+          const nie = poolEl.filter(
+            (el) => window.WSKoch?.tageSeit(el.dataset.slug) === null ||
+                    window.WSKoch?.tageSeit(el.dataset.slug) === undefined);
+          const tagesZahl = Math.floor(Date.now() / 86400000);
+          auswahl = nie
+            .map((el, k) => ({ el, r: (k * 7 + tagesZahl) % Math.max(1, nie.length) }))
+            .sort((a, b) => a.r - b.r).slice(0, 3).map((x) => x.el);
+        }
+        for (const el of poolEl) el.hidden = !auswahl.includes(el);
+        document.getElementById('sLangeBlock').hidden = auswahl.length === 0;
+      }
+      window.addEventListener('ws-koch-change', langeZeichnen);
+      langeZeichnen();
+    })();
   </script>
 </Base>

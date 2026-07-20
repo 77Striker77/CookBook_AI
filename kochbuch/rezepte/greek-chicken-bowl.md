@@ -2,11 +2,10 @@
 titel: Greek Chicken Bowl (Gyrosteller)
 kategorie: hauptgericht
 küche: griechisch
-tags: [high-protein, meal-prep, hähnchen, gesund, airfryer]
+tags: [high-protein, meal-prep, hähnchen, gesund]
 portionen: 4
 zeit_aktiv: 25
 zeit_gesamt: 70
-schwierigkeit: einfach
 zutaten:
   - "# Hähnchen"
   - 800 g Hähnchenbrust
@@ -52,6 +51,8 @@ quelle:
 bild: ../anhang/greek-chicken-bowl.jpg
 gekocht: []
 status: entwurf
+geraete: [airfryer, ofen]
+hinzugefuegt: 2026-07-16
 ---
 
 High-Protein-Bowl im Gyros-Stil: mariniertes Hähnchen, würzige Airfryer-Kartoffeln, frischer griechischer Salat und Tzatziki. **Ca. 550 kcal & 64 g Protein pro Portion** — sättigend und ideal fürs Meal-Prep.

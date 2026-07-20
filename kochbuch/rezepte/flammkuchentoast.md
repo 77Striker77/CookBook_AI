@@ -2,11 +2,10 @@
 titel: Flammkuchentoast
 kategorie: snack
 küche: deutsch
-tags: [schnell, snack, partyfood, überbacken, feierabend]
+tags: [schnell, partyfood, überbacken, feierabend]
 portionen: 4
 zeit_aktiv: 10
 zeit_gesamt: 25
-schwierigkeit: einfach
 zutaten:
   - 100 g Schmand
   - 100 g Frischkäse, oder Crème fraîche
@@ -22,6 +21,8 @@ quelle:
 bild: ../anhang/flammkuchentoast.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Flammkuchen-Gefühl in unter 5 Minuten Zubereitung: cremig belegte, überbackene Toasts mit Schmand, Schinken und Käse. Perfekt als Snack, schnelles Abendessen oder Partyfood.

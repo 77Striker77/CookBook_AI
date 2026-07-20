@@ -1,0 +1,78 @@
+---
+import { Image } from 'astro:assets';
+import { url } from '../lib/url';
+import {
+  katLabel, arbeitLabel, warteklasse, WARTE_KURZ, komponenten,
+  komponentenLabel, GERAET_LABEL,
+} from '../lib/darstellung';
+
+interface Props {
+  r: any;
+  /** gross = Aufmacher, normal = Raster, zeile = dichte Liste ohne Bild */
+  form?: 'gross' | 'normal' | 'zeile';
+  /** Bild sofort laden (nur für die ersten sichtbaren Karten). */
+  eager?: boolean;
+}
+const { r, form = 'normal', eager = false } = Astro.props;
+const d = r.data;
+
+const arbeit = arbeitLabel(d.zeit_aktiv, d.zeit_gesamt);
+const wk = warteklasse(d.zeit_aktiv, d.zeit_gesamt);
+const komp = komponentenLabel(komponenten(d.zutaten ?? []));
+const geraete = (d.geraete ?? []).map((g: string) => GERAET_LABEL[g] ?? g);
+---
+
+<article
+  class:list={['rk', `rk--${form}`]}
+  data-slug={r.id}
+  data-titel={d.titel.toLowerCase()}
+  data-kat={d.kategorie}
+  data-tags={(d.tags ?? []).join(' ')}
+  data-geraete={(d.geraete ?? []).join(' ')}
+  data-aktiv={d.zeit_aktiv ?? ''}
+  data-gesamt={d.zeit_gesamt ?? ''}
+  data-warte={wk ?? ''}
+>
+  {form !== 'zeile' && (
+    <div class="rk-bild">
+      {/* alt bleibt leer: der Titel daneben benennt das Gericht bereits. */}
+      {d.bild && (
+        <Image
+          src={d.bild}
+          alt=""
+          widths={form === 'gross' ? [560, 900, 1400] : [280, 460, 760]}
+          sizes={form === 'gross' ? '(max-width: 780px) 100vw, 66vw' : '(max-width: 780px) 100vw, 33vw'}
+          loading={eager ? 'eager' : 'lazy'}
+        />
+      )}
+    </div>
+  )}
+
+  <div class="rk-text">
+    <p class="rk-kopf">
+      <span class="rk-kat">{katLabel(d.kategorie)}</span>
+      {geraete.map((g: string) => <span class="rk-geraet">{g}</span>)}
+    </p>
+
+    <a class="rk-titel" href={url(`/rezept/${r.id}`)}>{d.titel}</a>
+
+    <p class="rk-meta">
+      {/* Arbeitszeit steht vorn — sie ist die Zahl, die am Feierabend zählt. */}
+      {arbeit && <span class="rk-zeit">{arbeit}</span>}
+      {wk && wk !== 'dabei' && <span class="rk-warte">{WARTE_KURZ[wk]}</span>}
+      {komp && <span>{komp}</span>}
+      <span>{d.portionen} Portionen</span>
+    </p>
+
+    {/* Wird clientseitig gefüllt, sobald ein Kochverlauf existiert. */}
+    <p class="rk-verlauf" data-verlauf={r.id} hidden></p>
+  </div>
+
+  <button
+    class="rk-plan"
+    data-slug={r.id}
+    data-basis={d.portionen}
+    aria-label={`„${d.titel}" zum Kochplan hinzufügen`}
+    aria-pressed="false"
+  >+</button>
+</article>

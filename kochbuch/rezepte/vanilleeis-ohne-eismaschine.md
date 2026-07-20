@@ -6,7 +6,6 @@ tags: [eis, sommer, einfach, ohne-eismaschine, 3-zutaten, vorbereiten]
 portionen: 10
 zeit_aktiv: 10
 zeit_gesamt: 310
-schwierigkeit: einfach
 zutaten:
   - 400 g gezuckerte Kondensmilch, z. B. Dovgan oder Milchmädchen
   - 500 ml Sahne, mind. 32 % Fett
@@ -18,6 +17,8 @@ quelle:
 bild: ../anhang/vanilleeis-ohne-eismaschine.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-20
 ---
 
 Cremiges Vanilleeis aus nur drei Zutaten — ohne Eismaschine und ohne Rühren während des Gefrierens. Die gezuckerte Kondensmilch verhindert, dass sich Eiskristalle bilden, die steif geschlagene Sahne macht das Eis luftig.

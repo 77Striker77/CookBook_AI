@@ -6,7 +6,6 @@ tags: [hähnchen, one-pan, high-protein, meal-prep, sommer, bowl]
 portionen: 4
 zeit_aktiv: 35
 zeit_gesamt: 60
-schwierigkeit: einfach
 zutaten:
   - "# Hähnchen & Marinade"
   - 4 Stück Hähnchenbrust, groß
@@ -61,6 +60,8 @@ quelle:
 bild: ../anhang/greek-chicken-rice-bowls.jpg
 gekocht: []
 status: entwurf
+geraete: [airfryer]
+hinzugefuegt: 2026-07-20
 ---
 
 Alle frischen griechischen Aromen in einer Schüssel: saftige Hähnchenbrust aus der Pfanne auf Zitronen-Kräuter-Reis, dazu knackiger griechischer Salat und Tzatziki. Der Reis wird im selben Topf im Bratensatz des Hähnchens gekocht — daher „One-Pan".

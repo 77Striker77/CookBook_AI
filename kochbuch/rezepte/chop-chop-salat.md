@@ -1,11 +1,10 @@
 ---
 titel: Chop-Chop-Salat mit Granatapfel & Orangendressing
 kategorie: salat
-tags: [salat, vegetarisch, vegan, granatapfel, rotkohl, meal-prep]
+tags: [vegetarisch, vegan, granatapfel, rotkohl, meal-prep]
 portionen: 4
 zeit_aktiv: 25
 zeit_gesamt: 25
-schwierigkeit: einfach
 zutaten:
   - "# Salat"
   - 0.25 Rotkohl, fein gehackt
@@ -25,6 +24,9 @@ quelle:
 bild: ../anhang/chop-chop-salat.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-17
+küche: international
 ---
 
 Ein knackiger „Chop-Chop"-Regenbogensalat: alles fein gehackt, mit süßen Granatapfelkernen und einem frischen Orangen-Olivenöl-Dressing. Farbenfroh, vegan und ganz ohne Kochen. Von **ariane ernst**.

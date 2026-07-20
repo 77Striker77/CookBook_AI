@@ -1,0 +1,37 @@
+---
+// Verhalten aller Rezeptkarten an einer Stelle: Plan-Knopf und Kochverlauf.
+// Vorher lag das dupliziert in index.astro und der Zutatenseite, mit
+// auseinanderdriftenden Varianten.
+---
+
+<script is:inline>
+  (() => {
+    function planZeichnen() {
+      for (const b of document.querySelectorAll('.rk-plan')) {
+        const drin = window.WSPlan?.has(b.dataset.slug);
+        b.setAttribute('aria-pressed', String(!!drin));
+        b.textContent = drin ? '✓' : '+';
+      }
+    }
+    function verlaufZeichnen() {
+      for (const el of document.querySelectorAll('[data-verlauf]')) {
+        const slug = el.dataset.verlauf;
+        const label = window.WSKoch?.label(slug);
+        const n = window.WSKoch?.anzahl(slug) ?? 0;
+        el.hidden = !label;
+        if (label) el.textContent = n > 1 ? `${label} · ${n}×` : label;
+      }
+    }
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('.rk-plan');
+      if (!b) return;
+      e.preventDefault();
+      window.WSPlan.toggle(b.dataset.slug, Number(b.dataset.basis) || 1);
+      planZeichnen();
+    });
+    window.addEventListener('ws-plan-change', planZeichnen);
+    window.addEventListener('ws-koch-change', verlaufZeichnen);
+    planZeichnen();
+    verlaufZeichnen();
+  })();
+</script>

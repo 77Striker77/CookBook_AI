@@ -6,7 +6,6 @@ tags: [high-protein, meal-prep, rindfleisch, schnell, hackfleisch]
 portionen: 3
 zeit_aktiv: 20
 zeit_gesamt: 20
-schwierigkeit: einfach
 zutaten:
   - "# Sticky Beef"
   - 700 g Rinderhackfleisch, 5 % Fett
@@ -36,6 +35,8 @@ quelle:
 bild: ../anhang/sticky-beef-gurkensalat.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-17
 ---
 
 Klebrig-karamellisiertes asiatisches Rinderhack mit erfrischendem Smashed-Gurkensalat und Reis — in rund 20 Minuten fertig. Ideales High-Protein-Meal-Prep mit fast 60 g Protein pro Portion.

@@ -6,7 +6,6 @@ tags: [nachtisch, schokolade, im-glas, rocher, schichtdessert]
 portionen: 6
 zeit_aktiv: 30
 zeit_gesamt: 90
-schwierigkeit: mittel
 zutaten:
   - "# Schoko-Pudding"
   - 100 g Zartbitterschokolade
@@ -27,6 +26,8 @@ quelle:
 bild: ../anhang/rocher-dessert.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-17
 ---
 
 Cremiges Schichtdessert im Glas: selbst gekochter Schokopudding, Sahne und reichlich Ferrero Rocher. Sieht edel aus und lässt sich gut vorbereiten. Ergibt 6 Gläser à 125 ml.

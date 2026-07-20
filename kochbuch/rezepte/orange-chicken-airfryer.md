@@ -2,11 +2,10 @@
 titel: Orange Chicken aus dem Airfryer
 kategorie: hauptgericht
 küche: asiatisch
-tags: [hähnchen, airfryer, orange, süß-scharf]
+tags: [hähnchen, orange, süß-scharf]
 portionen: 2
 zeit_aktiv: 20
 zeit_gesamt: 65
-schwierigkeit: mittel
 zutaten:
   - "# Hähnchen & Marinade"
   - Hähnchenschenkel, gewürfelt
@@ -39,6 +38,8 @@ quelle:
 bild: ../anhang/orange-chicken-airfryer.jpg
 gekocht: []
 status: entwurf
+geraete: [airfryer]
+hinzugefuegt: 2026-07-17
 ---
 
 Süß-würziges Orange Chicken mit knuspriger Panade aus dem Airfryer, in einer Orangensauce mit Chili, Ingwer und Zimt geschwenkt. Serviert mit Reis.

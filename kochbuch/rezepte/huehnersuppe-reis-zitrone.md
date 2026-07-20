@@ -2,11 +2,10 @@
 titel: Hühnersuppe mit Reis & Zitrone
 kategorie: suppe
 küche: deutsch
-tags: [suppe, hühnersuppe, erkältung, zitrone, reis, souptember]
+tags: [hühnersuppe, erkältung, zitrone, reis, souptember]
 portionen: 3
 zeit_aktiv: 40
 zeit_gesamt: 150
-schwierigkeit: mittel
 zutaten:
   - "# Brühe"
   - 2 Hähnchenschenkel, oder 1 Suppenhuhn
@@ -35,6 +34,8 @@ quelle:
 bild: ../anhang/huehnersuppe-reis-zitrone.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-17
 ---
 
 Cremige, zitronige Hühnersuppe mit Reis — das perfekte Wohlfühlessen, auch bei Erkältungen. Aus Pias „Souptember"-Reihe (**piaundhalloumi**), in der sie im September jeden Tag ein Suppen- oder Eintopfrezept teilt.

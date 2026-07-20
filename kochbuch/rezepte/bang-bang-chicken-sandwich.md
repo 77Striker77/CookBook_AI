@@ -2,11 +2,10 @@
 titel: Bang Bang Chicken Sandwiches
 kategorie: hauptgericht
 küche: amerikanisch
-tags: [hähnchen, airfryer, sandwich, high-protein, low-cal]
+tags: [hähnchen, sandwich, high-protein, low-cal]
 portionen: 2
 zeit_aktiv: 20
 zeit_gesamt: 40
-schwierigkeit: einfach
 zutaten:
   - "# Hähnchen"
   - 2 Stück Hähnchenbrust, je 100 g
@@ -34,6 +33,8 @@ quelle:
 bild: ../anhang/bang-bang-chicken-sandwich.jpg
 gekocht: []
 status: entwurf
+geraete: [airfryer, ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Knusprige Hähnchenbrust in Knoblauch-Panko, dazu Bang-Bang-Sauce, geschmolzener Käse und Eisbergsalat im Briochebrötchen. Schnelles, proteinreiches Sandwich mit nur 474 kcal pro Portion.

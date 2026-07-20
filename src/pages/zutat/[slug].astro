@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import Rezeptkarte from '../../components/Rezeptkarte.astro';
+import Kartenlogik from '../../components/Kartenlogik.astro';
 import { url } from '../../lib/url';
 import { parseZutaten } from '../../lib/zutaten';
-import { verlauf, katLabel, zeitLabel } from '../../lib/darstellung';
 
 export async function getStaticPaths() {
   const rezepte = await getCollection('rezepte');
@@ -21,40 +21,34 @@ export async function getStaticPaths() {
     }
   }
 
-  return [...index.entries()].map(([slug, eintrag]) => ({
-    params: { slug },
-    props: { name: eintrag.name, rezepte: eintrag.rezepte },
-  }));
+  // Nur ab zwei Rezepten. Eine Seite „Wasser" oder „Salz" mit einem einzigen
+  // Treffer beantwortet keine Frage — sie kostet nur Build-Zeit und erzeugt
+  // Registereinträge ohne Aussage. Von 122 kanonischen Zutaten kommen 68 in
+  // genau einem Rezept vor.
+  return [...index.entries()]
+    .filter(([, e]) => e.rezepte.length >= 2)
+    .map(([slug, eintrag]) => ({
+      params: { slug },
+      props: { name: eintrag.name, rezepte: eintrag.rezepte },
+    }));
 }
 
 const { name, rezepte } = Astro.props;
 rezepte.sort((a: any, b: any) => a.data.titel.localeCompare(b.data.titel, 'de'));
 ---
 
-<Base titel={name} beschreibung={`Rezepte mit ${name}`}>
-  <div class="wrap zutat-head">
-    <p class="crumb"><a href={url('/')}>Rezepte</a> › Zutat</p>
+<Base titel={name} beschreibung={`${rezepte.length} Rezepte mit ${name}`}>
+  <div class="wrap katalog">
+    <p class="crumb"><a href={url('/register')}>Register</a> › Zutat</p>
     <h1>{name}</h1>
-    <p>{rezepte.length} {rezepte.length === 1 ? 'Rezept verwendet' : 'Rezepte verwenden'} diese Zutat.</p>
-  </div>
+    <p class="s-unter">
+      {rezepte.length} Rezepte verwenden diese Zutat.
+    </p>
 
-  <div class="wrap">
-    <div class="grid" style="padding-top:16px">
-      {rezepte.map((r: any) => (
-        <a class="rcard" href={url(`/rezept/${r.id}`)}>
-          <div class="thumb" style={`background:${verlauf(r.data.kategorie)}`}>
-            {r.data.bild && <Image src={r.data.bild} alt={r.data.titel} widths={[260, 460]} sizes="260px" />}
-            <span class="kat">{katLabel(r.data.kategorie)}</span>
-          </div>
-          <div class="body">
-            <span class="title">{r.data.titel}</span>
-            <span class="meta">
-              {zeitLabel(r.data.zeit_gesamt) && <span>{zeitLabel(r.data.zeit_gesamt)}</span>}
-              <span>{r.data.portionen} Portionen</span>
-            </span>
-          </div>
-        </a>
-      ))}
+    <div class="liste">
+      {rezepte.map((r: any, i: number) => <Rezeptkarte r={r} form="normal" eager={i < 3} />)}
     </div>
   </div>
+
+  <Kartenlogik />
 </Base>

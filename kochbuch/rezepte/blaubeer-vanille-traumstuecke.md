@@ -6,7 +6,6 @@ tags: [plätzchen, weihnachtsbäckerei, mürbeteig, blaubeeren, kekse]
 portionen: 30
 zeit_aktiv: 30
 zeit_gesamt: 55
-schwierigkeit: mittel
 zutaten:
   - "# Teig"
   - 300 g Mehl
@@ -27,6 +26,8 @@ quelle:
 bild: ../anhang/blaubeer-vanille-traumstuecke.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Zarte Mürbeteig-Plätzchen mit Blaubeer-Vanille-Füllung — aufgerollt, in Stücke geschnitten und mit Puderzucker bestäubt. Sorte 11/30 aus der Weihnachtsbäckerei.

@@ -6,7 +6,6 @@ tags: [rinderbraten, schmorbraten, tafelspitz, festtagsessen, sonntagsessen, rot
 portionen: 2
 zeit_aktiv: 30
 zeit_gesamt: 105
-schwierigkeit: einfach
 zutaten:
   - 1,2 kg Tafelspitz
   - 1/2 Sellerie
@@ -31,6 +30,8 @@ quelle:
 bild: ../anhang/zarter-rinderbraten.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Klassischer Rinderbraten aus dem Ofen: ein Tafelspitz, kräftig angebraten und im geschlossenen Bräter auf einem Bett aus Sellerie, Karotten, Zwiebel und Porree geschmort. Aus dem Röstgemüse, Rotwein und Gemüsebrühe entsteht eine aromatische Rotwein-Gemüsesoße. Ein Festtags- und Sonntagsessen zum Wohlfühlen.

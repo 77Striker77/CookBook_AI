@@ -2,9 +2,8 @@
 titel: Streifenkuchen
 kategorie: backen
 küche: deutsch
-tags: [kuchen, backen, festlich, geschichtet, blechkuchen]
+tags: [kuchen, festlich, geschichtet, blechkuchen]
 portionen: 20
-schwierigkeit: aufwendig
 zutaten:
   - "# Für den Teig"
   - 350 g Butter, weich
@@ -30,6 +29,8 @@ quelle:
 bild: ../anhang/streifenkuchen.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-16
 ---
 
 Ein geschichteter Blechkuchen aus dünnen Biskuit-Streifen mit drei Füllungen

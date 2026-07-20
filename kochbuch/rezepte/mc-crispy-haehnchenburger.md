@@ -2,11 +2,10 @@
 titel: MC Crispy – Hähnchenburger aus dem Ofen
 kategorie: hauptgericht
 küche: amerikanisch
-tags: [hähnchen, burger, ofen, high-protein, fast-food-style]
+tags: [hähnchen, burger, high-protein, fast-food-style]
 portionen: 2
 zeit_aktiv: 15
 zeit_gesamt: 40
-schwierigkeit: einfach
 zutaten:
   - "# Patties"
   - 1 Packung Hähnchen-Hackfleisch
@@ -33,6 +32,8 @@ quelle:
 bild: ../anhang/mc-crispy-haehnchenburger.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Selbst gemachte „McCrispy"-Hähnchenburger im McDonald's-Stil — mit knuspriger Cornflakes-Panade aus dem Ofen statt frittiert. Laut Autorin in doppelter Größe und mit fast 50 % weniger Kalorien.

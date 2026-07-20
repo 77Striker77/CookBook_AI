@@ -2,11 +2,10 @@
 titel: Ofen-Kebab mit Fladenbrot & Joghurt-Knoblauch-Soße
 kategorie: hauptgericht
 küche: orientalisch
-tags: [hackfleisch, ofen, high-protein, fladenbrot, meal-prep]
+tags: [hackfleisch, high-protein, fladenbrot, meal-prep]
 portionen: 4
 zeit_aktiv: 40
 zeit_gesamt: 80
-schwierigkeit: mittel
 zutaten:
   - "# Kebab"
   - 500-600 g Hackfleisch
@@ -47,6 +46,8 @@ quelle:
 bild: ../anhang/ofen-kebab.jpg
 gekocht: []
 status: entwurf
+geraete: [ofen]
+hinzugefuegt: 2026-07-17
 ---
 
 Saftiges Kebab vom Backblech statt vom Drehspieß: würzig geknetetes Hackfleisch, dazu selbstgemachtes Skyr-Fladenbrot, eine cremige Joghurt-Knoblauch-Soße und ein frischer Tomate-Gurke-Salat. High-Protein-Feierabendessen von **fina.cooks**.

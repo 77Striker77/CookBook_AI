@@ -342,153 +342,100 @@ img { max-width: 100%; display: block; }
 .nav a.nav-plan .badge { background: var(--color-accent); color: var(--c-white); font-size: var(--fs-2xs); font-weight: var(--fw-bold); min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
 .theme-toggle { border: var(--bw-hair) solid var(--color-line-strong); background: var(--color-surface-raised); color: var(--color-ink); border-radius: var(--r-xs); width: 44px; height: 44px; cursor: pointer; font-size: 1rem; }
 
-/* ---- Startseite: Hero ----
-   Die Titelzeile spannt die volle Breite und bricht bewusst bis an den Rand.
-   Das ist der Kern des Editorial-Looks — ein Titel, der sich benimmt, ist
-   keiner. Groesse ueber vw statt fester Stufen, damit die Zeile bei jeder
-   Fensterbreite ausfuellt. */
-.hero-band { border-bottom: var(--bw-heavy) solid var(--color-ink); }
-.hero { padding: var(--sp-xl) 0 var(--sp-lg); }
-.eyebrow { display: inline-flex; align-items: center; gap: 9px; text-transform: uppercase; letter-spacing: var(--tr-caps); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-accent-text); margin: 0 0 var(--sp-2xs); }
+/* ---- Wiederkehrende Kleinteile ---- */
+/* Rubrikenzeile ueber einer Ueberschrift. */
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); }
 .eyebrow::before { content: ""; width: 28px; height: var(--bw); background: var(--color-accent); }
 
-.hero h1 {
-  font-family: var(--ff-display);
-  font-size: var(--fs-display);
-  line-height: var(--lh-display);
-  letter-spacing: -0.045em;
-  font-weight: var(--fw-semibold);
-  margin: 0;
-  text-transform: uppercase;
-  text-wrap: nowrap;
-}
-.hero h1 span { display: block; }
-.hero h1 .accent { color: var(--color-accent-text); }
+/* Trefferzahl ueber einer Liste. */
+.count { margin: var(--sp-md) 0 var(--sp-sm); padding-bottom: var(--sp-2xs); border-bottom: var(--bw-rule) solid var(--color-ink); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
 
-.hero-foot {
-  display: flex; flex-wrap: wrap; align-items: baseline;
-  gap: var(--sp-xs) var(--sp-md);
-  margin-top: var(--sp-md);
-  padding-top: var(--sp-xs);
-  border-top: var(--bw-hair) solid var(--color-line);
-}
-.hero-sub { color: var(--color-ink-muted); margin: 0; max-width: 46ch; font-size: var(--fs-md); flex: 1 1 22ch; }
-.hero-stats { display: flex; align-items: baseline; gap: var(--sp-2xs); color: var(--color-ink-muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); white-space: nowrap; }
-.hero-stats b { color: var(--color-ink); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; }
-.hero-stats .dot { color: var(--color-line-strong); }
+/* ---- Rezeptkarte (eine Implementierung fuer alle Seiten) ---- */
+.rk { position: relative; display: flex; flex-direction: column; }
+.rk-bild { position: relative; overflow: hidden; aspect-ratio: 4/3; background: var(--color-surface); }
+.rk--gross .rk-bild { aspect-ratio: 21/9; }
+.rk-bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-.controls { display: flex; flex-wrap: wrap; gap: var(--sp-xs); align-items: stretch; margin: var(--sp-section) 0 var(--sp-sm); }
-/* Kein Kasten: nur eine Grundlinie. Feldrahmen sind Formular-Sprache, hier
-   soll die Suche wie eine Zeile im Satz wirken. */
-.searchfield { flex: 1 1 260px; display: flex; align-items: center; gap: var(--sp-2xs); border: 0; border-bottom: var(--bw) solid var(--color-line-strong); padding: 9px 2px; }
-.searchfield:focus-within { border-bottom-color: var(--color-accent); }
-.searchfield input { border: 0; background: transparent; color: var(--color-ink); font-size: var(--fs-md); width: 100%; outline: none; }
+.rk-text { padding-top: var(--sp-2xs); margin-top: var(--sp-2xs); border-top: var(--bw) solid var(--color-ink); }
+.rk-kopf { margin: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2xs); font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); font-weight: var(--fw-semibold); }
+.rk-kat { color: var(--color-ink-muted); }
+.rk-geraet { color: var(--color-accent-text); }
 
-.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-sm); margin: var(--sp-sm) 0 var(--sp-3xs); }
-/* Chips als Wortmarken statt Pillen. Aktiv = Inversion, nicht Faerbung. */
-.chip {
-  border: 0; border-bottom: var(--bw) solid transparent; background: transparent;
-  color: var(--color-ink-muted); border-radius: 0; padding: 6px 2px;
-  font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;
-  text-transform: uppercase; letter-spacing: var(--tr-caps);
-}
-.chip:hover { color: var(--color-ink); border-bottom-color: var(--color-line-strong); }
-.chip[aria-pressed="true"] { color: var(--color-ink); border-bottom-color: var(--color-accent); }
+.rk-titel { display: block; margin-top: var(--sp-3xs); font-family: var(--ff-display); font-weight: 600; font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight); color: var(--color-ink); text-decoration: none; }
+.rk--gross .rk-titel { font-size: var(--fs-h2); letter-spacing: var(--tr-display); }
+.rk--zeile .rk-titel { font-size: var(--fs-lg); }
+/* Ganze Karte klickbar, ohne den Plan-Knopf zu verschachteln. */
+.rk-titel::after { content: ""; position: absolute; inset: 0; }
+.rk:hover .rk-titel, .rk:focus-within .rk-titel { color: var(--color-accent-text); }
+.rk:hover .rk-text { border-top-color: var(--color-accent); }
+.rk:active .rk-titel { background: var(--color-ink); color: var(--color-bg); }
 
-/* Unterstrichene CTA statt Kasten — Stil #78, "underline CTA pattern". */
-.btn {
-  border: 0; border-bottom: var(--bw-rule) solid var(--color-ink);
-  background: transparent; color: var(--color-ink); border-radius: 0;
-  padding: 10px 2px; font-size: var(--fs-md); font-weight: var(--fw-semibold);
-  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
-  gap: 7px; min-height: 44px; text-transform: uppercase; letter-spacing: .08em;
-}
-.btn:hover { border-bottom-color: var(--color-accent); color: var(--color-accent-text); }
-.btn:active { background: var(--color-ink); color: var(--color-bg); }
-.btn.primary { border-bottom-color: var(--color-accent); color: var(--color-accent-text); }
+.rk-meta { margin: var(--sp-3xs) 0 0; display: flex; flex-wrap: wrap; gap: 2px var(--sp-2xs); font-size: var(--fs-sm); color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
+/* Die Arbeitszeit ist die Zahl, die am Feierabend entscheidet. */
+.rk-zeit { color: var(--color-ink); font-weight: var(--fw-semibold); }
+.rk-meta > span + span::before { content: "·"; margin-right: var(--sp-2xs); color: var(--color-line-strong); }
+.rk-warte { font-style: italic; }
+.rk-verlauf { margin: var(--sp-3xs) 0 0; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); font-weight: var(--fw-semibold); }
 
-.count { color: var(--color-ink-muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); margin: var(--sp-lg) 0 var(--sp-sm); padding-bottom: var(--sp-2xs); border-bottom: var(--bw-rule) solid var(--color-ink); }
-
-/* Editorial-Raster: Rhythmus von sechs Karten in drei Groessen —
-   volle Breite, dann zwei Haelften, dann drei Drittel. Drei Massstaebe statt
-   zwei, das ist der Unterschied zwischen Raster und Seitenlayout.
-   Die Position kommt aus data-pos, das beim Filtern neu vergeben wird;
-   :nth-child wuerde die versteckten Karten mitzaehlen und den Rhythmus
-   zerreissen. Bewusst KEINE Kartenkaesten: Bild, Linie, Text. */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: var(--sp-2xl) var(--sp-md);
-  padding-bottom: var(--sp-3xl);
-}
-.rcard { position: relative; grid-column: span 2; display: flex; flex-direction: column; }
-.rcard[data-pos="0"] { grid-column: span 6; }
-.rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 3; }
-
-.rcard .thumb { position: relative; overflow: hidden; aspect-ratio: 4/5; background: var(--color-surface); }
-.rcard[data-pos="0"] .thumb { aspect-ratio: 21/9; }
-.rcard[data-pos="1"] .thumb, .rcard[data-pos="2"] .thumb { aspect-ratio: 3/2; }
-.rcard .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-
-.rcard .body {
-  display: grid; grid-template-columns: auto 1fr; gap: 2px var(--sp-2xs);
-  padding-top: var(--sp-2xs);
-  border-top: var(--bw) solid var(--color-ink);
-  margin-top: var(--sp-xs);
-}
-/* Laufende Nummer — das Magazin-Motiv. Aendert sich beim Filtern mit. */
-.rcard .nr { grid-row: 1; font-size: var(--fs-2xs); font-weight: var(--fw-bold); color: var(--color-accent-text); font-variant-numeric: tabular-nums lining-nums; letter-spacing: .04em; }
-.rcard .kat { grid-row: 1; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); }
-.rcard .title {
-  grid-column: 1 / -1; margin-top: var(--sp-3xs);
-  font-family: var(--ff-display); font-weight: 600;
-  font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight);
-  color: var(--color-ink); text-decoration: none;
-}
-.rcard[data-pos="1"] .title, .rcard[data-pos="2"] .title { font-size: var(--fs-h3); }
-.rcard[data-pos="0"] .title { font-size: var(--fs-h1); letter-spacing: var(--tr-display); line-height: var(--lh-tight); max-width: 18ch; }
-/* Ganze Karte klickbar, ohne den Button zu verschachteln (waere ungueltiges
-   HTML und per Tastatur kaputt). */
-.rcard .title::after { content: ""; position: absolute; inset: 0; }
-/* Sofortige Inversion statt weichem Uebergang — reagiert auch auf Tap, wo es
-   keinen Hover gibt. Stil #70: "instant inversion active state". */
-.rcard:hover .body, .rcard:focus-within .body { border-top-color: var(--color-accent); }
-.rcard:hover .title, .rcard:focus-within .title { color: var(--color-accent-text); }
-.rcard:active .title { background: var(--color-ink); color: var(--color-bg); }
-.rcard .meta { grid-column: 1 / -1; color: var(--color-ink-muted); font-size: var(--fs-sm); display: flex; gap: var(--sp-xs); flex-wrap: wrap; font-variant-numeric: tabular-nums; margin-top: 2px; }
-
-.add-plan {
+.rk-plan {
   position: absolute; top: var(--sp-2xs); right: var(--sp-2xs); z-index: var(--z-float);
   width: 44px; height: 44px; border-radius: var(--r-pill); border: 0;
   background: rgba(250,250,249,.94); color: #0C0A09;
   font-size: 1.25rem; line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: background var(--dur-fast) var(--ease);
 }
-.add-plan[aria-pressed="true"] { background: var(--color-accent); color: var(--c-white); font-size: 1rem; font-weight: var(--fw-bold); }
+.rk-plan[aria-pressed="true"] { background: var(--color-accent); color: var(--c-white); font-size: 1rem; font-weight: var(--fw-bold); }
+.rk--zeile .rk-plan { position: static; margin-left: auto; background: transparent; color: var(--color-ink-muted); }
 
+.raster-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg) var(--sp-md); }
+@media (max-width: 900px) { .raster-3 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .raster-3 { grid-template-columns: 1fr; gap: var(--sp-xl); } }
+
+/* ---- Startseite: Entscheidungshilfe, kein Katalog ---- */
+.start { padding: var(--sp-lg) 0 var(--sp-3xl); }
+
+.s-plan { border-top: var(--bw-heavy) solid var(--color-accent); padding-top: var(--sp-2xs); margin-bottom: var(--sp-xl); }
+.s-plan-zeile { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-sm); }
+.s-plan-text { margin: 0; font-family: var(--ff-display); font-size: var(--fs-h3); }
+.s-plan-links { margin-left: auto; }
+
+.s-block { margin-bottom: var(--sp-section); }
+.s-kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-sm); }
+.s-titel { margin: 0; font-size: var(--fs-h1); letter-spacing: var(--tr-display); line-height: var(--lh-tight); }
+.s-h2 { margin: 0; font-size: var(--fs-h2); letter-spacing: var(--tr-display); }
+.s-unter { margin: var(--sp-3xs) 0 var(--sp-md); color: var(--color-ink-muted); max-width: var(--w-measure); }
+.s-wuerfel { margin-left: auto; border: 0; border-bottom: var(--bw) solid var(--color-line-strong); background: transparent; color: var(--color-ink-muted); font: var(--fw-semibold) var(--fs-xs)/1 var(--ff-ui); text-transform: uppercase; letter-spacing: var(--tr-caps); min-height: 44px; cursor: pointer; padding: 0 2px; }
+.s-wuerfel:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
+
+/* Zeit-Einstiege: grosse Flaechen statt Chip-Wueste */
+.s-zeit { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--bw-hair); background: var(--color-line); border-block: var(--bw-rule) solid var(--color-ink); }
+@media (max-width: 700px) { .s-zeit { grid-template-columns: 1fr; } }
+.s-zeit-feld { display: flex; flex-direction: column; gap: var(--sp-3xs); padding: var(--sp-md) var(--sp-sm); background: var(--color-bg); text-decoration: none; min-height: 96px; justify-content: center; }
+.s-zeit-feld:hover, .s-zeit-feld:focus-visible { background: var(--color-ink); }
+.s-zeit-feld:hover .s-zeit-gross, .s-zeit-feld:hover .s-zeit-klein { color: var(--color-bg); }
+.s-zeit-gross { font-family: var(--ff-display); font-size: var(--fs-h3); color: var(--color-ink); letter-spacing: var(--tr-tight); }
+.s-zeit-klein { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.s-zeit-lang .s-zeit-gross { color: var(--color-accent-text); }
+
+.s-alle { border-top: var(--bw-heavy) solid var(--color-ink); padding-top: var(--sp-sm); }
+.s-alle-link { display: flex; align-items: baseline; gap: var(--sp-sm); font-family: var(--ff-display); font-size: var(--fs-h2); color: var(--color-ink); text-decoration: none; letter-spacing: var(--tr-display); }
+.s-alle-link:hover { color: var(--color-accent-text); }
+.s-alle-pfeil { margin-left: auto; }
+
+/* ---- Katalog /alle ---- */
+.katalog { padding: var(--sp-lg) 0 var(--sp-3xl); }
+.katalog h1 { font-size: var(--fs-h1); margin: 0 0 var(--sp-md); letter-spacing: var(--tr-display); }
+.filter { display: flex; flex-direction: column; gap: var(--sp-sm); margin-bottom: var(--sp-md); }
+.f-suche input { width: 100%; border: 0; border-bottom: var(--bw) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-size: var(--fs-lg); padding: var(--sp-2xs) 2px; outline: none; }
+.f-suche input:focus { border-bottom-color: var(--color-accent); }
+.f-gruppe { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2xs) var(--sp-sm); }
+.f-gruppe legend { float: left; width: 100%; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); margin-bottom: var(--sp-3xs); }
+.chip-n { font-variant-numeric: tabular-nums; opacity: .55; font-size: var(--fs-2xs); }
+
+.liste { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg) var(--sp-md); padding-bottom: var(--sp-2xl); }
+@media (max-width: 900px) { .liste { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .liste { grid-template-columns: 1fr; gap: var(--sp-xl); } }
 .empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
-
-@media (max-width: 1040px) {
-  .grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-xl) var(--sp-md); }
-  .rcard { grid-column: span 2; }
-  .rcard[data-pos="0"] { grid-column: span 4; }
-  .rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 2; }
-  .rcard[data-pos="1"] .thumb, .rcard[data-pos="2"] .thumb { aspect-ratio: 4/5; }
-  .rcard[data-pos="1"] .title, .rcard[data-pos="2"] .title { font-size: var(--fs-xl); }
-  .rcard[data-pos="0"] .title { font-size: var(--fs-h2); }
-}
-@media (max-width: 560px) {
-  .grid { grid-template-columns: 1fr; gap: var(--sp-xl); }
-  .rcard, .rcard[data-pos="0"],
-  .rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 1; }
-  .rcard .thumb { aspect-ratio: 4/3; }
-  .rcard[data-pos="0"] .thumb { aspect-ratio: 3/2; }
-  /* Das Lead-Bild bricht auf dem Handy ueber die Seitenraender —
-     "text bleeds to/over screen edges", Stil #78. */
-  .rcard[data-pos="0"] .thumb { width: 100vw; margin-left: calc(50% - 50vw); }
-  .rcard[data-pos="0"] .title { font-size: var(--fs-h2); }
-}
 
 /* ---- Rezeptseite ---- */
 .recipe { padding: var(--sp-lg) 0 var(--sp-3xl); }
@@ -789,3 +736,17 @@ footer.site .wrap { display: flex; gap: var(--sp-xs); flex-wrap: wrap; justify-c
 .v-roh pre { background: var(--color-surface); padding: var(--sp-xs); overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
 .v-fuss { margin-top: var(--sp-2xl); }
 a.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
+
+/* ---- Register ---- */
+.reg-block { margin-bottom: var(--sp-2xl); }
+.reg-block .s-h2 { margin-bottom: var(--sp-sm); padding-bottom: var(--sp-2xs); border-bottom: var(--bw-rule) solid var(--color-ink); }
+.reg-gruppe { display: grid; grid-template-columns: 2.5rem 1fr; gap: var(--sp-sm); margin-bottom: var(--sp-md); align-items: start; }
+.reg-buchstabe { margin: 0; font-family: var(--ff-display); font-size: var(--fs-h3); color: var(--color-accent-text); line-height: 1.2; }
+.reg-liste { list-style: none; margin: 0; padding: 0; columns: 3; column-gap: var(--sp-lg); }
+.reg-liste.reg-breit { columns: 2; }
+@media (max-width: 780px) { .reg-liste { columns: 2; } .reg-liste.reg-breit { columns: 1; } }
+@media (max-width: 480px) { .reg-liste { columns: 1; } }
+.reg-liste li { break-inside: avoid; }
+.reg-liste a { display: flex; align-items: baseline; gap: var(--sp-2xs); padding: 7px 0; color: var(--color-ink); text-decoration: none; border-bottom: var(--bw-hair) solid var(--color-line); min-height: 40px; }
+.reg-liste a:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
+.reg-liste a span { margin-left: auto; font-variant-numeric: tabular-nums lining-nums; font-size: var(--fs-sm); color: var(--color-ink-muted); }

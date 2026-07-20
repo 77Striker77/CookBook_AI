@@ -1,22 +1,5 @@
-// Darstellungshelfer: Platzhalter-Farbverläufe (bis echte Bilder da sind),
-// Kategorie-Label und Zeitformatierung.
-
-const VERLAEUFE: Record<string, string> = {
-  hauptgericht: 'linear-gradient(135deg,#C8512E,#E0A426)',
-  suppe: 'linear-gradient(135deg,#B5642A,#D99A2B)',
-  frühstück: 'linear-gradient(135deg,#E0A426,#8AB559)',
-  dessert: 'linear-gradient(135deg,#B5548A,#E0A426)',
-  beilage: 'linear-gradient(135deg,#3D7A4E,#8AB559)',
-  salat: 'linear-gradient(135deg,#5AA152,#C7D34E)',
-  snack: 'linear-gradient(135deg,#C8802E,#E0C026)',
-  backen: 'linear-gradient(135deg,#A9662E,#E0B15C)',
-  getränk: 'linear-gradient(135deg,#2E86C8,#5AC7B0)',
-  grundrezept: 'linear-gradient(135deg,#6B7263,#A7B08F)',
-};
-
-export function verlauf(kategorie: string): string {
-  return VERLAEUFE[kategorie] ?? VERLAEUFE.grundrezept;
-}
+// Darstellungshelfer: Kategorie-Label, Zeitformatierung und die beiden
+// Achsen, die den Alltag tragen — Arbeitszeit und Wartezeit.
 
 export function katLabel(kategorie: string): string {
   return kategorie.charAt(0).toUpperCase() + kategorie.slice(1);
@@ -29,3 +12,78 @@ export function zeitLabel(minuten?: number): string | null {
   const m = minuten % 60;
   return m ? `${h} h ${m} min` : `${h} h`;
 }
+
+/**
+ * Die wichtigste Zahl auf jeder Karte ist die ARBEITSZEIT, nicht die
+ * Gesamtzeit. Beispiel aus dem Bestand: Das Vanilleeis braucht 310 Minuten
+ * gesamt, aber nur 10 Minuten Arbeit — angezeigt als „5 h 10 min" sah es aus
+ * wie das aufwendigste Rezept und war das faulste.
+ */
+export function arbeitLabel(aktiv?: number, gesamt?: number): string | null {
+  if (!aktiv && !gesamt) return null;
+  if (!aktiv) return zeitLabel(gesamt);
+  if (!gesamt || gesamt <= aktiv) return `${zeitLabel(aktiv)} Arbeit`;
+  return `${zeitLabel(aktiv)} Arbeit · ${zeitLabel(gesamt)} gesamt`;
+}
+
+export type Warteklasse = 'dabei' | 'kurz' | 'halbe' | 'einplanen';
+
+/**
+ * Wartezeit = gesamt − aktiv, als absolute Differenz.
+ *
+ * Bewusst NICHT der Quotient aktiv/gesamt: Über die 17 Rezepte mit Zeiten
+ * liegt der zwischen 0,25 und 0,58 in einem lückenlosen Kontinuum — jede
+ * Grenze wäre gesetzt statt gefunden. Schlimmer noch, er normiert weg, worauf
+ * es ankommt: Hühnersuppe (0,27) und Honey-Smokey-Hähnchen (0,33) liegen fast
+ * gleichauf, aber die eine kostet 40 Minuten Arbeit über 2½ Stunden, die
+ * andere 10 Minuten über eine halbe.
+ *
+ * Die Differenz verteilt sich dagegen sauber auf 2 / 6 / 5 / 4 Rezepte.
+ */
+export function warteklasse(aktiv?: number, gesamt?: number): Warteklasse | null {
+  if (aktiv == null || gesamt == null) return null;
+  const warten = Math.max(0, gesamt - aktiv);
+  if (warten < 15) return 'dabei';
+  if (warten < 30) return 'kurz';
+  if (warten < 60) return 'halbe';
+  return 'einplanen';
+}
+
+export const WARTE_LABEL: Record<Warteklasse, string> = {
+  dabei: 'Durchgehend dabei',
+  kurz: 'Kurz warten',
+  halbe: 'Halbe Stunde warten',
+  einplanen: 'Muss man einplanen',
+};
+
+/** Kurzform für die Karte. */
+export const WARTE_KURZ: Record<Warteklasse, string> = {
+  dabei: 'am Stück',
+  kurz: 'kurz warten',
+  halbe: 'mit Wartezeit',
+  einplanen: 'läuft von allein',
+};
+
+/**
+ * Anzahl der Komponenten eines Rezepts = Zahl der `# `-Gruppen in der
+ * Zutatenliste. Ersetzt `schwierigkeit`, das mit 12/5/1 nichts trennte:
+ * Die Komponenten verteilen sich auf 4/1/4/4/4/1 und beantworten die Frage,
+ * die am Feierabend wirklich zählt — ein Topf und eine Sache, oder Hähnchen
+ * plus Reis plus Salat plus Sauce gleichzeitig?
+ */
+export function komponenten(zutaten: string[]): number {
+  return zutaten.filter((z) => z.trim().startsWith('#')).length || 1;
+}
+
+export function komponentenLabel(n: number): string | null {
+  if (n <= 1) return null;
+  return `${n} Komponenten`;
+}
+
+export const GERAET_LABEL: Record<string, string> = {
+  airfryer: 'Airfryer',
+  ofen: 'Ofen',
+  herd: 'Herd',
+  mixer: 'Mixer',
+  eismaschine: 'Eismaschine',
+};

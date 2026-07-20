@@ -6,7 +6,6 @@ tags: [one-pan, hähnchen, reis, meal-prep, shawarma]
 portionen: 4
 zeit_aktiv: 30
 zeit_gesamt: 60
-schwierigkeit: einfach
 zutaten:
   - "# Hähnchen"
   - 680 g Hähnchenschenkelfilet, ohne Haut und Knochen
@@ -55,6 +54,8 @@ quelle:
 bild: ../anhang/chicken-shawarma-rice-bowls.jpg
 gekocht: []
 status: entwurf
+geraete: []
+hinzugefuegt: 2026-07-17
 ---
 
 One-Pan-Feierabendessen im Shawarma-Stil: würzig mariniertes Hähnchen, goldener Zwiebel-Reis-Pilaw, ein frischer Sumak-Salat und eine cremige Knoblauchsauce — alles aus einer Pfanne. „Dinners you'll actually make", Folge 38.
