@@ -1,0 +1,171 @@
+---
+// Der gesamte Client-Zustand an einer Stelle: Kochplan und Koch-Gedächtnis.
+//
+// Warum localStorage und nicht das Frontmatter: `gekocht` und `bewertung`
+// liegen im YAML, also in Git. Der Moment des Ausfüllens ist aber „gerade
+// gegessen, Handy in der Hand" — und eine der beiden Personen ist laut
+// docs/KONZEPT.md nicht technisch. Ein Feld, das nur über Klonen, Editieren,
+// Committen und Build befüllbar ist, bleibt leer; genau das ist passiert
+// (0 Einträge bei 18 Rezepten).
+//
+// Deshalb zwei Ebenen: Hier wird sofort geschrieben und sofort angezeigt.
+// Die Persistenz nach Git läuft später über /verlauf, das aus diesen Daten
+// eine vorbefüllte Issue erzeugt — derselbe Briefkasten-Weg, den der Import
+// schon benutzt.
+//
+// Steht im <head> und ohne `type="module"`, damit alle Seitenskripte den
+// Zustand beim Laden bereits vorfinden.
+---
+
+<script is:inline>
+  (() => {
+    const lesen = (key, fallback) => {
+      try {
+        return JSON.parse(localStorage.getItem(key)) ?? fallback;
+      } catch {
+        return fallback;
+      }
+    };
+    const melden = (name) => window.dispatchEvent(new CustomEvent(name));
+
+    /* ---------------------------------------------------------------
+       Kochplan — was diese Woche gekocht werden soll.
+       Eintrag: { slug, ziel, tag }  tag: 0=unzugeordnet, 1=Mo … 7=So
+       --------------------------------------------------------------- */
+    window.WSPlan = {
+      KEY: 'ws-plan',
+      read() {
+        // Alte Einträge ohne `tag` bleiben gültig — sie landen als
+        // unzugeordnet. Kein Migrationsschritt, keine verlorenen Pläne.
+        return lesen(this.KEY, []).map((e) => ({ tag: 0, ...e }));
+      },
+      write(list) {
+        localStorage.setItem(this.KEY, JSON.stringify(list));
+        this.updateBadge();
+        melden('ws-plan-change');
+      },
+      has(slug) {
+        return this.read().some((e) => e.slug === slug);
+      },
+      toggle(slug, ziel) {
+        const l = this.read();
+        const i = l.findIndex((e) => e.slug === slug);
+        if (i >= 0) l.splice(i, 1);
+        else l.push({ slug, ziel: ziel || 1, tag: 0 });
+        this.write(l);
+        return i < 0;
+      },
+      setPortion(slug, ziel) {
+        const l = this.read();
+        const e = l.find((x) => x.slug === slug);
+        if (e) {
+          e.ziel = Math.max(1, ziel);
+          this.write(l);
+        }
+      },
+      setTag(slug, tag) {
+        const l = this.read();
+        const e = l.find((x) => x.slug === slug);
+        if (e) {
+          e.tag = Math.max(0, Math.min(7, tag));
+          this.write(l);
+        }
+      },
+      remove(slug) {
+        this.write(this.read().filter((e) => e.slug !== slug));
+      },
+      clear() {
+        this.write([]);
+      },
+      count() {
+        return this.read().length;
+      },
+      updateBadge() {
+        const b = document.getElementById('planBadge');
+        if (!b) return;
+        const n = this.count();
+        b.textContent = n;
+        b.hidden = n === 0;
+        const s = document.getElementById('planStatus');
+        if (s) s.textContent = n === 0 ? 'Kochplan leer' : `${n} im Kochplan`;
+      },
+    };
+
+    /* ---------------------------------------------------------------
+       Koch-Gedächtnis — was tatsächlich gekocht wurde.
+       Eintrag: { slug, datum: 'YYYY-MM-DD', urteil: 'nochmal'|'ok'|'nein' }
+
+       Drei Urteilsstufen statt fünf Sternen: Dass 0 von 18 Rezepten bewertet
+       waren, ist die Antwort, nicht das Symptom. Zwei Menschen vergeben keine
+       konsistente 1–5-Skala, und der Unterschied zwischen 3 und 4 Sternen
+       ändert nie eine Entscheidung.
+       --------------------------------------------------------------- */
+    window.WSKoch = {
+      KEY: 'ws-koch',
+      read() {
+        return lesen(this.KEY, []);
+      },
+      write(list) {
+        localStorage.setItem(this.KEY, JSON.stringify(list));
+        melden('ws-koch-change');
+      },
+      /** Trägt einen Kochvorgang ein. Mehrfach am selben Tag zählt einmal. */
+      log(slug, urteil, datum) {
+        const tag = datum || new Date().toISOString().slice(0, 10);
+        const l = this.read().filter((e) => !(e.slug === slug && e.datum === tag));
+        l.push({ slug, datum: tag, urteil: urteil || null });
+        l.sort((a, b) => b.datum.localeCompare(a.datum));
+        this.write(l);
+      },
+      entfernen(slug, datum) {
+        this.write(this.read().filter((e) => !(e.slug === slug && e.datum === datum)));
+      },
+      /** Alle Einträge eines Rezepts, neueste zuerst. */
+      fuer(slug) {
+        return this.read().filter((e) => e.slug === slug);
+      },
+      anzahl(slug) {
+        return this.fuer(slug).length;
+      },
+      letzte(slug) {
+        return this.fuer(slug)[0]?.datum ?? null;
+      },
+      /** Jüngstes Urteil, damit eine Korrektur die alte Meinung ersetzt. */
+      urteil(slug) {
+        return this.fuer(slug).find((e) => e.urteil)?.urteil ?? null;
+      },
+      /** Tage seit dem letzten Mal. null = noch nie gekocht. */
+      tageSeit(slug) {
+        const d = this.letzte(slug);
+        if (!d) return null;
+        const ms = Date.now() - new Date(d + 'T12:00:00').getTime();
+        return Math.max(0, Math.floor(ms / 86400000));
+      },
+      /** Für die Anzeige auf Karten: „vor 3 Wochen“, „heute“, null. */
+      label(slug) {
+        const t = this.tageSeit(slug);
+        if (t === null) return null;
+        if (t === 0) return 'heute gekocht';
+        if (t === 1) return 'gestern gekocht';
+        if (t < 7) return `vor ${t} Tagen`;
+        if (t < 14) return 'vor einer Woche';
+        if (t < 60) return `vor ${Math.round(t / 7)} Wochen`;
+        return `vor ${Math.round(t / 30)} Monaten`;
+      },
+      alle() {
+        return this.read();
+      },
+      leeren() {
+        this.write([]);
+      },
+    };
+
+    // Frühe Aufrufer bedienen und über Tabs hinweg synchron halten.
+    window.addEventListener('DOMContentLoaded', () => window.WSPlan.updateBadge());
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'ws-plan') window.WSPlan.updateBadge();
+      if (e.key === 'ws-koch') melden('ws-koch-change');
+    });
+    window.addEventListener('ws-plan-change', () => window.WSPlan.updateBadge());
+  })();
+</script>
