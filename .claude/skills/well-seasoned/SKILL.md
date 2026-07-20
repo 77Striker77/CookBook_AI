@@ -7,6 +7,11 @@ description: Gestaltung, Sprache und Barrierefreiheit von "Well Seasoned" — De
 
 Verbindlich für alles, was der Nutzer sieht oder liest. Details in `references/`.
 
+**Hier stehen die Entscheidungen dieses Projekts.** Die Methode dahinter — wie
+man Kontrast misst, Skalen herleitet, Theming ohne Duplikate baut, eine Stimme
+destilliert — steht projektunabhängig im Skill `frontend-handwerk`. Bei
+Grundsatzfragen dort nachsehen, nicht hier neu erfinden.
+
 ## Was das hier ist
 
 Ein privates Kochbuch für zwei Personen. Astro 5, statisch, GitHub Pages,
@@ -39,16 +44,12 @@ Fünf Regeln, aus denen der Rest folgt:
 
 ## Tokens
 
-`references/tokens.css` ist die Referenzfassung. Regeln dazu:
+`references/tokens.css` ist die Referenzfassung. Architektur (zwei Schichten,
+lokale Component-Tokens, `light-dark()`-Theming) siehe `frontend-handwerk`.
+Projektspezifisch gilt zusätzlich:
 
-- **Zwei Schichten:** Primitive (Rohwerte) → Semantic (Bedeutung). Komponenten
-  greifen **nur** auf Semantic zu, nie auf Primitive.
-- **Component-Tokens nur lokal** im Regelblock der Komponente, nie in `:root`.
-  Einführen, sobald eine Komponente ≥2 Zustände hat, die ≥2 Eigenschaften
-  gleichzeitig ändern.
-- **Dark Mode über `light-dark()`** — jeder Token genau einmal deklariert. Der
-  Toggle kippt nur `color-scheme`, keine Farbwerte werden wiederholt.
 - **Kein Hex direkt im Astro-Template.** Immer über Semantic-Token.
+- Alles bleibt in **einer** CSS-Datei, solange sie unter ~400 Zeilen liegt.
 
 ### Farbe — geprüfte Werte
 
@@ -109,16 +110,20 @@ Kein Publikum, keine Begrüßung, keine Begeisterung auf Vorrat.
 
 **Testfrage:** Klingt das nach einer Rezept-App aus dem Store? Dann streichen.
 
-## Barrierefreiheit — nicht verhandelbar
+## Barrierefreiheit
 
-- Touch-Ziele **≥44px**, Abstand ≥8px. In der Küche eher 48px.
-- `:focus-visible` sichtbar auf **allem** Interaktiven. Nie `outline: none`
-  ohne Ersatz.
-- Kontrast in **beiden** Themes prüfen, nicht nur im hellen.
-- Keine verschachtelten interaktiven Elemente (Button in Link).
-- `color-scheme` gesetzt, damit native Checkboxen dem Theme folgen.
-- `prefers-reduced-motion` respektieren — besonders bei Scroll-Effekten.
-- Skip-Link zum Inhalt: der Header hat fünf Nav-Elemente vor `<main>`.
+Allgemeine Regeln in `frontend-handwerk/references/a11y.md`. Für dieses
+Projekt kommt eines dazu, und es wiegt schwer:
+
+**Gekocht wird mit nassen und fettigen Fingern.** Touch-Ziele deshalb eher
+48px als 44px, und kein Zustand darf ausschließlich über Hover erreichbar
+sein. Ein Hover-Lift als Karten-Feedback ist hier nicht nur unschön, sondern
+funktionslos.
+
+Drei bekannte offene Mängel, die beim Umbau mitgehen:
+- `.add-plan` liegt als `<button>` im `<a>` der Rezeptkarte — verschachtelt
+- Checkboxen der Einkaufsliste sind im Dark Mode systemhell — löst `color-scheme`
+- Kein Skip-Link, obwohl fünf Nav-Elemente vor `<main>` liegen
 
 Vollständige Prüfliste in `references/pruefliste.md`, vor jedem Merge
 durchgehen.
