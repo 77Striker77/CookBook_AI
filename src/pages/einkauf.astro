@@ -1,0 +1,192 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+import { parseZutaten } from '../lib/zutaten';
+
+// Zutatendaten eingebettet, damit die Liste ohne Netzabfrage funktioniert —
+// diese Seite wird im Supermarkt geöffnet, oft bei schlechtem Empfang.
+const rezepte = await getCollection('rezepte');
+const katalog = Object.fromEntries(
+  rezepte.map((r) => [
+    r.id,
+    { titel: r.data.titel, basis: r.data.portionen, zutaten: parseZutaten(r.data.zutaten) },
+  ]),
+);
+const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
+---
+
+<Base titel="Einkauf" beschreibung="Die Einkaufsliste aus deinem Kochplan.">
+  <div class="wrap ek-seite">
+    <div class="ek-kopf">
+      <h1>Einkauf</h1>
+      <p class="ek-fortschritt" id="ekFortschritt" aria-live="polite"></p>
+    </div>
+
+    <div id="ekLeer" class="leer-box" hidden>
+      <p>Die Einkaufsliste ist leer.</p>
+      <p class="muted">Sie entsteht aus deinem Kochplan — Mengen auf deine Portionen gerechnet und zusammengezählt.</p>
+      <a class="btn primary" href={url('/plan')}>Zum Kochplan</a>
+    </div>
+
+    <div id="ekInhalt" hidden>
+      <!-- Eigene Zeilen: Ein echter Einkauf enthält Milch, Kaffee, Spülmittel.
+           Ohne diese Möglichkeit führt man daneben eine zweite Liste — und dann
+           ist die erzeugte Liste tot. -->
+      <form class="ek-zufuegen" id="ekForm">
+        <label class="sr-only" for="ekNeu">Etwas hinzufügen</label>
+        <input id="ekNeu" type="text" placeholder="Milch, Kaffee, Spülmittel …" autocomplete="off" />
+        <button class="btn" type="submit">Hinzufügen</button>
+      </form>
+
+      <div id="ekGruppen"></div>
+
+      <div class="ek-werkzeuge">
+        <button class="btn ghost small" id="ekKopieren">Kopieren</button>
+        <button class="btn ghost small" id="ekTeilen" hidden>Teilen</button>
+        <button class="btn ghost small" id="ekDrucken">Drucken</button>
+        <button class="btn ghost small" id="ekHaken">Haken zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { aggregiere, alsText, CHECK_KEY, gruppeFuer, istVorrat, GRUPPEN } from '../lib/einkauf';
+
+    const EIGEN_KEY = 'ws-einkauf-eigen';
+    const katalog = JSON.parse(document.getElementById('katalog').textContent);
+    const leerEl = document.getElementById('ekLeer');
+    const inhaltEl = document.getElementById('ekInhalt');
+    const gruppenEl = document.getElementById('ekGruppen');
+    const fortschrittEl = document.getElementById('ekFortschritt');
+    let zeilen = [];
+
+    const lade = (k, f) => { try { return JSON.parse(localStorage.getItem(k)) ?? f; } catch { return f; } };
+    const ladeHaken = () => new Set(lade(CHECK_KEY, []));
+    const speichereHaken = (s) => localStorage.setItem(CHECK_KEY, JSON.stringify([...s]));
+    const ladeEigen = () => lade(EIGEN_KEY, []);
+    const speichereEigen = (l) => localStorage.setItem(EIGEN_KEY, JSON.stringify(l));
+
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+    function render() {
+      const plan = window.WSPlan.read().filter((e) => katalog[e.slug]);
+      const eigen = ladeEigen();
+
+      const ausPlan = aggregiere(
+        plan.map((e) => ({
+          slug: e.slug, titel: katalog[e.slug].titel,
+          basis: katalog[e.slug].basis, ziel: e.ziel, zutaten: katalog[e.slug].zutaten,
+        })),
+      // Vorratsware raus: Salz steckt in 9 von 18 Rezepten, Pfeffer in 8.
+      // Eine Liste, auf der Wasser steht, liest man misstrauisch.
+      ).filter((z) => !istVorrat(z.kanonisch));
+
+      zeilen = [
+        ...ausPlan,
+        ...eigen.map((t) => ({ key: 'eigen|' + t, kanonisch: t, text: '', herkunft: [], ungenau: false, eigen: true })),
+      ];
+
+      leerEl.hidden = zeilen.length > 0;
+      inhaltEl.hidden = zeilen.length === 0;
+      if (!zeilen.length) { fortschrittEl.textContent = ''; return; }
+
+      const haken = ladeHaken();
+      for (const k of [...haken]) if (!zeilen.some((z) => z.key === k)) haken.delete(k);
+      speichereHaken(haken);
+
+      // Nach Warengruppen statt alphabetisch — sonst laeuft man den Markt
+      // dreimal ab: Butter, Haehnchen, Joghurt, Kartoffeln, Knoblauch, Mehl.
+      const nachGruppe = new Map();
+      for (const z of zeilen) {
+        const g = z.eigen ? 'Sonstiges' : gruppeFuer(z.kanonisch);
+        if (!nachGruppe.has(g)) nachGruppe.set(g, []);
+        nachGruppe.get(g).push(z);
+      }
+
+      gruppenEl.innerHTML = '';
+      for (const g of GRUPPEN) {
+        const liste = nachGruppe.get(g);
+        if (!liste?.length) continue;
+        // Erledigtes nach unten, damit die Restliste sichtbar schrumpft.
+        liste.sort((a, b) => (haken.has(a.key) ? 1 : 0) - (haken.has(b.key) ? 1 : 0)
+          || a.kanonisch.localeCompare(b.kanonisch, 'de'));
+        const sec = document.createElement('section');
+        sec.className = 'ek-gruppe';
+        sec.innerHTML = `<h2>${esc(g)}</h2><ul>${liste.map((z) => {
+          const ab = haken.has(z.key);
+          const herkunft = z.herkunft.length > 1
+            ? `<span class="ek-herkunft">${z.herkunft.length} Rezepte</span>` : '';
+          return `<li class="ek-item${ab ? ' ab' : ''}">
+            <label>
+              <input type="checkbox" data-key="${esc(z.key)}"${ab ? ' checked' : ''} />
+              <span class="ek-name">${esc(z.kanonisch)}</span>
+              ${z.text ? `<span class="ek-menge${z.ungenau ? ' ungenau' : ''}">${esc(z.text)}</span>` : ''}
+              ${herkunft}
+              ${z.eigen ? `<button class="ek-weg" data-eigen="${esc(z.kanonisch)}" aria-label="Entfernen">×</button>` : ''}
+            </label></li>`;
+        }).join('')}</ul>`;
+        gruppenEl.appendChild(sec);
+      }
+
+      const offen = zeilen.filter((z) => !haken.has(z.key)).length;
+      fortschrittEl.textContent = offen === 0
+        ? 'Alles im Wagen ✓'
+        : `${zeilen.length - offen} von ${zeilen.length} erledigt`;
+    }
+
+    gruppenEl.addEventListener('change', (ev) => {
+      const cb = ev.target.closest('input[type=checkbox]');
+      if (!cb) return;
+      const haken = ladeHaken();
+      cb.checked ? haken.add(cb.dataset.key) : haken.delete(cb.dataset.key);
+      speichereHaken(haken);
+      render();
+    });
+    gruppenEl.addEventListener('click', (ev) => {
+      const weg = ev.target.closest('.ek-weg');
+      if (!weg) return;
+      ev.preventDefault();
+      speichereEigen(ladeEigen().filter((t) => t !== weg.dataset.eigen));
+      render();
+    });
+
+    document.getElementById('ekForm').addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const feld = document.getElementById('ekNeu');
+      const wert = feld.value.trim();
+      if (!wert) return;
+      const l = ladeEigen();
+      if (!l.includes(wert)) l.push(wert);
+      speichereEigen(l);
+      feld.value = '';
+      render();
+    });
+
+    function blitz(el, text) {
+      const alt = el.textContent;
+      el.textContent = text;
+      setTimeout(() => { el.textContent = alt; }, 1400);
+    }
+    document.getElementById('ekKopieren').addEventListener('click', async (ev) => {
+      try {
+        await navigator.clipboard.writeText('Einkaufsliste\n' + alsText(zeilen));
+        blitz(ev.target, 'Kopiert ✓');
+      } catch { blitz(ev.target, 'Ging nicht'); }
+    });
+    const teilen = document.getElementById('ekTeilen');
+    if (navigator.share) {
+      teilen.hidden = false;
+      teilen.addEventListener('click', () => {
+        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(zeilen) }).catch(() => {});
+      });
+    }
+    document.getElementById('ekDrucken').addEventListener('click', () => window.print());
+    document.getElementById('ekHaken').addEventListener('click', () => { speichereHaken(new Set()); render(); });
+
+    window.addEventListener('ws-plan-change', render);
+    render();
+  </script>
+
+  <script type="application/json" id="katalog" set:html={katalogJson}></script>
+</Base>

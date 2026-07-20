@@ -2,11 +2,8 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
-import { parseZutaten } from '../lib/zutaten';
-import { katLabel } from '../lib/darstellung';
+import { katLabel, arbeitLabel } from '../lib/darstellung';
 
-// Katalog aller Rezepte inkl. geparster Zutaten – wird kompakt in die Seite
-// eingebettet, damit der Plan komplett offline (ohne Fetch) funktioniert.
 const rezepte = await getCollection('rezepte');
 const katalog = Object.fromEntries(
   rezepte.map((r) => [
@@ -15,195 +12,109 @@ const katalog = Object.fromEntries(
       titel: r.data.titel,
       basis: r.data.portionen,
       kategorie: katLabel(r.data.kategorie),
-      zutaten: parseZutaten(r.data.zutaten),
+      zeit: arbeitLabel(r.data.zeit_aktiv, r.data.zeit_gesamt) ?? '',
     },
   ]),
 );
-// `<` maskieren, damit ein "</script>" im Text den Block nicht vorzeitig schließt.
 const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
+
+// Wochentage. Laut Mealies eigener Nutzerumfrage planen viele lieber als
+// Warteschlange statt auf feste Tage — deshalb ist „ohne Tag" ein
+// gleichwertiger Zustand und nicht ein Mangel.
+const TAGE = ['Ohne Tag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 ---
 
-<Base titel="Kochplan" beschreibung="Dein Kochplan und die daraus erzeugte Einkaufsliste.">
-  <div class="wrap plan-wrap">
-    <p class="crumb"><a href={url('/')}>Rezepte</a> › Kochplan</p>
-    <h1>Kochplan &amp; Einkaufsliste</h1>
-    <p class="plan-intro">Wähle auf den Rezepten, was du kochen willst — hier landet der Plan und daraus wird automatisch die Einkaufsliste (Mengen auf deine Portionen skaliert und zusammengezählt).</p>
-
-    <div id="planLeer" class="plan-empty" hidden>
-      <p>Dein Kochplan ist noch leer.</p>
-      <p class="muted">Öffne ein Rezept und tippe auf <b>🛒 In den Kochplan</b> — oder nutze das <b>+</b> auf den Rezeptkarten.</p>
-      <a class="btn primary" href={url('/')}>Rezepte durchstöbern</a>
+<Base titel="Kochplan" beschreibung="Was diese Woche gekocht wird.">
+  <div class="wrap plan-seite">
+    <div class="ek-kopf">
+      <h1>Kochplan</h1>
+      <p class="ek-fortschritt" id="planZahl" aria-live="polite"></p>
     </div>
 
-    <div id="planInhalt" class="plan-layout" hidden>
-      <section class="plan-col">
-        <h2>Rezepte <span class="zahl" id="rezeptZahl"></span></h2>
-        <ul class="plan-recipes" id="planRecipes"></ul>
-      </section>
+    <div id="planLeer" class="leer-box" hidden>
+      <p>Dein Kochplan ist noch leer.</p>
+      <p class="muted">Tippe auf das <b>+</b> an einer Rezeptkarte oder auf <b>In den Kochplan</b> im Rezept.</p>
+      <a class="btn primary" href={url('/')}>Rezepte ansehen</a>
+    </div>
 
-      <section class="plan-col einkauf">
-        <div class="einkauf-head">
-          <h2>Einkaufsliste <span class="zahl" id="zutatZahl"></span></h2>
-          <div class="einkauf-tools">
-            <button class="btn small" id="btnKopieren">Kopieren</button>
-            <button class="btn small" id="btnTeilen" hidden>Teilen</button>
-            <button class="btn small" id="btnDrucken">Drucken</button>
-          </div>
-        </div>
-        <ul class="einkauf-list" id="einkaufList"></ul>
-        <div class="plan-foot">
-          <button class="btn small ghost" id="btnHakenReset">Haken zurücksetzen</button>
-          <button class="btn small ghost danger" id="btnLeeren">Plan leeren</button>
-        </div>
-      </section>
+    <div id="planInhalt" hidden>
+      <div id="planTage"></div>
+      <p class="plan-hinweis">
+        Aus diesem Plan entsteht die <a href={url('/einkauf')}>Einkaufsliste</a> —
+        Mengen auf deine Portionen gerechnet und zusammengezählt.
+      </p>
+      <button class="btn ghost small danger" id="planLeeren">Plan leeren</button>
     </div>
   </div>
 
-  <script>
-    import { aggregiere, alsText, CHECK_KEY } from '../lib/einkauf';
-
+  <script define:vars={{ TAGE }}>
     const katalog = JSON.parse(document.getElementById('katalog').textContent);
     const leerEl = document.getElementById('planLeer');
     const inhaltEl = document.getElementById('planInhalt');
-    const recipesEl = document.getElementById('planRecipes');
-    const listEl = document.getElementById('einkaufList');
-    const rezeptZahl = document.getElementById('rezeptZahl');
-    const zutatZahl = document.getElementById('zutatZahl');
+    const tageEl = document.getElementById('planTage');
+    const zahlEl = document.getElementById('planZahl');
 
-    let aktuelleZeilen = [];
-
-    function ladeHaken() {
-      try { return new Set(JSON.parse(localStorage.getItem(CHECK_KEY)) || []); } catch { return new Set(); }
-    }
-    function speichereHaken(set) { localStorage.setItem(CHECK_KEY, JSON.stringify([...set])); }
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const basis = document.querySelector('link[rel="manifest"]').getAttribute('href').replace(/\/manifest\.webmanifest$/, '');
 
     function render() {
       const plan = window.WSPlan.read().filter((e) => katalog[e.slug]);
-      if (!plan.length) {
-        leerEl.hidden = false;
-        inhaltEl.hidden = true;
-        return;
-      }
-      leerEl.hidden = true;
-      inhaltEl.hidden = false;
+      leerEl.hidden = plan.length > 0;
+      inhaltEl.hidden = plan.length === 0;
+      zahlEl.textContent = plan.length
+        ? `${plan.length} ${plan.length === 1 ? 'Rezept' : 'Rezepte'}` : '';
+      if (!plan.length) return;
 
-      // --- Rezeptliste ---
-      rezeptZahl.textContent = plan.length;
-      recipesEl.innerHTML = '';
-      for (const e of plan) {
-        const r = katalog[e.slug];
-        const li = document.createElement('li');
-        li.className = 'plan-recipe';
-        li.innerHTML = `
-          <div class="pr-main">
-            <a class="pr-titel" href="${planHref(e.slug)}">${escape(r.titel)}</a>
-            <span class="pr-kat">${escape(r.kategorie)}</span>
-          </div>
-          <div class="pr-stepper" data-slug="${e.slug}">
-            <button class="minus" aria-label="weniger">−</button>
-            <span class="pr-portion">${e.ziel}</span>
-            <span class="pr-lbl">Port.</span>
-            <button class="plus" aria-label="mehr">+</button>
-          </div>
-          <button class="pr-remove" data-slug="${e.slug}" aria-label="Entfernen">×</button>`;
-        recipesEl.appendChild(li);
-      }
+      tageEl.innerHTML = '';
+      for (let t = 0; t < TAGE.length; t++) {
+        const drin = plan.filter((e) => (e.tag ?? 0) === t);
+        // Leere Wochentage nur zeigen, wenn ueberhaupt nach Tagen geplant wird.
+        const nachTagen = plan.some((e) => (e.tag ?? 0) > 0);
+        if (!drin.length && (t === 0 || !nachTagen)) continue;
 
-      // --- Einkaufsliste ---
-      const eintraege = plan.map((e) => ({
-        slug: e.slug,
-        titel: katalog[e.slug].titel,
-        basis: katalog[e.slug].basis,
-        ziel: e.ziel,
-        zutaten: katalog[e.slug].zutaten,
-      }));
-      aktuelleZeilen = aggregiere(eintraege);
-      zutatZahl.textContent = aktuelleZeilen.length;
-
-      // Haken nur für noch existierende Zeilen behalten.
-      const gueltig = new Set(aktuelleZeilen.map((z) => z.key));
-      const haken = ladeHaken();
-      for (const k of [...haken]) if (!gueltig.has(k)) haken.delete(k);
-      speichereHaken(haken);
-
-      listEl.innerHTML = '';
-      for (const z of aktuelleZeilen) {
-        const li = document.createElement('li');
-        li.className = 'ek-item' + (haken.has(z.key) ? ' ab' : '');
-        const herkunft = z.herkunft.length > 1 ? ` <span class="ek-herkunft">${z.herkunft.length} Rezepte</span>` : '';
-        li.innerHTML = `
-          <label>
-            <input type="checkbox" data-key="${escapeAttr(z.key)}" ${haken.has(z.key) ? 'checked' : ''} />
-            <span class="ek-name">${escape(z.kanonisch)}</span>
-            <span class="ek-menge${z.ungenau ? ' ungenau' : ''}">${escape(z.text)}</span>${herkunft}
-          </label>`;
-        listEl.appendChild(li);
+        const sec = document.createElement('section');
+        sec.className = 'plan-tag';
+        sec.innerHTML = `<h2>${esc(TAGE[t])}</h2><ul>${drin.map((e) => {
+          const r = katalog[e.slug];
+          return `<li class="plan-zeile">
+            <div class="pz-text">
+              <a class="pz-titel" href="${basis}/rezept/${esc(e.slug)}">${esc(r.titel)}</a>
+              <span class="pz-meta">${esc(r.kategorie)}${r.zeit ? ' · ' + esc(r.zeit) : ''}</span>
+            </div>
+            <div class="pz-stepper" data-slug="${esc(e.slug)}">
+              <button class="minus" aria-label="weniger Portionen">−</button>
+              <span class="pz-portion">${e.ziel}</span>
+              <button class="plus" aria-label="mehr Portionen">+</button>
+            </div>
+            <select class="pz-tag" data-slug="${esc(e.slug)}" aria-label="Wochentag">
+              ${TAGE.map((n, i) => `<option value="${i}"${i === (e.tag ?? 0) ? ' selected' : ''}>${esc(n)}</option>`).join('')}
+            </select>
+            <button class="pz-weg" data-slug="${esc(e.slug)}" aria-label="Aus dem Plan entfernen">×</button>
+          </li>`;
+        }).join('')}</ul>`;
+        tageEl.appendChild(sec);
       }
     }
 
-    function planHref(slug) {
-      const base = document.querySelector('link[rel="manifest"]').getAttribute('href').replace(/\/manifest\.webmanifest$/, '');
-      return `${base}/rezept/${slug}`;
-    }
-    function escape(s) {
-      return String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-    }
-    function escapeAttr(s) { return escape(s).replace(/"/g, '&quot;'); }
-
-    // Portionen ändern / Rezept entfernen (Event-Delegation).
-    recipesEl.addEventListener('click', (ev) => {
-      const step = ev.target.closest('.pr-stepper');
+    tageEl.addEventListener('click', (ev) => {
+      const step = ev.target.closest('.pz-stepper');
       if (step) {
-        const slug = step.dataset.slug;
-        const e = window.WSPlan.read().find((x) => x.slug === slug);
+        const e = window.WSPlan.read().find((x) => x.slug === step.dataset.slug);
         if (!e) return;
-        if (ev.target.classList.contains('plus')) window.WSPlan.setPortion(slug, e.ziel + 1);
-        else if (ev.target.classList.contains('minus') && e.ziel > 1) window.WSPlan.setPortion(slug, e.ziel - 1);
+        if (ev.target.classList.contains('plus')) window.WSPlan.setPortion(e.slug, e.ziel + 1);
+        else if (ev.target.classList.contains('minus') && e.ziel > 1) window.WSPlan.setPortion(e.slug, e.ziel - 1);
         return;
       }
-      const rm = ev.target.closest('.pr-remove');
-      if (rm) window.WSPlan.remove(rm.dataset.slug);
+      const weg = ev.target.closest('.pz-weg');
+      if (weg) window.WSPlan.remove(weg.dataset.slug);
     });
-
-    // Abhaken.
-    listEl.addEventListener('change', (ev) => {
-      const cb = ev.target.closest('input[type=checkbox]');
-      if (!cb) return;
-      const haken = ladeHaken();
-      if (cb.checked) haken.add(cb.dataset.key);
-      else haken.delete(cb.dataset.key);
-      speichereHaken(haken);
-      cb.closest('.ek-item')?.classList.toggle('ab', cb.checked);
+    tageEl.addEventListener('change', (ev) => {
+      const sel = ev.target.closest('.pz-tag');
+      if (sel) window.WSPlan.setTag(sel.dataset.slug, Number(sel.value));
     });
-
-    // Werkzeuge.
-    document.getElementById('btnKopieren').addEventListener('click', async (ev) => {
-      const txt = 'Einkaufsliste\n' + alsText(aktuelleZeilen);
-      try {
-        await navigator.clipboard.writeText(txt);
-        blitz(ev.target, 'Kopiert ✓');
-      } catch {
-        blitz(ev.target, 'Ging nicht');
-      }
-    });
-    const teilenBtn = document.getElementById('btnTeilen');
-    if (navigator.share) {
-      teilenBtn.hidden = false;
-      teilenBtn.addEventListener('click', () => {
-        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(aktuelleZeilen) }).catch(() => {});
-      });
-    }
-    document.getElementById('btnDrucken').addEventListener('click', () => window.print());
-    document.getElementById('btnHakenReset').addEventListener('click', () => { speichereHaken(new Set()); render(); });
-    document.getElementById('btnLeeren').addEventListener('click', () => {
+    document.getElementById('planLeeren').addEventListener('click', () => {
       if (confirm('Kompletten Kochplan leeren?')) window.WSPlan.clear();
     });
-
-    function blitz(el, text) {
-      const alt = el.textContent;
-      el.textContent = text;
-      setTimeout(() => { el.textContent = alt; }, 1400);
-    }
 
     window.addEventListener('ws-plan-change', render);
     render();

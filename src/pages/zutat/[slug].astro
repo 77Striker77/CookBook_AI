@@ -39,7 +39,7 @@ rezepte.sort((a: any, b: any) => a.data.titel.localeCompare(b.data.titel, 'de'))
 
 <Base titel={name} beschreibung={`${rezepte.length} Rezepte mit ${name}`}>
   <div class="wrap katalog">
-    <p class="crumb"><a href={url('/register')}>Register</a> › Zutat</p>
+    <p class="crumb"><a href={url('/')}>Rezepte</a> › Zutat</p>
     <h1>{name}</h1>
     <p class="s-unter">
       {rezepte.length} Rezepte verwenden diese Zutat.

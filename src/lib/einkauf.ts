@@ -152,3 +152,96 @@ export function aggregiere(eintraege: PlanEintrag[]): EinkaufZeile[] {
 export function alsText(zeilen: EinkaufZeile[]): string {
   return zeilen.map((z) => `- ${z.kanonisch}${z.text ? ` — ${z.text}` : ''}`).join('\n');
 }
+
+/* ============================================================================
+   Warengruppen und Vorratsware
+   ========================================================================= */
+
+/**
+ * Vorratsware — steht ohnehin im Schrank und muss nicht auf die Liste.
+ *
+ * Grund: Salz kommt in 9 der 18 Rezepte vor, Pfeffer in 8, dazu Öl und in der
+ * Hühnersuppe „700 ml Wasser". Wer drei Rezepte einplant, bekam eine Liste,
+ * auf der Wasser stand — ab da denkt man jede Zeile misstrauisch mit, und die
+ * ganze Aggregation ist entwertet.
+ *
+ * Bewusst konservativ gehalten: Nur was praktisch immer da ist. Mehl und
+ * Zucker stehen NICHT drin — die gehen aus.
+ */
+export const VORRAT = new Set([
+  'wasser', 'salz', 'pfeffer', 'schwarzer pfeffer', 'olivenöl', 'öl',
+  'sonnenblumenöl', 'rapsöl', 'pflanzenöl', 'essig', 'weißweinessig',
+  'paprikapulver', 'knoblauchpulver', 'zwiebelpulver', 'currypulver',
+  'oregano', 'thymian', 'rosmarin', 'kreuzkümmel', 'koriander, gemahlen',
+  'muskatnuss', 'zimt', 'chili', 'chiliflocken', 'piment', 'nelken',
+  'selleriesamen', 'lorbeerblatt', 'backpulver', 'natron', 'vanillezucker',
+]);
+
+/**
+ * Reihenfolge der Warengruppen = Laufweg durch den Markt.
+ *
+ * Vorher war die Liste alphabetisch sortiert: Butter (Kühlregal) → Hähnchen
+ * (Fleisch) → Joghurt (Kühlregal) → Kartoffeln (Gemüse) → Knoblauch (Gemüse)
+ * → Mehl (Trocken). Man lief den Laden dreimal ab.
+ */
+export const GRUPPEN = [
+  'Obst & Gemüse',
+  'Fleisch & Fisch',
+  'Kühlregal',
+  'Trocken & Konserven',
+  'Backen',
+  'Tiefkühl',
+  'Getränke',
+  'Sonstiges',
+] as const;
+export type Gruppe = (typeof GRUPPEN)[number];
+
+// Stichwörter je Gruppe. Bewusst als Teilstring-Treffer, damit
+// „Hähnchenoberschenkel" und „Hähnchenbrust" beide unter Fleisch landen.
+const GRUPPEN_WORTE: [Gruppe, string[]][] = [
+  ['Obst & Gemüse', ['zwiebel', 'knoblauch', 'karotte', 'möhre', 'kartoffel', 'tomate',
+    'gurke', 'paprika', 'salat', 'rotkohl', 'petersilie', 'zitrone', 'orange', 'limette',
+    'granatapfel', 'blaubeer', 'apfel', 'banane', 'lauch', 'sellerie', 'ingwer',
+    'champignon', 'pilz', 'spinat', 'rucola', 'dill', 'schnittlauch', 'minze',
+    'koriander', 'basilikum', 'avocado', 'mais', 'brokkoli', 'zucchini', 'aubergine']],
+  ['Fleisch & Fisch', ['hähnchen', 'huhn', 'hühner', 'pute', 'rind', 'hack', 'schwein',
+    'speck', 'schinken', 'wurst', 'lachs', 'fisch', 'garnele', 'braten', 'filet',
+    'kotelett', 'steak']],
+  ['Kühlregal', ['milch', 'sahne', 'joghurt', 'quark', 'schmand', 'frischkäse', 'käse',
+    'butter', 'ei', 'eier', 'feta', 'mozzarella', 'parmesan', 'creme fraiche',
+    'crème fraîche', 'margarine', 'hefe']],
+  ['Backen', ['mehl', 'zucker', 'puderzucker', 'stärke', 'kakao', 'schokolade',
+    'marzipan', 'gelatine', 'kondensmilch', 'marmelade', 'gelee', 'vanille']],
+  ['Tiefkühl', ['tiefkühl', 'tk-', 'eiswürfel']],
+  ['Getränke', ['wein', 'bier', 'brühe', 'fond', 'saft', 'cola']],
+  ['Trocken & Konserven', ['reis', 'nudel', 'pasta', 'couscous', 'bulgur', 'linsen',
+    'bohnen', 'kichererbsen', 'passierte tomaten', 'tomatenmark', 'kokosmilch',
+    'brot', 'toast', 'fladenbrot', 'burger', 'semmelbrösel', 'panko', 'honig',
+    'senf', 'ketchup', 'mayonnaise', 'sauce', 'soße', 'sesam', 'nuss', 'mandel',
+    'haferflocken', 'öl', 'essig']],
+];
+
+/**
+ * Ordnet eine Zutat einer Warengruppe zu. Ohne Treffer: „Sonstiges".
+ *
+ * Kurze Stichwörter (≤3 Zeichen) matchen nur auf Wortgrenzen. Sonst landet
+ * „Reis" im Kühlregal, weil „ei" darin steckt — und „Fleisch" gleich mit.
+ * Längere Stichwörter dürfen als Teilstring greifen, damit
+ * „Hähnchenoberschenkel" und „Hähnchenbrust" beide unter Fleisch fallen.
+ */
+export function gruppeFuer(kanonisch: string): Gruppe {
+  const n = kanonisch.toLowerCase();
+  const trifft = (w: string) =>
+    w.length <= 3
+      ? new RegExp(`(^|[^a-zäöüß])${w}([^a-zäöüß]|$)`, 'i').test(n)
+      : n.includes(w);
+  for (const [gruppe, worte] of GRUPPEN_WORTE) {
+    if (worte.some(trifft)) return gruppe;
+  }
+  return 'Sonstiges';
+}
+
+/** Ist das Vorratsware, die nicht auf die Einkaufsliste gehört? */
+export function istVorrat(kanonisch: string): boolean {
+  return VORRAT.has(kanonisch.toLowerCase().trim());
+}

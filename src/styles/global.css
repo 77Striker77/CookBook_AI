@@ -481,58 +481,84 @@ ul.zutaten .grp { border: 0; padding: var(--sp-sm) 0 var(--sp-3xs); font-weight:
 .plan-btn { width: 100%; justify-content: center; margin-bottom: var(--sp-sm); }
 .plan-btn.on { background: var(--color-accent-text); border-color: var(--color-accent-text); color: var(--color-accent-ink); }
 
-/* ---- Kochplan-Seite ---- */
-.plan-wrap { padding: var(--sp-lg) 0 var(--sp-3xl); }
-.plan-wrap h1 { font-size: var(--fs-h2); margin: 0 0 .4rem; font-weight: var(--fw-semibold); }
-.plan-intro { color: var(--color-ink-muted); max-width: 60ch; margin: 0 0 var(--sp-md); }
-.plan-empty { text-align: center; max-width: var(--w-narrow); margin-inline: auto; border-top: var(--bw-rule) solid var(--color-ink); border-bottom: var(--bw-hair) solid var(--color-line); padding: var(--sp-2xl) var(--sp-md); }
-.plan-empty p { margin: 0 0 var(--sp-2xs); }
-.plan-empty .muted { color: var(--color-ink-muted); font-size: var(--fs-md); }
-.plan-empty .btn { margin-top: var(--sp-xs); }
+/* ---- Liste und Filter (Startseite) ---- */
+.liste-seite { padding: var(--sp-md) 0 var(--sp-3xl); }
+.filter { display: flex; flex-direction: column; gap: var(--sp-sm); }
+.f-suche input { width: 100%; border: 0; border-bottom: var(--bw) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-family: var(--ff-display); font-size: var(--fs-h3); padding: var(--sp-2xs) 2px; outline: none; }
+.f-suche input:focus { border-bottom-color: var(--color-accent); }
+.f-leiste { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2xs) var(--sp-sm); }
+.f-mehr summary { cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); border-bottom: var(--bw) solid var(--color-line-strong); }
+.f-mehr[open] summary { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
+.f-mehr-inhalt { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-sm); padding: var(--sp-sm) 0; }
+.f-gruppentitel { width: 100%; margin: var(--sp-2xs) 0 0; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); }
+.chip-n { font-variant-numeric: tabular-nums; opacity: .55; font-size: var(--fs-2xs); }
+.f-reset { margin-bottom: var(--sp-sm); }
 
-.plan-layout { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-lg); align-items: start; }
-@media (max-width: 780px) { .plan-layout { grid-template-columns: 1fr; gap: var(--sp-md); } }
-.plan-col h2 { font-size: var(--fs-h3); margin: 0 0 var(--sp-sm); display: flex; align-items: baseline; gap: var(--sp-2xs); }
-.plan-col h2 .zahl { font-size: var(--fs-sm); color: var(--color-ink-muted); font-family: var(--ff-ui); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+.liste { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg) var(--sp-md); padding-bottom: var(--sp-2xl); }
+@media (max-width: 900px) { .liste { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .liste { grid-template-columns: 1fr; gap: var(--sp-xl); } }
+.empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
 
-.plan-recipes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-2xs); }
-.plan-recipe { display: flex; align-items: center; gap: var(--sp-xs); background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line); padding: var(--sp-xs) var(--sp-sm); }
-.pr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.pr-titel { font-family: var(--ff-display); font-weight: 650; font-size: 1.02rem; color: var(--color-ink); text-decoration: none; }
-.pr-titel:hover { color: var(--color-accent-text); }
-.pr-kat { font-size: var(--fs-xs); color: var(--color-ink-muted); text-transform: uppercase; letter-spacing: .06em; }
-.pr-stepper { display: flex; align-items: center; gap: 7px; background: var(--color-surface); padding: var(--sp-3xs) var(--sp-2xs); }
-.pr-stepper button { width: 44px; height: 44px; border-radius: var(--r-xs); border: var(--bw-hair) solid var(--color-line-strong); background: var(--color-surface-raised); color: var(--color-ink); font-size: 1rem; cursor: pointer; line-height: 1; }
-.pr-portion { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
-.pr-lbl { font-size: var(--fs-xs); color: var(--color-ink-muted); }
-.pr-remove { border: 0; background: transparent; color: var(--color-ink-muted); font-size: 1.4rem; line-height: 1; cursor: pointer; width: 44px; height: 44px; }
-.pr-remove:hover { color: var(--color-danger); }
+/* Zutatenregister am Listenende - Nachschlagen, kein Haupteinstieg. */
+.reg-details { border-top: var(--bw-rule) solid var(--color-ink); padding-top: var(--sp-2xs); }
+.reg-details summary { cursor: pointer; min-height: 48px; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-sm); }
+.reg-summary-titel { font-family: var(--ff-display); font-size: var(--fs-h3); }
+.reg-summary-n { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.reg-liste { list-style: none; margin: var(--sp-sm) 0 0; padding: 0; columns: 3; column-gap: var(--sp-lg); }
+@media (max-width: 780px) { .reg-liste { columns: 2; } }
+@media (max-width: 480px) { .reg-liste { columns: 1; } }
+.reg-liste li { break-inside: avoid; }
+.reg-liste a { display: flex; align-items: baseline; gap: var(--sp-2xs); padding: 7px 0; color: var(--color-ink); text-decoration: none; border-bottom: var(--bw-hair) solid var(--color-line); min-height: 40px; }
+.reg-liste a:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
+.reg-liste a span { margin-left: auto; font-variant-numeric: tabular-nums lining-nums; font-size: var(--fs-sm); color: var(--color-ink-muted); }
 
-.einkauf-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-xs); flex-wrap: wrap; margin-bottom: var(--sp-sm); }
-.einkauf-head h2 { margin: 0; }
-.einkauf-tools { display: flex; gap: 6px; }
-.btn.small { padding: 8px 12px; font-size: var(--fs-sm); min-height: 40px; }
-.btn.ghost { background: transparent; border-color: transparent; color: var(--color-ink-muted); }
-.btn.ghost:hover { color: var(--color-ink); background: var(--color-surface); }
-.btn.ghost.danger:hover { color: var(--color-danger); }
-.einkauf-list { list-style: none; margin: 0; padding: 0; background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line); overflow: hidden; }
+/* ---- Plan und Einkauf ---- */
+.plan-seite, .ek-seite { padding: var(--sp-md) 0 var(--sp-3xl); max-width: var(--w-content); }
+.ek-kopf { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-sm); padding-bottom: var(--sp-2xs); margin-bottom: var(--sp-lg); border-bottom: var(--bw-heavy) solid var(--color-ink); }
+.ek-kopf h1 { margin: 0; font-size: var(--fs-h1); letter-spacing: var(--tr-display); }
+.ek-fortschritt { margin: 0 0 0 auto; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+
+.leer-box { text-align: center; max-width: var(--w-narrow); margin-inline: auto; padding: var(--sp-2xl) var(--sp-md); border-top: var(--bw-rule) solid var(--color-ink); }
+.leer-box p { margin: 0 0 var(--sp-2xs); }
+.leer-box .muted { color: var(--color-ink-muted); font-size: var(--fs-md); }
+.leer-box .btn { margin-top: var(--sp-md); }
+
+.plan-tag { margin-bottom: var(--sp-lg); }
+.plan-tag h2 { margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); padding-bottom: var(--sp-3xs); border-bottom: var(--bw-hair) solid var(--color-line); }
+.plan-tag ul { list-style: none; margin: 0; padding: 0; }
+.plan-zeile { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2xs) var(--sp-sm); padding: var(--sp-2xs) 0; border-bottom: var(--bw-hair) solid var(--color-line); }
+.pz-text { flex: 1 1 12ch; min-width: 0; }
+.pz-titel { display: block; font-family: var(--ff-display); font-size: var(--fs-xl); color: var(--color-ink); text-decoration: none; }
+.pz-titel:hover { color: var(--color-accent-text); }
+.pz-meta { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.pz-stepper { display: flex; align-items: center; gap: var(--sp-3xs); }
+.pz-stepper button { width: 44px; height: 44px; border: var(--bw-hair) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-size: 1.1rem; cursor: pointer; }
+.pz-portion { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; }
+.pz-tag { min-height: 44px; border: var(--bw-hair) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-family: var(--ff-ui); font-size: var(--fs-sm); padding: 0 var(--sp-2xs); }
+.pz-weg { width: 44px; height: 44px; border: 0; background: transparent; color: var(--color-ink-muted); font-size: 1.4rem; cursor: pointer; }
+.pz-weg:hover { color: var(--color-danger); }
+.plan-hinweis { color: var(--color-ink-muted); font-size: var(--fs-md); margin: var(--sp-lg) 0 var(--sp-md); }
+
+.ek-zufuegen { display: flex; gap: var(--sp-2xs); margin-bottom: var(--sp-lg); }
+.ek-zufuegen input { flex: 1; border: 0; border-bottom: var(--bw) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-size: var(--fs-lg); padding: var(--sp-2xs) 2px; outline: none; }
+.ek-zufuegen input:focus { border-bottom-color: var(--color-accent); }
+.ek-gruppe { margin-bottom: var(--sp-lg); }
+.ek-gruppe h2 { margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); padding-bottom: var(--sp-3xs); border-bottom: var(--bw) solid var(--color-line); }
+.ek-gruppe ul { list-style: none; margin: 0; padding: 0; }
 .ek-item { border-bottom: var(--bw-hair) solid var(--color-line); }
-.ek-item:last-child { border-bottom: 0; }
-.ek-item label { display: flex; align-items: center; gap: var(--sp-xs); padding: var(--sp-xs) var(--sp-sm); cursor: pointer; min-height: 48px; }
-.ek-item input { width: 20px; height: 20px; accent-color: var(--color-accent); flex: none; }
-.ek-name { flex: 1; }
-.ek-menge { font-variant-numeric: tabular-nums lining-nums; font-weight: 650; color: var(--color-ink); white-space: nowrap; }
+.ek-item label { display: flex; align-items: center; gap: var(--sp-xs); padding: var(--sp-2xs) 0; cursor: pointer; min-height: 52px; }
+.ek-item input[type="checkbox"] { width: 24px; height: 24px; accent-color: var(--color-accent); flex: none; }
+.ek-name { flex: 1; font-size: var(--fs-lg); }
+.ek-menge { font-variant-numeric: tabular-nums lining-nums; font-weight: var(--fw-bold); white-space: nowrap; }
 .ek-menge.ungenau { font-weight: var(--fw-normal); color: var(--color-ink-muted); font-style: italic; }
-.ek-herkunft { font-size: var(--fs-xs); color: var(--color-ink-muted); background: var(--color-surface); padding: 2px 7px; white-space: nowrap; }
-.ek-item.ab .ek-name { text-decoration: line-through; color: var(--color-ink-muted); }
-.ek-item.ab .ek-menge { color: var(--color-ink-muted); text-decoration: line-through; }
-.plan-foot { display: flex; justify-content: space-between; gap: var(--sp-2xs); margin-top: var(--sp-sm); flex-wrap: wrap; }
+.ek-herkunft { font-size: var(--fs-2xs); color: var(--color-ink-muted); white-space: nowrap; }
+.ek-item.ab .ek-name, .ek-item.ab .ek-menge { text-decoration: line-through; color: var(--color-ink-muted); }
+.ek-weg { width: 40px; height: 40px; border: 0; background: transparent; color: var(--color-ink-muted); font-size: 1.2rem; cursor: pointer; }
+.ek-werkzeuge { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin-top: var(--sp-lg); padding-top: var(--sp-sm); border-top: var(--bw-hair) solid var(--color-line); }
 
 @media print {
-  .site-header, footer.site, .plan-col:not(.einkauf), .plan-intro, .crumb, .einkauf-tools, .plan-foot, .skip-link { display: none !important; }
-  .plan-layout { grid-template-columns: 1fr; }
-  .einkauf-list { border-color: #999; }
-  .ek-herkunft { display: none; }
+  .site-header, footer.site, .ek-werkzeuge, .ek-zufuegen, .skip-link, .ek-fortschritt { display: none !important; }
+  .ek-item { break-inside: avoid; }
 }
 
 /* ---- Zubereitung ---- */
@@ -750,3 +776,6 @@ a.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 .reg-liste a { display: flex; align-items: baseline; gap: var(--sp-2xs); padding: 7px 0; color: var(--color-ink); text-decoration: none; border-bottom: var(--bw-hair) solid var(--color-line); min-height: 40px; }
 .reg-liste a:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
 .reg-liste a span { margin-left: auto; font-variant-numeric: tabular-nums lining-nums; font-size: var(--fs-sm); color: var(--color-ink-muted); }
+
+.fact-geraet { color: var(--color-accent-text); }
+.fact-urteil { background: var(--color-accent); color: var(--c-white); border-color: var(--color-accent); font-weight: var(--fw-semibold); }
