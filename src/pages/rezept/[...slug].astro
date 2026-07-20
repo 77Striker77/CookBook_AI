@@ -110,6 +110,17 @@ const quelleText: Record<string, string> = {
       </aside>
 
       <div class="zubereitung reading">
+        {/* Sichtbar machen, statt still falsch zu rechnen: Der Portionsrechner
+            skaliert die Zutatenliste, nicht den Fließtext. Ein Trockenlauf über
+            alle 18 Rezepte zeigte, dass von 32 Mengenangaben im Text nur 5
+            skaliert werden dürften — der Rest sind Makros pro Portion,
+            Umrechnungstabellen, Glasgrößen und feste Toleranzen. Eine stille
+            Umrechnung wäre öfter falsch als richtig. */}
+        <p class="mengen-hinweis" id="mengenHinweis" hidden>
+          <b>Achtung:</b> Die Mengen <em>im Text</em> gelten unverändert für
+          <span id="mhBasis"></span> Portionen — nur die Zutatenliste ist auf
+          <span id="mhZiel"></span> umgerechnet.
+        </p>
         <Content />
         <p class="quelle">
           Quelle: {quelleText[d.quelle?.typ ?? 'eigen']}
@@ -147,6 +158,44 @@ const quelleText: Record<string, string> = {
           el.textContent = [txt, einheit].filter(Boolean).join(' ');
         }
         pval.textContent = ziel;
+        hinweisZeichnen();
+      }
+
+      // Der Hinweis erscheint nur, wenn die Portionszahl abweicht — und
+      // markiert dann die betroffenen Stellen im Text, damit man sie beim
+      // Lesen nicht übersieht.
+      const hinweis = document.getElementById('mengenHinweis');
+      const zub = document.querySelector('.zubereitung');
+      let markiert = false;
+      function textMengenMarkieren() {
+        if (markiert) return;
+        markiert = true;
+        // Als Literal, nicht als String zusammengebaut — sonst gehen die
+        // Escapes beim Erzeugen der Datei verloren.
+        const muster = /(\d+(?:[.,]\d+)?|[½¼¾⅓⅔])\s*(g|kg|ml|l|Liter|EL|TL|Esslöffel|Teelöffel|Prisen?|Zehen?|Bund|Dosen?|Packungen?|Scheiben?)\b/g;
+        const lauf = document.createTreeWalker(zub, NodeFilter.SHOW_TEXT);
+        const knoten = [];
+        while (lauf.nextNode()) knoten.push(lauf.currentNode);
+        const maskiere = (t) => t.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+        for (const k of knoten) {
+          if (!muster.test(k.nodeValue)) continue;
+          muster.lastIndex = 0;
+          const huelle = document.createElement('span');
+          // Erst maskieren, dann die Marker einsetzen — sonst wuerde ein „&"
+          // im Rezepttext als Entity-Anfang gelesen.
+          huelle.innerHTML = maskiere(k.nodeValue).replace(muster, '<mark class="textmenge">$&</mark>');
+          k.parentNode.replaceChild(huelle, k);
+        }
+      }
+      function hinweisZeichnen() {
+        const abweichend = ziel !== basis;
+        hinweis.hidden = !abweichend;
+        zub.classList.toggle('mengen-abweichend', abweichend);
+        if (abweichend) {
+          document.getElementById('mhBasis').textContent = basis;
+          document.getElementById('mhZiel').textContent = ziel;
+          textMengenMarkieren();
+        }
       }
       document.getElementById('plus').addEventListener('click', () => { ziel++; render(); syncPlan(); });
       document.getElementById('minus').addEventListener('click', () => { if (ziel > 1) { ziel--; render(); syncPlan(); } });

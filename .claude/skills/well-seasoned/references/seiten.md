@@ -121,3 +121,28 @@ Titel.
 
 **Kopfbereich** darf eine Display-Stufe tragen (der Zutatenname ist die
 Überschrift), sonst nüchtern.
+
+---
+
+## Portionsrechner: was er NICHT tut
+
+Der Rechner skaliert die **Zutatenliste**, nicht den Fließtext. Das ist eine
+bewusste Entscheidung, keine Lücke.
+
+Ein Trockenlauf über alle 18 Rezepte fand 32 Mengenangaben im Fließtext.
+Skaliert werden dürften davon **fünf**. Der Rest sind:
+
+- Makros pro Portion (`43 g Protein`) — schon umgerechnet
+- Umrechnungstabellen (`1 Tasse Reis ≈ 200 g`) — absolut
+- Gefäßgrößen (`6 Gläser à 125 ml`)
+- feste Toleranzen (`20 g Toleranz` in einer Formel)
+- Gesamtausbeute (`ergibt gut 1 Liter Eis`)
+- Notizen über das Original (`bei 1,2 kg Tafelspitz`)
+
+Selbst auf nummerierte Schritte beschränkt wären 2 von 7 falsch. **Eine stille
+Umrechnung mit dieser Fehlerquote ist schlimmer als gar keine** — sie ist
+unbemerkt falsch.
+
+Stattdessen: Sobald die Portionszahl von der Grundmenge abweicht, erscheint
+über der Zubereitung ein Hinweis, und die betroffenen Stellen im Text werden
+markiert. Zeiten, Temperaturen, Stückzahlen und Kalorien bleiben unmarkiert.
