@@ -30,6 +30,7 @@ zutaten:
 quelle:
   typ: eigen
   autor: Hausrezept, über die Zeit gewachsen
+bild: ../anhang/bulgursalat.jpg
 gekocht: []
 status: entwurf
 geraete: [herd]
@@ -59,6 +60,8 @@ Masse entsteht, und in **groben Chunks** für Optik und Biss.
    Schüssel geben und alles gründlich durchmischen. Abschmecken.
 6. **Ziehen lassen.** Den Salat **ca. 30 Minuten** durchziehen lassen. Vor dem
    Servieren nach Belieben mit etwas Petersilie bestreuen.
+
+![Bulgursalat in einer großen Schüssel, angerichtet zum Servieren](../anhang/bulgursalat-schuessel.webp)
 
 ## Notizen & Varianten
 
