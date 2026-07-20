@@ -24,6 +24,12 @@ const ogBild = bild
 const absolut = (pfad: string) =>
   Astro.site ? new URL(pfad, Astro.site).href : pfad;
 const seitenUrl = absolut(Astro.url.pathname);
+// Aktiver Reiter — sonst weiss man nicht, wo man ist.
+const pfad = Astro.url.pathname.replace(/\/$/, '') || '/';
+const hier = (z: string) => {
+  const zz = url(z).replace(/\/$/, '') || '/';
+  return pfad === zz || (z !== '/' && pfad.startsWith(zz)) ? 'page' : undefined;
+};
 const fontLatin = url('/fonts/fraunces-latin.woff2');
 const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
 ---
@@ -104,9 +110,9 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
       <div class="wrap bar">
         <a class="logo" href={url('/')}>Well <span>Seasoned</span></a>
         <nav class="nav" aria-label="Hauptnavigation">
-          <a href={url('/')}>Übersicht</a>
-          <a href={url('/rezepte')}>Rezepte</a>
-          <a href={url('/einkauf')} class="nav-plan">
+          <a href={url('/')} aria-current={hier('/')}>Übersicht</a>
+          <a href={url('/rezepte')} aria-current={hier('/rezepte')}>Rezepte</a>
+          <a href={url('/einkauf')} class="nav-plan" aria-current={hier('/einkauf')}>
             Einkauf<span class="badge" id="planBadge" hidden>0</span>
             <span class="sr-only" id="planStatus" aria-live="polite"></span>
           </a>

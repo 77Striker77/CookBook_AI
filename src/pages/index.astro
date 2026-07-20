@@ -1,49 +1,83 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
 import { katLabel } from '../lib/darstellung';
 
 const alle = await getCollection('rezepte');
 
-// Kategorien mit Anzahl — das sind die Sprungmarken des Dashboards.
+// Bildführung: Die Fotos sind das Beste, was diese Seite hat. Das Muster
+// „Portfolio Grid" aus der Stildatenbank sagt es deutlich — neutraler Grund,
+// das Werk spricht. Bei einem Kochbuch sind die Gerichte das Werk.
+const mitBild = alle.filter((r) => r.data.bild);
+const neueste = [...mitBild].sort(
+  (a, b) => +new Date(b.data.hinzugefuegt ?? 0) - +new Date(a.data.hinzugefuegt ?? 0),
+);
+const heldBild = neueste[0];
+const nebenBilder = neueste.slice(1, 5);
+
 const kategorien = [...new Set(alle.map((r) => r.data.kategorie))]
   .map((k) => ({ k, n: alle.filter((r) => r.data.kategorie === k).length }))
   .sort((a, b) => b.n - a.n);
 
 const geraete = [...new Set(alle.flatMap((r) => r.data.geraete ?? []))];
 const schnell = alle.filter((r) => (r.data.zeit_aktiv ?? 999) <= 20).length;
+const vonAllein = alle.filter(
+  (r) => (r.data.zeit_gesamt ?? 0) - (r.data.zeit_aktiv ?? 0) >= 60,
+).length;
 ---
 
-<Base beschreibung={`Unser digitales Kochbuch — ${alle.length} Rezepte.`}>
+<Base beschreibung={`Unser gemeinsam gesammeltes digitales Kochbuch — ${alle.length} Rezepte.`}>
+  <!-- HERO: Titel und Bilder nebeneinander. Die Bildwand rechts ist die
+       eigentliche Aussage der Seite — was wir kochen, sieht so aus. -->
+  <section class="held">
+    <div class="wrap held-innen">
+      <div class="held-text">
+        <p class="eyebrow">Gemeinsam gesammelt</p>
+        <h1 class="held-titel">Well<br /><span class="akzent">Seasoned</span></h1>
+        <p class="held-sub">
+          Erprobte Lieblingsrezepte, über die Zeit zusammengekocht.
+        </p>
+        <div class="held-aktion">
+          <a class="knopf-gross" href={url('/rezepte')}>
+            Alle {alle.length} Rezepte
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="held-bilder" aria-hidden="true">
+        {heldBild?.data.bild && (
+          <a class="hb hb-1" href={url(`/rezept/${heldBild.id}`)}>
+            <Image src={heldBild.data.bild} alt="" widths={[400, 700]} sizes="(max-width: 780px) 60vw, 30vw" loading="eager" />
+          </a>
+        )}
+        {nebenBilder.map((r, i) => r.data.bild && (
+          <a class={`hb hb-${i + 2}`} href={url(`/rezept/${r.id}`)}>
+            <Image src={r.data.bild} alt="" widths={[240, 420]} sizes="(max-width: 780px) 30vw, 16vw" loading="eager" />
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
   <div class="wrap dash">
-    <!-- Drei Bereiche, drei Kacheln. Jede zeigt ihren Zustand und führt
-         hinein. Das ist die ganze Aufgabe dieser Seite. -->
-    <nav class="dash-haupt" aria-label="Bereiche">
-      <a class="kachel kachel-gross" href={url('/rezepte')}>
-        <span class="kachel-zahl">{alle.length}</span>
-        <span class="kachel-titel">Rezepte</span>
-        <span class="kachel-unter">Alle ansehen, filtern, suchen</span>
-      </a>
+    <!-- Zustand und Einstieg in den zweiten Bereich -->
+    <a class="einkauf-band" href={url('/einkauf')} id="dashEinkauf">
+      <span class="eb-zahl" id="dashPlan">0</span>
+      <span class="eb-text">
+        <b>Einkauf</b>
+        <span id="dashPlanUnter">Noch keine Gerichte gewählt</span>
+      </span>
+      <span class="eb-pfeil" aria-hidden="true">→</span>
+    </a>
 
-      <a class="kachel" href={url('/einkauf')}>
-        <span class="kachel-zahl" id="dashPlan">0</span>
-        <span class="kachel-titel">Einkauf</span>
-        <span class="kachel-unter" id="dashPlanUnter">Noch nichts gewählt</span>
-      </a>
-    </nav>
-
-    <!-- Direktsprünge in die Rezeptliste. Der eigentliche Zweck des
-         Dashboards: schneller dorthin, wo man ohnehin hinwill. -->
     <section class="dash-block">
       <h2 class="dash-h2">Nach Art</h2>
       <ul class="sprung">
         {kategorien.map(({ k, n }) => (
-          <li>
-            <a href={url(`/rezepte?kat=${k}`)}>
-              {katLabel(k)}<span>{n}</span>
-            </a>
-          </li>
+          <li><a href={url(`/rezepte?kat=${k}`)}>{katLabel(k)}<span>{n}</span></a></li>
         ))}
       </ul>
     </section>
@@ -52,7 +86,7 @@ const schnell = alle.filter((r) => (r.data.zeit_aktiv ?? 999) <= 20).length;
       <h2 class="dash-h2">Nach Aufwand</h2>
       <ul class="sprung">
         <li><a href={url('/rezepte?zeit=20')}>Höchstens 20 Minuten Arbeit<span>{schnell}</span></a></li>
-        <li><a href={url('/rezepte?warte=einplanen')}>Läuft von allein<span>{alle.filter((r) => (r.data.zeit_gesamt ?? 0) - (r.data.zeit_aktiv ?? 0) >= 60).length}</span></a></li>
+        <li><a href={url('/rezepte?warte=einplanen')}>Läuft von allein<span>{vonAllein}</span></a></li>
         {geraete.map((g) => (
           <li>
             <a href={url(`/rezepte?geraet=${g}`)}>
@@ -69,11 +103,13 @@ const schnell = alle.filter((r) => (r.data.zeit_aktiv ?? 999) <= 20).length;
     (() => {
       const zahl = document.getElementById('dashPlan');
       const unter = document.getElementById('dashPlanUnter');
+      const band = document.getElementById('dashEinkauf');
       function zeichnen() {
         const n = window.WSPlan?.count() ?? 0;
         zahl.textContent = n;
+        band.classList.toggle('leer', n === 0);
         unter.textContent = n === 0
-          ? 'Noch nichts gewählt'
+          ? 'Noch keine Gerichte gewählt'
           : `${n === 1 ? 'Gericht' : 'Gerichte'} — Zutatenliste ansehen`;
       }
       window.addEventListener('ws-plan-change', zeichnen);
