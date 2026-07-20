@@ -65,7 +65,7 @@ const zutaten = [...zIndex.entries()]
       <div class="f-leiste" id="fLeiste">
         <button type="button" class="chip" data-f="zeit" data-v="20">≤ 20 min Arbeit</button>
         <button type="button" class="chip" data-f="zeit" data-v="35">≤ 35 min Arbeit</button>
-        <button type="button" class="chip" data-f="warte" data-v="einplanen">Läuft von allein</button>
+        <button type="button" class="chip" data-f="allein" data-v="1">Läuft von allein</button>
         {geraete.map((g) => (
           <button type="button" class="chip" data-f="geraet" data-v={g}>{GERAET_LABEL[g] ?? g}</button>
         ))}
@@ -139,6 +139,7 @@ const zutaten = [...zIndex.entries()]
           kat: p.get('kat') || '',
           tag: p.get('tag') || '',
           lange: p.get('lange') || '',
+          allein: p.get('allein') || '',
         };
       }
       function schreiben(s, ersetzen) {
@@ -163,7 +164,11 @@ const zutaten = [...zIndex.entries()]
             (!s.geraet || (k.dataset.geraete || '').split(' ').includes(s.geraet)) &&
             (!s.kat || k.dataset.kat === s.kat) &&
             (!s.tag || (k.dataset.tags || '').split(' ').includes(s.tag)) &&
-            (!s.lange || (tage !== null && tage !== undefined && tage >= 21));
+            (!s.lange || (tage !== null && tage !== undefined && tage >= 21)) &&
+            // „Laeuft von allein" heisst BEIDES: lange Wartezeit UND wenig
+            // Arbeit. Nur nach Wartezeit zu filtern wuerde den Streifenkuchen
+            // einschliessen - 12 Stunden Pressen, aber 75 Minuten Arbeit.
+            (!s.allein || (k.dataset.warte === 'einplanen' && aktiv > 0 && aktiv <= 35));
           k.hidden = !ok;
           if (ok) n++;
         }

@@ -61,7 +61,7 @@ export const WARTE_KURZ: Record<Warteklasse, string> = {
   dabei: 'am Stück',
   kurz: 'kurz warten',
   halbe: 'mit Wartezeit',
-  einplanen: 'läuft von allein',
+  einplanen: 'mit Vorlauf',
 };
 
 /**

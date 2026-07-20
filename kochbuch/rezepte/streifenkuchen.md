@@ -4,6 +4,8 @@ kategorie: backen
 küche: deutsch
 tags: [kuchen, festlich, geschichtet, blechkuchen]
 portionen: 20
+zeit_aktiv: 75
+zeit_gesamt: 870
 zutaten:
   - "# Für den Teig"
   - 350 g Butter, weich

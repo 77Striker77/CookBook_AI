@@ -24,7 +24,7 @@ const kategorien = [...new Set(alle.map((r) => r.data.kategorie))]
 const geraete = [...new Set(alle.flatMap((r) => r.data.geraete ?? []))];
 const schnell = alle.filter((r) => (r.data.zeit_aktiv ?? 999) <= 20).length;
 const vonAllein = alle.filter(
-  (r) => (r.data.zeit_gesamt ?? 0) - (r.data.zeit_aktiv ?? 0) >= 60,
+  (r) => (r.data.zeit_gesamt ?? 0) - (r.data.zeit_aktiv ?? 0) >= 60 && (r.data.zeit_aktiv ?? 999) <= 35,
 ).length;
 ---
 
@@ -86,7 +86,7 @@ const vonAllein = alle.filter(
       <h2 class="dash-h2">Nach Aufwand</h2>
       <ul class="sprung">
         <li><a href={url('/rezepte?zeit=20')}>Höchstens 20 Minuten Arbeit<span>{schnell}</span></a></li>
-        <li><a href={url('/rezepte?warte=einplanen')}>Läuft von allein<span>{vonAllein}</span></a></li>
+        <li><a href={url('/rezepte?allein=1')}>Läuft von allein<span>{vonAllein}</span></a></li>
         {geraete.map((g) => (
           <li>
             <a href={url(`/rezepte?geraet=${g}`)}>
