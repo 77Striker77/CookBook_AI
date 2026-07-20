@@ -78,6 +78,15 @@ im Ablauf später auftauchen, aber hier fehlen, nachtragen.
 
 Fasse die Liste danach **einmal geschlossen** zusammen und lass sie bestätigen.
 
+**Keine `#`-Überschriften einziehen, um die Liste hübsch zu sortieren.** Jede
+zählt als Komponente und erscheint als Zahl auf der Rezeptkarte („4
+Komponenten"). Sie gehört nur dorthin, wo etwas **separat zubereitet und erst
+am Ende zusammengeführt** wird. Details in `kochbuch/_meta/schema.md`.
+
+Im ersten Lauf bekam ein Bulgursalat die Überschriften „Bulgur / Gemüse /
+Dressing / Zum Servieren" — und stand damit auf der Karte so aufwendig da wie
+eine Bowl mit vier parallelen Bestandteilen. Es ist ein Salat.
+
 ### Runde 4 — Ablauf
 „Erzähl mir den Ablauf, so wie du kochst." Frei erzählen lassen, mitschreiben.
 

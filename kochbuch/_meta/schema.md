@@ -41,8 +41,27 @@ zutaten:
   - 6-8 Kirschtomaten                      # Bereich wird mitskaliert
   - 1 Bund Petersilie
   - Salz nach Geschmack                    # wird nicht skaliert
-  - "# Für die Sauce"                      # Zwischenüberschrift (mit #)
+  - "# Für die Sauce"                      # Komponente (mit #)
 ```
+
+### `#`-Zeilen sind keine Dekoration
+
+Jede `#`-Zeile zählt als **Komponente**. Die Anzahl steht auf der Rezeptkarte
+(„4 Komponenten") und beantwortet die Frage: *Wie viele Sachen muss ich
+gleichzeitig fertigkriegen?* Sie hat `schwierigkeit` als Sortierkriterium
+abgelöst, weil die nichts getrennt hat.
+
+Eine Überschrift setzen heißt also: **Das ist eine eigene Sache, die separat
+zubereitet und erst am Ende zusammengeführt wird.** Hähnchen, Reis, Salat und
+Sauce einer Bowl — vier Komponenten. Drei Füllungen eines Schichtkuchens —
+drei Komponenten.
+
+**Nicht** dafür gedacht: eine lange Zutatenliste optisch sortieren. „Gemüse",
+„Gewürze", „Zum Servieren" sind Etiketten, keine Komponenten. Wer so gliedert,
+lässt einen Salat auf der Karte so aufwendig aussehen wie ein Vier-Gänge-Blech.
+
+Im Zweifel: **keine Überschrift.** Ein Rezept ohne `#`-Zeilen zählt als eine
+Komponente und zeigt gar kein Label.
 
 - **Mengen:** ganze Zahlen, Dezimal (`1.5` oder `1,5`), Brüche (`1/2`),
   gemischt (`1 1/2`) oder Bereiche (`6-8`).

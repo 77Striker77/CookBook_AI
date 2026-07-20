@@ -8,15 +8,12 @@ zeit_aktiv: 25
 zeit_gesamt: 60
 schwierigkeit: einfach
 zutaten:
-  - "# Bulgur"
   - 350 g Bulgur, grob
   - 2-3 Prisen Rinderbrühe, gekörnt, ins Kochwasser
-  - "# Gemüse"
   - 1 Rote Paprika, groß, alternativ Spitzpaprika
   - 2-3 Tomaten, fein gehackt
   - 1-2 Tomaten, in Chunks
   - 1 Rote Zwiebel, groß, alternativ 2 kleine
-  - "# Dressing"
   - 175 g Ajvar, mild, ein halbes Glas à 350 g
   - 50 g Tomatenmark
   - 6 EL Olivenöl
@@ -25,7 +22,6 @@ zutaten:
   - Salz nach Geschmack
   - Pfeffer nach Geschmack
   - Fondor nach Geschmack
-  - "# Zum Servieren"
   - Petersilie, optional als Deko
 quelle:
   typ: eigen
