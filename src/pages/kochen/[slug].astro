@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
-import { parseZutaten, formatMenge } from '../../lib/zutaten';
+import { parseZutaten, formatMenge, mitGruppen } from '../../lib/zutaten';
 import { parseSchritte } from '../../lib/schritte';
 
 export async function getStaticPaths() {
@@ -14,6 +14,7 @@ const { r } = Astro.props;
 const d = r.data;
 const schritte = parseSchritte(r.body ?? '');
 const zutaten = parseZutaten(d.zutaten);
+const anzeige = mitGruppen(zutaten);
 ---
 
 <Base titel={`${d.titel} kochen`} beschreibung={`Kochmodus: ${d.titel}`}>
@@ -42,18 +43,20 @@ const zutaten = parseZutaten(d.zutaten);
         </div>
       </div>
       <ul class="k-zliste">
-        {zutaten.map((z) => (
+        {anzeige.map((zeile) => zeile.typ === 'grp'
+          ? <li class="k-grp">{zeile.text}</li>
+          : (
           <li>
             <span
               class="k-menge"
-              data-base={z.skalierbar ? String(z.menge) : ''}
-              data-basemax={z.skalierbar && z.mengeMax !== null ? String(z.mengeMax) : ''}
-              data-einheit={z.einheit ?? ''}
+              data-base={zeile.z.skalierbar ? String(zeile.z.menge) : ''}
+              data-basemax={zeile.z.skalierbar && zeile.z.mengeMax !== null ? String(zeile.z.mengeMax) : ''}
+              data-einheit={zeile.z.einheit ?? ''}
             >{[
-              z.menge !== null ? (z.mengeMax ? `${formatMenge(z.menge)}–${formatMenge(z.mengeMax)}` : formatMenge(z.menge)) : '',
-              z.einheit ?? '',
+              zeile.z.menge !== null ? (zeile.z.mengeMax ? `${formatMenge(zeile.z.menge)}–${formatMenge(zeile.z.mengeMax)}` : formatMenge(zeile.z.menge)) : '',
+              zeile.z.einheit ?? '',
             ].filter(Boolean).join(' ')}</span>
-            <span class="k-zname">{z.name}{z.notiz && <span class="k-znotiz">, {z.notiz}</span>}</span>
+            <span class="k-zname">{zeile.z.name}{zeile.z.notiz && <span class="k-znotiz">, {zeile.z.notiz}</span>}</span>
           </li>
         ))}
       </ul>

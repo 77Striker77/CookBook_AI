@@ -167,6 +167,31 @@ export function parseZutaten(zeilen: string[]): ParsedZutat[] {
   return out;
 }
 
+export type ZutatZeile =
+  | { typ: 'grp'; text: string }
+  | { typ: 'item'; z: ParsedZutat };
+
+/**
+ * Flache Anzeige-Liste mit Zwischenüberschriften: vor der ersten Zutat einer
+ * neuen Gruppe wird deren Titel eingefügt.
+ *
+ * Steht hier und nicht in der Seite, weil Rezeptseite und Kochmodus dieselbe
+ * Liste zeigen müssen. Der Kochmodus hat die Gruppen eine Weile verschluckt —
+ * beim Streifenkuchen standen dadurch zweimal „Zucker" und zweimal
+ * „Rum-Aroma" untereinander, ohne dass erkennbar war, welche Menge zu welcher
+ * Füllung gehört.
+ */
+export function mitGruppen(zutaten: ParsedZutat[]): ZutatZeile[] {
+  const out: ZutatZeile[] = [];
+  let letzte: string | null = null;
+  for (const z of zutaten) {
+    if (z.gruppe && z.gruppe !== letzte) out.push({ typ: 'grp', text: z.gruppe });
+    letzte = z.gruppe;
+    out.push({ typ: 'item', z });
+  }
+  return out;
+}
+
 function titelCase(s: string): string {
   return s.replace(/^\p{L}/u, (c) => c.toUpperCase());
 }

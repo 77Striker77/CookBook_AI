@@ -29,6 +29,32 @@ Wenn der User es wirklich nicht weiß, ist das eine gültige Antwort. Dann
 **nicht raten**: Feld weglassen und die Unsicherheit im Rezept sichtbar machen
 (Notiz oder „nach Gefühl"), so wie es `/neues-rezept` auch hält.
 
+### Immer mit Vorschlag fragen
+
+Die wirksamste Technik im ganzen Skill. Eine offene Frage („wie viel Ajvar?")
+bringt „ein paar Löffel". Eine Frage mit konkreter Zahl zum Korrigieren bringt
+den echten Wert — sofort und ohne Nachdenken:
+
+> Ajvar 3 EL, Olivenöl 4 EL, Tomatenmark 1 EL — sag einfach, was daneben liegt.
+
+Im ersten Lauf dieses Skills lag der Vorschlag „3 EL Ajvar" um **Faktor 60**
+neben der Wahrheit (ein halbes Glas, 175 g). Ohne die Zahl zum Widersprechen
+wäre das nie herausgekommen — mit ihr kam es in einer Antwort.
+
+Danebenliegen ist also kein Problem, sondern der Zweck. Nur: Der Vorschlag ist
+eine **Frage**, keine Setzung. Was der User nicht bestätigt, kommt nicht ins
+Rezept.
+
+### Unbeantwortete Fragen sofort wiederholen
+
+Fragen werden überlesen, besonders die dritte in einer Liste. Prüfe vor jeder
+neuen Runde, ob die letzte vollständig beantwortet wurde — und stell die
+offene Frage **in der nächsten Nachricht ganz oben** noch einmal, statt sie
+hinten anzuhängen. Wandert sie ans Ende, wird sie wieder überlesen.
+
+Beim ersten Lauf ging die Frage „rote oder weiße Zwiebel?" dreimal unter, weil
+sie jedes Mal als letzter Punkt stand.
+
 ## Ablauf
 
 Jede Runde: kurz spiegeln, was du verstanden hast → die Frage(n) → weiter.

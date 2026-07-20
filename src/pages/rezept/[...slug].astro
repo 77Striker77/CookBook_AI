@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
-import { parseZutaten, formatMenge } from '../../lib/zutaten';
+import { parseZutaten, formatMenge, mitGruppen } from '../../lib/zutaten';
 import { katLabel, zeitLabel, arbeitLabel, komponenten, komponentenLabel, GERAET_LABEL } from '../../lib/darstellung';
 
 export async function getStaticPaths() {
@@ -20,15 +20,7 @@ const URTEIL: Record<string, string> = {
   nochmal: 'Nochmal ✓', ok: 'War ok', nein: 'Eher nicht',
 };
 
-// Flache Anzeige-Liste: Gruppen-Überschrift einfügen, wenn sich die Gruppe ändert.
-type Zeile = { typ: 'grp'; text: string } | { typ: 'item'; z: (typeof zutaten)[number] };
-const anzeige: Zeile[] = [];
-let letzteGruppe: string | null = null;
-for (const z of zutaten) {
-  if (z.gruppe && z.gruppe !== letzteGruppe) anzeige.push({ typ: 'grp', text: z.gruppe });
-  letzteGruppe = z.gruppe;
-  anzeige.push({ typ: 'item', z });
-}
+const anzeige = mitGruppen(zutaten);
 
 const quelleText: Record<string, string> = {
   instagram: 'Instagram', web: 'Web', scan: 'Scan', eigen: 'Eigenkreation', familie: 'Familienrezept',

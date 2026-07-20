@@ -716,6 +716,9 @@ footer.site .wrap { display: flex; gap: var(--sp-xs); flex-wrap: wrap; justify-c
 .k-zliste li:last-child { border-bottom: 0; }
 .k-menge { font-variant-numeric: tabular-nums lining-nums; font-weight: var(--fw-bold); white-space: nowrap; min-width: 5.5ch; }
 .k-znotiz { color: var(--color-ink-muted); }
+/* Bauteil-Überschrift ("Für den Teig") — trägt keine Menge, also kein Flex-Raster. */
+.k-zliste .k-grp { display: block; border-bottom: 0; padding: var(--sp-md) 0 var(--sp-3xs); font-size: var(--fs-md); font-weight: var(--fw-bold); color: var(--color-accent-text); text-transform: uppercase; letter-spacing: var(--tr-caps); }
+.k-zliste .k-grp:first-child { padding-top: 0; }
 
 /* ---- Schritt ---- */
 .k-schritte { flex: 1; padding: var(--sp-lg) var(--sp-gutter) 0; max-width: var(--w-measure); margin-inline: auto; width: 100%; }
