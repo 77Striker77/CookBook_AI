@@ -64,28 +64,15 @@ export const WARTE_KURZ: Record<Warteklasse, string> = {
   einplanen: 'mit Vorlauf',
 };
 
-/**
- * Anzahl der Komponenten eines Rezepts = Zahl der `# `-Gruppen in der
- * Zutatenliste. Ersetzt `schwierigkeit`, das mit 12/5/1 nichts trennte:
- * Die Komponenten verteilen sich auf 4/1/4/4/4/1 und beantworten die Frage,
- * die am Feierabend wirklich zählt — ein Topf und eine Sache, oder Hähnchen
- * plus Reis plus Salat plus Sauce gleichzeitig?
- *
- * `##` zählt bewusst nicht mit. Eine Zutatenliste braucht zwei verschiedene
- * Überschriften, und vorher trugen beide dasselbe Zeichen: Neben echten
- * Komponenten („Tzatziki", „Reis") standen Resterubriken wie „Zum Belegen",
- * „Deko" oder „Extra" — Salatblatt und Brötchen sind aber nichts, was man
- * *nebenher fertigkriegen* muss. Sie haben die Zahl in 6 von 15 Rezepten
- * aufgebläht. Jetzt gilt: `#` ist eine Komponente, `##` gliedert nur.
- */
-export function komponenten(zutaten: string[]): number {
-  return zutaten.filter((z) => /^#(?!#)/.test(z.trim())).length || 1;
-}
+/* Hier stand eine Komponenten-Zählung: „4 Komponenten" auf der Rezeptkarte,
+   gedacht als Antwort auf „wie viele Sachen muss ich gleichzeitig
+   fertigkriegen?". Sie ist entfernt worden, weil die Zahl beim Draufschauen
+   niemandem etwas gesagt hat — sie brauchte eine Erklärung, um verständlich
+   zu sein, und eine Kennzahl mit Fußnote ist keine.
 
-export function komponentenLabel(n: number): string | null {
-  if (n <= 1) return null;
-  return `${n} Komponenten`;
-}
+   Die `#`-Überschriften in den Zutatenlisten bleiben; sie gliedern die Liste
+   und werden auf Rezeptseite und im Kochmodus angezeigt (siehe
+   `mitGruppen()` in lib/zutaten.ts). Sie zählen nur nichts mehr. */
 
 export const GERAET_LABEL: Record<string, string> = {
   airfryer: 'Airfryer',

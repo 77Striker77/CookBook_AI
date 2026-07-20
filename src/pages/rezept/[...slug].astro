@@ -4,7 +4,7 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
 import { parseZutaten, formatMenge, mitGruppen } from '../../lib/zutaten';
-import { katLabel, zeitLabel, arbeitLabel, komponenten, komponentenLabel, GERAET_LABEL } from '../../lib/darstellung';
+import { katLabel, zeitLabel, arbeitLabel, GERAET_LABEL } from '../../lib/darstellung';
 
 export async function getStaticPaths() {
   const rezepte = await getCollection('rezepte');
@@ -47,7 +47,6 @@ const quelleText: Record<string, string> = {
 
     <ul class="eckdaten">
       <li>{d.portionen} Portionen</li>
-      {komponentenLabel(komponenten(d.zutaten)) && <li>{komponentenLabel(komponenten(d.zutaten))}</li>}
       {(d.geraete ?? []).map((g: string) => <li>{GERAET_LABEL[g] ?? g}</li>)}
       {d.küche && <li>{d.küche}</li>}
       {d.bewertung && <li class="eck-urteil">{URTEIL[d.bewertung] ?? d.bewertung}</li>}

@@ -36,10 +36,6 @@ const GERAET_MUSTER = {
   eismaschine: /eismaschine/gi,
 };
 
-/** Überschriften, die keine Komponente benennen, sondern einen Rest einsammeln. */
-const SAMMELRUBRIK =
-  /^(zum (belegen|servieren|garnieren|dippen)|deko(ration)?|extra|extras|au[sß]erdem|sonstiges|beilage[n]?|toppings?)$/i;
-
 const fehler = [];
 const warnung = [];
 
@@ -125,19 +121,6 @@ for (const name of dateien) {
     }
     if (t === kategorie) {
       warnung.push(`${ort}: Tag „${t}" wiederholt nur die Kategorie`);
-    }
-  }
-
-  // --- Komponenten: „# " zählt auf der Karte, „## " gliedert nur ---
-  // Resterubriken sind keine Komponenten. Salatblatt und Brötchen sind nichts,
-  // was man nebenher fertigkriegen muss — sie standen aber mit „# " in der
-  // Liste und haben die Zahl in 6 von 15 Rezepten aufgebläht.
-  for (const z of roh.split('\n')) {
-    const k = z.match(/^\s*-\s*"#(?!#)\s*(.+?)"/);
-    if (k && SAMMELRUBRIK.test(k[1])) {
-      fehler.push(
-        `${ort}: „${k[1]}" ist eine Sammelrubrik, keine Komponente — mit „## " schreiben`,
-      );
     }
   }
 

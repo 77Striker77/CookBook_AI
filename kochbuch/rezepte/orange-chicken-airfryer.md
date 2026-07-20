@@ -27,7 +27,7 @@ zutaten:
   - Ingwer
   - brauner Zucker
   - Zimt
-  - "## Zum Servieren"
+  - "# Zum Servieren"
   - Reis
   - Sesam
   - Schnittlauch

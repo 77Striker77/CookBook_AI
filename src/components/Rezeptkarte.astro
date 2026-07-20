@@ -3,8 +3,7 @@ import { Image } from 'astro:assets';
 import { url } from '../lib/url';
 import { parseZutaten } from '../lib/zutaten';
 import {
-  katLabel, arbeitLabel, warteklasse, WARTE_KURZ, komponenten,
-  komponentenLabel, GERAET_LABEL,
+  katLabel, arbeitLabel, warteklasse, WARTE_KURZ, GERAET_LABEL,
 } from '../lib/darstellung';
 
 interface Props {
@@ -19,7 +18,6 @@ const d = r.data;
 
 const arbeit = arbeitLabel(d.zeit_aktiv, d.zeit_gesamt);
 const wk = warteklasse(d.zeit_aktiv, d.zeit_gesamt);
-const komp = komponentenLabel(komponenten(d.zutaten ?? []));
 const geraete = (d.geraete ?? []).map((g: string) => GERAET_LABEL[g] ?? g);
 // Zutatennamen als Suchgrundlage: Vorher fand die Suche nur Titel und
 // Tags — „Sriracha" oder „Granatapfel" blieben unauffindbar, obwohl sie
@@ -66,7 +64,6 @@ const zutatenSuche = [...new Set(parseZutaten(d.zutaten ?? []).map((z) => z.kano
       {/* Arbeitszeit steht vorn — sie ist die Zahl, die am Feierabend zählt. */}
       {arbeit && <span class="rk-zeit">{arbeit}</span>}
       {wk && wk !== 'dabei' && <span class="rk-warte">{WARTE_KURZ[wk]}</span>}
-      {komp && <span>{komp}</span>}
       <span>{d.portionen} Portionen</span>
     </p>
 

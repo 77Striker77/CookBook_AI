@@ -78,14 +78,11 @@ im Ablauf später auftauchen, aber hier fehlen, nachtragen.
 
 Fasse die Liste danach **einmal geschlossen** zusammen und lass sie bestätigen.
 
-**Überschriften in der Zutatenliste sind zweistufig:** `#` markiert eine
-**Komponente** (wird separat zubereitet, kostet Zeit am Herd) und zählt auf
-der Rezeptkarte mit. `##` **gliedert nur** die Liste. Details in
-`kochbuch/_meta/schema.md`, `npm run pruefen` erzwingt es.
-
-Im ersten Lauf bekam ein Bulgursalat die Überschriften „Bulgur / Gemüse /
-Dressing / Zum Servieren" — und stand damit auf der Karte so aufwendig da wie
-eine Bowl mit vier parallelen Bestandteilen. Es ist ein Salat.
+**`#`-Überschriften nur setzen, wo sie beim Lesen helfen.** Bei einem Gericht
+aus mehreren Teilen (Hähnchen / Reis / Sauce) sind sie Gold wert, bei einer
+15-zeiligen Salatliste sind sie Bürokratie. Im Zweifel weglassen — die
+Reihenfolge der Zutaten und Notizen wie „fein gehackt" tragen die Struktur
+schon.
 
 ### Runde 4 — Ablauf
 „Erzähl mir den Ablauf, so wie du kochst." Frei erzählen lassen, mitschreiben.
