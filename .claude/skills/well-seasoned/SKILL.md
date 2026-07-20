@@ -104,6 +104,12 @@ Kein Publikum, keine Begrüßung, keine Begeisterung auf Vorrat.
   scheitern kann — Zeit, Temperatur, Menge.
 - **Emoji sind Funktionsträger:** 🛒 Kochplan · 🎲 Zufall · 🔍 Suche · ⏱ Zeit ·
   ◐ Theme · ✓ erledigt · ★ Bewertung. Sonst keine, nie im Fließtext.
+  ⚠️ **Offene Entscheidung, beim Umbau zu prüfen:** Drei unabhängige Quellen
+  raten von Emoji als strukturellen Icons ab (schriftabhängig,
+  plattforminkonsistent, nicht über Tokens steuerbar), und die
+  Editorial-Richtung bevorzugt ohnehin Wort-Labels gegenüber Icons. Im neuen
+  Layout ansehen und dann entscheiden — ★ und ✓ sind Symbole, keine Emoji,
+  und dürfen in jedem Fall bleiben.
 - **Verbotene Wörter:** „einfach mal", „lecker", „genial", „unwiderstehlich",
   „Ups", „leider", „bitte beachten Sie", „Nutzer", „Klick hier".
 - Kein Ausrufezeichen außer „Genießen!" am Ende einer Zubereitung.
