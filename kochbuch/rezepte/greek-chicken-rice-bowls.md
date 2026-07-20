@@ -60,7 +60,7 @@ quelle:
 bild: ../anhang/greek-chicken-rice-bowls.jpg
 gekocht: []
 status: entwurf
-geraete: [airfryer]
+geraete: []
 hinzugefuegt: 2026-07-20
 ---
 
