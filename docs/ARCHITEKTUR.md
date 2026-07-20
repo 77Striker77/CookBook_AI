@@ -13,7 +13,7 @@
 ┌───────────────┐    Issue     ┌─────┴──────┐   Build    ┌──────────────┐
 │ Person 2:     │ ──────────▶  │ Import-    │ ─────────▶ │ GitHub Pages │
 │ Link/Foto in  │   (Label     │ Action +   │  (Astro,   │ → Website    │
-│ Formular      │   `import`)  │ Claude API │  Pagefind) │ auf allen    │
+│ Formular      │   `import`)  │ Claude API │  Suche)    │ auf allen    │
 └───────────────┘              │ → PR       │            │ Geräten (PWA)│
                                └─────┬──────┘            └──────────────┘
                                      │ Review (Agent + Person 1) → Merge
@@ -26,7 +26,10 @@
 - **Astro** mit Content Collections: liest die Rezept-Markdown-Dateien direkt
   aus dem Vault; ein **Zod-Schema validiert das Frontmatter beim Build** —
   eine kaputte Datei kann nicht live gehen (automatisches Qualitäts-Gate).
-- **Pagefind** für client-seitige Volltextsuche (kein Server, kostenlos).
+- **Suche** laeuft clientseitig ueber Titel, Tags und Zutatennamen — die Karten
+  tragen sie als data-Attribute. Pagefind war einmal im Build, wurde aber mit
+  der eigenen Suchseite entfernt: 762 KB Index, den nichts mehr geladen hat.
+  Bei deutlich mehr Rezepten waere es der naheliegende Weg zurueck.
 - **PWA-Manifest** für Installation auf dem Homescreen.
 - **Deployment:** GitHub Action baut bei jedem Push auf `main` und deployt
   auf GitHub Pages.
@@ -85,7 +88,7 @@ Schema aus `_meta/schema.md` als Vertrag.
 |---|---|
 | GitHub (Repo, Issues, Actions, Pages) | 0 € (Free-Tier reicht locker) |
 | Obsidian | 0 € (Sync via Git) |
-| Astro, Pagefind, yt-dlp, whisper | 0 € (Open Source) |
+| Astro, yt-dlp, whisper | 0 € (Open Source) |
 | Claude API | ~1–5 ct pro Rezept-Import |
 | Eigene Domain (optional) | ~10 €/Jahr |
 

@@ -41,11 +41,28 @@ Jedes Rezept ist eine Markdown-Datei mit YAML-Frontmatter nach striktem Schema
 Bei jedem Merge baut GitHub Actions die Website neu (Astro) und deployt sie
 auf GitHub Pages. Features:
 
-- Rezept-Grid mit Filterchips (Kategorie, Tags, Zeit, „≤ 30 min“, „🎲 Überrasch mich“)
-- Client-seitige Volltextsuche (Pagefind — kein Server nötig)
-- Rezeptseite mit **Portionsrechner** (Mengen skalieren per Klick)
-- **Kochmodus:** große Schrift, Schritt-für-Schritt, Timer, Display bleibt an (Wake Lock)
-- **PWA:** auf dem Homescreen installierbar wie eine App, ohne App Store
+**Drei Bereiche** — mehr nicht. Die Navigation folgt dem Muster, auf das
+Paprika, Mela, Crouton, Mealie und Tandoor unabhängig voneinander kommen:
+
+| Bereich | Aufgabe |
+|---|---|
+| **Übersicht** (`/`) | Minimales Dashboard: Bildwand, Einkaufs-Zustand, Sprungmarken nach Art und Aufwand |
+| **Rezepte** (`/rezepte`) | Alle Rezepte, zuletzt hinzugefügt zuerst. Suche, kombinierbare Filter mit URL-Zustand, Zutatenregister |
+| **Einkauf** (`/einkauf`) | Gewählte Gerichte und die Zutaten daraus — nach Warengruppen, ohne Vorratsware, mit eigenen Zeilen |
+
+Dazu, außerhalb der Navigation:
+
+- **Rezeptseite** mit Portionsrechner. Er skaliert die Zutatenliste; weicht die
+  Portionszahl ab, weist ein Hinweis darauf hin, dass die Mengen im Fließtext
+  unverändert bleiben (Begründung in `.claude/skills/well-seasoned/references/seiten.md`)
+- **Kochmodus** (`/kochen/[slug]`): ein Schritt pro Bildschirm, Wake Lock,
+  antippbare Timer aus dem Rezepttext, am Ende „Gekocht ✓" mit drei
+  Bewertungsstufen
+- **Zutatenseiten** für Zutaten in mindestens zwei Rezepten
+
+**Was es bewusst nicht gibt:** keinen Service Worker und damit keine
+Offline-Fähigkeit — wurde geprüft und nicht gebraucht. Das Manifest macht die
+Seite installierbar, mehr nicht.
 
 ### 3. Wachstum: der Rezept-Briefkasten
 
@@ -66,6 +83,9 @@ optionaler Vollautomatik-Schalter über die Claude API bleibt für später drin.
 
 ## Später: das Küchen-Hirn
 
+> **Stand:** Noch nicht gebaut. Der Abschnitt beschreibt die Absicht, nicht
+> den Ist-Zustand.
+
 `vorrat/vorratskammer.md` hält fest, was zuhause ist. Ein Skill gleicht den
 Vorrat mit den Zutatenlisten aller Rezepte ab und beantwortet „Was koche ich
 heute?“ — inklusive „dir fehlen nur 2 Zutaten“. Darauf bauen Wochenplan und
@@ -82,3 +102,24 @@ Einkaufsliste auf.
   ein Lesezeichen).
 - **API-Kosten:** bewusst akzeptiert, ~1–5 ct pro Import; ohne Import-Nutzung
   fallen keine Kosten an.
+
+## Das Gedächtnis der Seite (20.07.2026)
+
+`gekocht` und `bewertung` liegen im Frontmatter, also in Git. Der Moment des
+Ausfüllens ist aber „gerade gegessen, Handy in der Hand" — und laut
+Nutzerprofil oben ist eine der beiden Personen nicht technisch. Ein Feld, das
+Klonen, Editieren, Committen und einen Build verlangt, bleibt leer. Genau das
+war der Fall: 0 Einträge bei 18 Rezepten.
+
+Deshalb zwei Ebenen:
+
+1. **Sofort:** `window.WSKoch` schreibt nach localStorage. Der Kochmodus trägt
+   am Ende mit einem Tap ein, und der Wert erscheint eine Sekunde später auf
+   der Rezeptseite.
+2. **Dauerhaft:** Ein Knopf erzeugt daraus eine vorbefüllte Einreichung über
+   das Issue-Template `kochverlauf.yml`. Der Agent schreibt sie ins
+   Frontmatter — derselbe Briefkasten-Weg wie beim Rezeptimport.
+
+Bewertung mit drei Stufen (`nochmal` · `ok` · `nein`) statt fünf Sternen. Dass
+0 von 18 Rezepten bewertet waren, war die Antwort und nicht das Symptom: zwei
+Menschen vergeben keine konsistente 1–5-Skala.

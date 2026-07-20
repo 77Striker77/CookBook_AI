@@ -31,14 +31,22 @@ verwalten.
 ## Projektstruktur
 
 ```
-kochbuch/          ← Obsidian-Vault = Datenbasis (Rezepte, Vorrat, Meta)
-src/               ← Astro-Website (liest aus dem Vault)
+kochbuch/          <- Obsidian-Vault = Datenbasis (Rezepte, Anhaenge, Meta)
+src/               <- Astro-Website
   content.config.ts  Schema-Validierung (Zod)
-  lib/zutaten.ts     Zutaten-Parser & kanonische Verlinkung
-  pages/             Startseite, Rezept-, Zutaten-, Suchseite
-.claude/skills/    ← /inbox, /neues-rezept, /review-rezept
-.github/workflows/ ← Build & Deploy auf GitHub Pages
-docs/              ← Konzept, Architektur, Roadmap
+  lib/               Zutaten-Parser, Schritt-Parser, Einkaufs-Aggregation
+  components/        Rezeptkarte, Speicher (Plan + Koch-Gedaechtnis)
+  pages/
+    index.astro        Uebersicht  - Dashboard
+    rezepte.astro      Rezepte     - alle, Suche, Filter, Zutatenregister
+    einkauf.astro      Einkauf     - Gerichte + Zutatenliste
+    rezept/[...slug]   Detailseite
+    kochen/[slug]      Kochmodus
+    zutat/[slug]       Rezepte mit dieser Zutat (ab 2 Treffern)
+scripts/           <- pruefe-rezepte.mjs laeuft vor jedem Build
+.claude/skills/    <- /inbox, /neues-rezept, /review-rezept, well-seasoned
+.github/workflows/ <- Build & Deploy auf GitHub Pages
+docs/              <- Konzept, Architektur, Roadmap
 ```
 
 ## Dokumente

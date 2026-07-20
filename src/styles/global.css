@@ -610,17 +610,6 @@ ul.zutaten .grp { border: 0; padding: var(--sp-sm) 0 var(--sp-3xs); font-weight:
 .zutat-head h1 { font-size: var(--fs-h2); margin: 0; }
 .zutat-head p { color: var(--color-ink-muted); margin: .4rem 0 0; }
 
-/* ---- Suche ---- */
-.suche-wrap { padding: var(--sp-lg) 0 var(--sp-3xl); }
-:root {
-  --pagefind-ui-primary: var(--color-accent-text);
-  --pagefind-ui-text: var(--color-ink);
-  --pagefind-ui-background: var(--color-surface-raised);
-  --pagefind-ui-border: var(--color-line-strong);
-  --pagefind-ui-tag: var(--color-surface);
-  --pagefind-ui-font: var(--ff-ui);
-  --pagefind-ui-border-radius: var(--r-xs);
-}
 
 footer.site { border-top: var(--bw-hair) solid var(--color-line); padding: var(--sp-md) 0; color: var(--color-ink-muted); font-size: var(--fs-sm); }
 footer.site .wrap { display: flex; gap: var(--sp-xs); flex-wrap: wrap; justify-content: space-between; }

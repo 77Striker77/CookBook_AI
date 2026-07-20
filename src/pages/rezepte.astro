@@ -158,7 +158,8 @@ const zutaten = [...zIndex.entries()]
           const aktiv = Number(k.dataset.aktiv) || 0;
           const tage = window.WSKoch?.tageSeit(k.dataset.slug);
           const ok =
-            (!s.q || k.dataset.titel.includes(s.q) || (k.dataset.tags || '').includes(s.q)) &&
+            (!s.q || k.dataset.titel.includes(s.q) || (k.dataset.tags || '').includes(s.q)
+                    || (k.dataset.zutaten || '').includes(s.q)) &&
             (!s.zeit || (aktiv > 0 && aktiv <= Number(s.zeit))) &&
             (!s.warte || k.dataset.warte === s.warte) &&
             (!s.geraet || (k.dataset.geraete || '').split(' ').includes(s.geraet)) &&

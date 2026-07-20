@@ -7,8 +7,8 @@
 | | Link |
 |---|---|
 | 🍳 **Dashboard / Website** | https://77striker77.github.io/CookBook_AI/ |
-| 🔍 Suche | https://77striker77.github.io/CookBook_AI/suche/ |
-| 🗓️ Wochenplan | https://77striker77.github.io/CookBook_AI/plan/ |
+| 📖 Alle Rezepte | https://77striker77.github.io/CookBook_AI/rezepte/ |
+| 🛒 Einkauf | https://77striker77.github.io/CookBook_AI/einkauf/ |
 | ➕ Rezept einwerfen | https://github.com/77Striker77/CookBook_AI/issues/new?template=neues-rezept.yml |
 
 ## Werkstatt

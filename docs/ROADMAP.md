@@ -61,21 +61,64 @@ dann per `/inbox` (kein API-Key, keine Kosten).
 
 ## Phase 4 — Küchen-Hirn
 
-- [x] **Kochplan + Einkaufsliste direkt auf der Website:** „🛒 In den Kochplan“
-      auf jeder Rezeptseite (übernimmt die gewählte Portionszahl) und „+“ auf den
-      Grid-Karten. Seite `/plan` zeigt die gewählten Rezepte (Portions-Stepper,
-      Entfernen) und erzeugt daraus die Einkaufsliste: Mengen auf die Zielportionen
-      skaliert und über den kanonischen Namen + Einheit zusammengezählt, zum
-      Abhaken, mit Kopieren/Teilen/Drucken. Rein clientseitig (localStorage),
-      offline-tauglich, kein Backend. Aggregation in `src/lib/einkauf.ts`.
+- [x] **Einkauf direkt auf der Website** (`/einkauf`): das „+“ auf jeder Karte
+      und „In den Kochplan“ im Rezept übernehmen die gewählte Portionszahl. Die
+      Seite zeigt oben die gewählten Gerichte (Portions-Stepper, Entfernen) und
+      darunter die Zutaten daraus — skaliert, zusammengezählt, **nach
+      Warengruppen sortiert** (Laufweg durch den Markt statt alphabetisch),
+      **ohne Vorratsware** (Salz stand in 9 von 18 Rezepten, dazu Wasser) und mit
+      **eigenen Zeilen** für Milch, Kaffee, Spülmittel. Erledigtes rutscht nach
+      unten. Rein clientseitig (localStorage), kein Backend. Aggregation in
+      `src/lib/einkauf.ts`.
+      *Nicht offline-tauglich* — es gibt keinen Service Worker, und er wurde
+      bewusst verworfen.
 - [ ] `vorrat/vorratskammer.md` + einfacher Pflege-Weg (auch mobil)
 - [ ] `/koch-was`: Vorrats-Abgleich, „dir fehlen nur 2 Zutaten“
-- [ ] `/wochenplan` als Skill (ausgewogener Wochenplan) — Einkaufsliste ✅ erledigt
+- [ ] Wochentage im Einkaufsbereich (waren kurz da, mit `/plan` wieder entfallen).
+      Laut Mealies Nutzerumfrage planen viele lieber als Warteschlange als auf
+      feste Tage — vor dem Bauen klären, was hier wirklich gebraucht wird.
 - [ ] Vorschlags-Seite auf der Website (wöchentlich generiert)
 
 ## Phase 5 — Kür
 
-- [ ] Kochmodus: Schritt-für-Schritt, Timer, Wake Lock
-- [ ] Statistiken („meistgekocht 2026“), Saisonales
+- [x] **Kochmodus** (`/kochen/[slug]`): ein Schritt pro Bildschirm, Wischen und
+      Pfeiltasten, Wake Lock, antippbare Timer aus dem Rezepttext (33 erkannt),
+      Zutaten als Overlay mit Portionsrechner, am Ende „Gekocht ✓“ mit drei
+      Bewertungsstufen. Die Schrittposition überlebt versehentliches Schließen.
+- [ ] Statistiken („meistgekocht 2026“), Saisonales — **jetzt baubar**: das
+      Koch-Gedächtnis (`window.WSKoch`) sammelt die Daten. Vorher war die
+      Grundlage nicht erzeugbar, weil das Feld nur über Git befüllbar war.
 - [ ] `/vault-pflege` als monatliche Routine
 - [ ] Export als druckbares Jahrbuch
+
+## Phase 6 — Umbau von Struktur und Optik ✅ *(20.07.2026)*
+
+Ausgelöst durch die Rückmeldung, der Aufbau sei „unübersichtlich und mies
+navigierbar“. Zwei Web-Recherchen gaben dem recht.
+
+- [x] **Von sieben Bereichen auf drei.** Drei waren praktisch unerreichbar —
+      `/register` lag vier Ebenen tief hinter einem Brotkrumen. NN/g (n=179):
+      versteckte Navigation kostet über 20 % Auffindbarkeit.
+      Verworfen: `/alle`, `/register`, `/verlauf`, `/suche`, `/plan`,
+      `daten.json.ts`
+- [x] **Koch-Gedächtnis** in localStorage plus Übertragung ins Repo über ein
+      eigenes Issue-Template (`kochverlauf.yml`)
+- [x] **Arbeitszeit statt Gesamtzeit** als Leitzahl auf Karten und Rezeptseite
+- [x] **Schema aufgeräumt:** `geraete` als Enum (vorher drei Schreibweisen für
+      eine Fritteuse), `hinzugefuegt` aus der Git-Historie nachgetragen,
+      `schwierigkeit` gestrichen (12/5/1 — trennte nichts), `bewertung` auf drei
+      Stufen
+- [x] **Hell als Grundton**, Bildführung im Held, Navigation als echte Reiter mit
+      `aria-current`
+- [x] **Datenprüfung vor dem Build** (`scripts/pruefe-rezepte.mjs`): bricht ab,
+      wenn ein Gerät zugewiesen ist, das im Rezepttext nicht vorkommt. Entstanden
+      aus einem echten Fehler — ein Rezept trug `airfryer`, weil das Gerät in
+      einem Querverweis auf ein anderes Rezept stand.
+
+### Offen aus dieser Phase
+
+- [ ] Mobil liegen Zutaten und Zubereitung auf der Rezeptseite untereinander.
+      Der Kochmodus löst das fürs Kochen, die Leseseite nicht.
+- [ ] Zwei-Geräte-Problem: Der Plan liegt in localStorage auf **einem** Gerät.
+      Wer plant, ist nicht wer einkauft. Ohne Backend lösbar über den Plan im
+      URL-Hash plus `navigator.share`.
