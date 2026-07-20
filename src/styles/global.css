@@ -371,8 +371,10 @@ img { max-width: 100%; display: block; }
 
 .rk-text { padding-top: var(--sp-2xs); margin-top: var(--sp-2xs); border-top: var(--bw) solid var(--color-ink); }
 .rk-kopf { margin: 0; display: flex; flex-wrap: wrap; gap: var(--sp-2xs); font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); font-weight: var(--fw-semibold); }
-.rk-kat { color: var(--color-ink-muted); }
-.rk-geraet { color: var(--color-accent-text); }
+/* Kategorie und Geraet sind beides Metadaten — gleiche Behandlung.
+   Vorher war das Geraet orange und die Kategorie grau, in derselben Zeile. */
+.rk-kat, .rk-geraet { color: var(--color-ink-muted); }
+.rk-geraet::before { content: "·"; margin-right: var(--sp-2xs); color: var(--color-line-strong); }
 
 .rk-titel { display: block; margin-top: var(--sp-3xs); font-family: var(--ff-display); font-weight: 600; font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight); color: var(--color-ink); text-decoration: none; }
 .rk--gross .rk-titel { font-size: var(--fs-h2); letter-spacing: var(--tr-display); }
@@ -451,16 +453,35 @@ img { max-width: 100%; display: block; }
 .empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
 
 /* ---- Rezeptseite ---- */
+/* Eckdaten: ein einziger Stil. Unterschieden wird ueber Position und Groesse,
+   nicht ueber Farbe — der Akzent gehoert der Interaktion. */
+.leitzahl {
+  margin: var(--sp-xs) 0 var(--sp-2xs);
+  font-family: var(--ff-display); font-size: var(--fs-h3);
+  letter-spacing: var(--tr-tight); color: var(--color-ink);
+}
+.eckdaten {
+  list-style: none; margin: 0 0 var(--sp-sm); padding: 0;
+  display: flex; flex-wrap: wrap; gap: var(--sp-3xs) var(--sp-sm);
+  font-size: var(--fs-sm); color: var(--color-ink-muted);
+}
+.eckdaten li + li::before { content: "·"; margin-right: var(--sp-sm); color: var(--color-line-strong); }
+.eck-urteil { color: var(--color-accent-text); font-weight: var(--fw-semibold); }
+
+/* Tags sind Links — nur sie tragen den Akzent, und zwar bei Interaktion. */
+.tagrow { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin: 0 0 var(--sp-md); }
+.tag {
+  font-size: var(--fs-sm); color: var(--color-ink-muted);
+  text-decoration: none; padding: 5px var(--sp-2xs);
+  border: var(--bw-hair) solid var(--color-line);
+  min-height: 34px; display: inline-flex; align-items: center;
+}
+.tag:hover { color: var(--color-accent-text); border-color: var(--color-accent); }
+
 .recipe { padding: var(--sp-lg) 0 var(--sp-3xl); }
 .crumb { font-size: var(--fs-sm); color: var(--color-ink-muted); margin-bottom: var(--sp-sm); }
 .crumb a { color: var(--color-ink-muted); }
 .recipe h1 { font-size: var(--fs-h1); margin: 0 0 .4rem; font-weight: var(--fw-semibold); letter-spacing: var(--tr-display); }
-.recipe .facts { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin: var(--sp-xs) 0 6px; }
-.fact { background: var(--color-surface); border: var(--bw-hair) solid var(--color-line); border-radius: var(--r-xs); padding: 4px 13px; font-size: var(--fs-sm); color: var(--color-ink); font-variant-numeric: tabular-nums; }
-.fact b { color: var(--color-accent-text); }
-.tagrow { display: flex; flex-wrap: wrap; gap: 7px; margin: var(--sp-xs) 0; }
-.tag { font-size: var(--fs-sm); color: var(--color-ink-muted); background: var(--color-surface); border-radius: var(--r-xs); padding: 3px 11px; text-decoration: none; }
-.tag:hover { color: var(--color-ink); }
 
 .hero-bild { margin: var(--sp-md) 0 0; display: flex; justify-content: center; align-items: center; background: var(--color-surface); overflow: hidden; border: var(--bw-hair) solid var(--color-line); }
 .hero-bild img { max-width: 100%; max-height: 480px; width: auto; height: auto; object-fit: contain; display: block; }
@@ -790,8 +811,6 @@ a.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 .reg-liste a:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
 .reg-liste a span { margin-left: auto; font-variant-numeric: tabular-nums lining-nums; font-size: var(--fs-sm); color: var(--color-ink-muted); }
 
-.fact-geraet { color: var(--color-accent-text); }
-.fact-urteil { background: var(--color-accent); color: var(--c-white); border-color: var(--color-accent); font-weight: var(--fw-semibold); }
 
 /* ---- Startseite: Held ----
    Muster "Portfolio Grid" aus der Stildatenbank: neutraler Grund, das Werk

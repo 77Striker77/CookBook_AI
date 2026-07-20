@@ -44,25 +44,28 @@ const quelleText: Record<string, string> = {
     <p class="crumb"><a href={url('/')}>Rezepte</a> › {katLabel(d.kategorie)}</p>
     <h1>{d.titel}</h1>
 
-    <div class="facts">
-      {/* Arbeitszeit zuerst — sie ist die Zahl, die entscheidet. */}
-      {arbeitLabel(d.zeit_aktiv, d.zeit_gesamt) && (
-        <span class="fact"><b>{arbeitLabel(d.zeit_aktiv, d.zeit_gesamt)}</b></span>
-      )}
-      <span class="fact"><b>{d.portionen}</b> Portionen</span>
-      {komponentenLabel(komponenten(d.zutaten)) && (
-        <span class="fact">{komponentenLabel(komponenten(d.zutaten))}</span>
-      )}
-      {(d.geraete ?? []).map((g: string) => (
-        <span class="fact fact-geraet">{GERAET_LABEL[g] ?? g}</span>
-      ))}
-      {d.küche && <span class="fact">{d.küche}</span>}
-      {d.bewertung && <span class="fact fact-urteil">{URTEIL[d.bewertung] ?? d.bewertung}</span>}
-    </div>
+    {/* Eckdaten: EIN Stil für alles. Vorher standen hier sechs Pillen in drei
+        Färbungen, und Orange bedeutete abwechselnd „Zeit", „die Ziffer 2" und
+        „Gerät" — eine Farbe ohne Bedeutung ist Dekoration. Unterschieden wird
+        jetzt über Position, nicht über Farbe. Der Akzent bleibt der
+        Interaktion vorbehalten (Tags weiter unten sind Links). */}
+    {arbeitLabel(d.zeit_aktiv, d.zeit_gesamt) && (
+      <p class="leitzahl">{arbeitLabel(d.zeit_aktiv, d.zeit_gesamt)}</p>
+    )}
 
-    <div class="tagrow">
-      {d.tags.map((t) => <a class="tag" href={`${url('/')}?tag=${t}`}>#{t}</a>)}
-    </div>
+    <ul class="eckdaten">
+      <li>{d.portionen} Portionen</li>
+      {komponentenLabel(komponenten(d.zutaten)) && <li>{komponentenLabel(komponenten(d.zutaten))}</li>}
+      {(d.geraete ?? []).map((g: string) => <li>{GERAET_LABEL[g] ?? g}</li>)}
+      {d.küche && <li>{d.küche}</li>}
+      {d.bewertung && <li class="eck-urteil">{URTEIL[d.bewertung] ?? d.bewertung}</li>}
+    </ul>
+
+    {d.tags.length > 0 && (
+      <p class="tagrow">
+        {d.tags.map((t) => <a class="tag" href={url(`/rezepte?tag=${t}`)}>{t}</a>)}
+      </p>
+    )}
 
     {d.bild && (
       <figure class="hero-bild">
