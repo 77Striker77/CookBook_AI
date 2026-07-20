@@ -779,3 +779,43 @@ a.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }
 
 .fact-geraet { color: var(--color-accent-text); }
 .fact-urteil { background: var(--color-accent); color: var(--c-white); border-color: var(--color-accent); font-weight: var(--fw-semibold); }
+
+/* ---- Dashboard ---- */
+.dash { padding: var(--sp-lg) 0 var(--sp-3xl); max-width: var(--w-content); }
+
+.dash-haupt { display: grid; grid-template-columns: 2fr 1fr; gap: var(--bw-hair); background: var(--color-line); border-block: var(--bw-heavy) solid var(--color-ink); margin-bottom: var(--sp-2xl); }
+@media (max-width: 620px) { .dash-haupt { grid-template-columns: 1fr; } }
+.kachel { display: flex; flex-direction: column; gap: var(--sp-3xs); padding: var(--sp-xl) var(--sp-md); background: var(--color-bg); text-decoration: none; min-height: 160px; justify-content: flex-end; }
+.kachel:hover, .kachel:focus-visible { background: var(--color-ink); }
+.kachel:hover .kachel-titel, .kachel:hover .kachel-zahl { color: var(--color-bg); }
+.kachel:hover .kachel-unter { color: var(--color-line); }
+.kachel-zahl { font-family: var(--ff-display); font-size: var(--fs-h1); line-height: 1; letter-spacing: var(--tr-display); color: var(--color-accent-text); font-variant-numeric: lining-nums tabular-nums; }
+.kachel-titel { font-family: var(--ff-display); font-size: var(--fs-h3); color: var(--color-ink); letter-spacing: var(--tr-tight); }
+.kachel-unter { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+
+.dash-block { margin-bottom: var(--sp-2xl); }
+.dash-h2 { margin: 0 0 var(--sp-sm); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); padding-bottom: var(--sp-3xs); border-bottom: var(--bw-rule) solid var(--color-ink); }
+.sprung { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0 var(--sp-lg); }
+.sprung a { display: flex; align-items: baseline; gap: var(--sp-2xs); padding: var(--sp-xs) 0; min-height: 48px; color: var(--color-ink); text-decoration: none; font-family: var(--ff-display); font-size: var(--fs-xl); border-bottom: var(--bw-hair) solid var(--color-line); }
+.sprung a:hover { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
+.sprung a span { margin-left: auto; font-family: var(--ff-ui); font-size: var(--fs-sm); color: var(--color-ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+
+.listen-titel { font-size: var(--fs-h1); letter-spacing: var(--tr-display); margin: 0 0 var(--sp-md); }
+
+/* Gerichte im Einkaufsbereich */
+.ek-abschnitt { margin: 0 0 var(--sp-sm); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); padding-bottom: var(--sp-3xs); border-bottom: var(--bw-rule) solid var(--color-ink); }
+.ek-gerichte { margin-bottom: var(--sp-2xl); }
+.ek-gerichte ul { list-style: none; margin: 0; padding: 0; }
+.ek-gericht { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2xs) var(--sp-sm); padding: var(--sp-2xs) 0; border-bottom: var(--bw-hair) solid var(--color-line); }
+.eg-text { flex: 1 1 12ch; min-width: 0; }
+.eg-titel { display: block; font-family: var(--ff-display); font-size: var(--fs-xl); color: var(--color-ink); text-decoration: none; }
+.eg-titel:hover { color: var(--color-accent-text); }
+.eg-meta { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.eg-stepper { display: flex; align-items: center; gap: var(--sp-3xs); }
+.eg-stepper button { width: 44px; height: 44px; border: var(--bw-hair) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-size: 1.1rem; cursor: pointer; }
+.eg-portion { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; }
+.eg-lbl { font-size: var(--fs-xs); color: var(--color-ink-muted); }
+.eg-weg { width: 44px; height: 44px; border: 0; background: transparent; color: var(--color-ink-muted); font-size: 1.4rem; cursor: pointer; }
+.eg-weg:hover { color: var(--color-danger); }
+.ek-hinweis { color: var(--color-ink-muted); font-size: var(--fs-md); padding: var(--sp-xs) 0; }
+.ek-gruppe h3 { margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); font-weight: var(--fw-semibold); padding-bottom: var(--sp-3xs); border-bottom: var(--bw) solid var(--color-line); }

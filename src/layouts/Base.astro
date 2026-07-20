@@ -103,24 +103,17 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
     <header class="site-header">
       <div class="wrap bar">
         <a class="logo" href={url('/')}>Well <span>Seasoned</span></a>
-        {/* Drei gleichrangige Ziele — der Kanon, auf den Paprika, Mela,
-            Crouton, Mealie, Tandoor und RecipeSage uebereinstimmend kommen:
-            Rezepte, Plan, Einkauf. Vorher waren es sieben Bereiche, davon drei
-            praktisch unerreichbar. Eine NN/g-Studie (n=179) misst fuer
-            versteckte Navigation ueber 20 % weniger Auffindbarkeit. */}
         <nav class="nav" aria-label="Hauptnavigation">
-          <a href={url('/')}>Rezepte</a>
-          <a href={url('/plan')} class="nav-plan">
-            Plan<span class="badge" id="planBadge" hidden>0</span>
+          <a href={url('/')}>Übersicht</a>
+          <a href={url('/rezepte')}>Rezepte</a>
+          <a href={url('/einkauf')} class="nav-plan">
+            Einkauf<span class="badge" id="planBadge" hidden>0</span>
             <span class="sr-only" id="planStatus" aria-live="polite"></span>
           </a>
-          <a href={url('/einkauf')}>Einkauf</a>
           <a
             class="nav-add"
             href="https://github.com/77Striker77/CookBook_AI/issues/new?template=neues-rezept.yml"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="Neues Rezept einwerfen"
+            target="_blank" rel="noreferrer" aria-label="Neues Rezept einwerfen"
           >+</a>
           <button class="theme-toggle" id="themeToggle" aria-label="Hell/Dunkel umschalten">◐</button>
         </nav>

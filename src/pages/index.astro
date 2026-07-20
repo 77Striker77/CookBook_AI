@@ -1,203 +1,83 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Rezeptkarte from '../components/Rezeptkarte.astro';
-import Kartenlogik from '../components/Kartenlogik.astro';
 import { url } from '../lib/url';
-import { parseZutaten } from '../lib/zutaten';
-import { katLabel, GERAET_LABEL, WARTE_LABEL } from '../lib/darstellung';
+import { katLabel } from '../lib/darstellung';
 
-// Sortierung: zuletzt hinzugefügt zuerst. Das ist die Ordnung, auf die
-// Paprika, Mela, Mealie und RecipeSage übereinstimmend setzen — sie
-// funktioniert ab Rezept Nr. 1, weil das Anlagedatum immer existiert.
-// Alphabetisch war eine Ordnung ohne Bedeutung; niemand sucht „bei B".
-const alle = (await getCollection('rezepte')).sort((a, b) => {
-  const da = a.data.hinzugefuegt ? +new Date(a.data.hinzugefuegt) : 0;
-  const db = b.data.hinzugefuegt ? +new Date(b.data.hinzugefuegt) : 0;
-  return db - da || a.data.titel.localeCompare(b.data.titel, 'de');
-});
+const alle = await getCollection('rezepte');
 
-const kategorien = [...new Set(alle.map((r) => r.data.kategorie))].sort();
-const geraete = [...new Set(alle.flatMap((r) => r.data.geraete ?? []))].sort();
+// Kategorien mit Anzahl — das sind die Sprungmarken des Dashboards.
+const kategorien = [...new Set(alle.map((r) => r.data.kategorie))]
+  .map((k) => ({ k, n: alle.filter((r) => r.data.kategorie === k).length }))
+  .sort((a, b) => b.n - a.n);
 
-// Tags nach Häufigkeit, nicht alphabetisch, und nur ab zwei Treffern.
-const tagZaehler = new Map<string, number>();
-for (const r of alle) {
-  for (const t of r.data.tags ?? []) tagZaehler.set(t, (tagZaehler.get(t) ?? 0) + 1);
-}
-const topTags = [...tagZaehler.entries()]
-  .filter(([, n]) => n >= 2)
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
-
-// Zutatenregister — steht am Listenende statt auf einer eigenen Seite.
-const zIndex = new Map<string, { name: string; n: number }>();
-for (const r of alle) {
-  const gesehen = new Set<string>();
-  for (const z of parseZutaten(r.data.zutaten)) {
-    if (gesehen.has(z.slug)) continue;
-    gesehen.add(z.slug);
-    const e = zIndex.get(z.slug) ?? { name: z.kanonisch, n: 0 };
-    e.n++;
-    zIndex.set(z.slug, e);
-  }
-}
-const zutaten = [...zIndex.entries()]
-  .filter(([, e]) => e.n >= 2)
-  .sort((a, b) => a[1].name.localeCompare(b[1].name, 'de'));
+const geraete = [...new Set(alle.flatMap((r) => r.data.geraete ?? []))];
+const schnell = alle.filter((r) => (r.data.zeit_aktiv ?? 999) <= 20).length;
 ---
 
-<Base beschreibung={`Unser gemeinsam gesammeltes digitales Kochbuch — ${alle.length} Rezepte.`}>
-  <div class="wrap liste-seite">
-    <!-- Suche und Filter sitzen über der Liste. Es gibt keinen zweiten Ort
-         für dieselbe Absicht mehr — vorher waren es drei, von denen einer
-         kaputt und einer versteckt war. -->
-    <form class="filter" id="filter" role="search">
-      <label class="f-suche">
-        <span class="sr-only">Rezept suchen</span>
-        <input
-          type="search" name="q" id="fQ"
-          placeholder="Rezept oder Zutat suchen …"
-          autocomplete="off"
-        />
-      </label>
+<Base beschreibung={`Unser digitales Kochbuch — ${alle.length} Rezepte.`}>
+  <div class="wrap dash">
+    <!-- Drei Bereiche, drei Kacheln. Jede zeigt ihren Zustand und führt
+         hinein. Das ist die ganze Aufgabe dieser Seite. -->
+    <nav class="dash-haupt" aria-label="Bereiche">
+      <a class="kachel kachel-gross" href={url('/rezepte')}>
+        <span class="kachel-zahl">{alle.length}</span>
+        <span class="kachel-titel">Rezepte</span>
+        <span class="kachel-unter">Alle ansehen, filtern, suchen</span>
+      </a>
 
-      <div class="f-leiste" id="fLeiste">
-        <button type="button" class="chip" data-f="zeit" data-v="20">≤ 20 min Arbeit</button>
-        <button type="button" class="chip" data-f="zeit" data-v="35">≤ 35 min Arbeit</button>
-        <button type="button" class="chip" data-f="warte" data-v="einplanen">Läuft von allein</button>
-        {geraete.map((g) => (
-          <button type="button" class="chip" data-f="geraet" data-v={g}>{GERAET_LABEL[g] ?? g}</button>
-        ))}
-        <!-- Erscheint erst, wenn genug Kochverlauf da ist. Ein Filter, der
-             auf alle 18 Rezepte zutrifft, sagt nichts. -->
-        <button type="button" class="chip chip-verlauf" data-f="lange" data-v="1" hidden>Lange nicht gekocht</button>
+      <a class="kachel" href={url('/einkauf')}>
+        <span class="kachel-zahl" id="dashPlan">0</span>
+        <span class="kachel-titel">Einkauf</span>
+        <span class="kachel-unter" id="dashPlanUnter">Noch nichts gewählt</span>
+      </a>
+    </nav>
 
-        <details class="f-mehr">
-          <summary>Mehr Filter</summary>
-          <div class="f-mehr-inhalt">
-            <p class="f-gruppentitel">Ablauf</p>
-            {(['dabei', 'kurz', 'halbe'] as const).map((w) => (
-              <button type="button" class="chip" data-f="warte" data-v={w}>{WARTE_LABEL[w]}</button>
-            ))}
-            <p class="f-gruppentitel">Art</p>
-            {kategorien.map((k) => (
-              <button type="button" class="chip" data-f="kat" data-v={k}>{katLabel(k)}</button>
-            ))}
-            <p class="f-gruppentitel">Merkmal</p>
-            {topTags.map(([t, n]) => (
-              <button type="button" class="chip" data-f="tag" data-v={t}>{t} <span class="chip-n">{n}</span></button>
-            ))}
-          </div>
-        </details>
-      </div>
-    </form>
-
-    <p class="count" id="fCount" aria-live="polite"></p>
-    <button type="button" class="btn ghost f-reset" id="fReset" hidden>Filter zurücksetzen</button>
-
-    <div class="liste" id="liste">
-      {alle.map((r, i) => <Rezeptkarte r={r} form="normal" eager={i < 4} />)}
-      <p class="empty" id="fLeer" hidden>Nichts gefunden — Filter zurücksetzen?</p>
-    </div>
-
-    <!-- Register: durchblätterbar, im Gegensatz zur Suche. Steht unten, weil
-         es Nachschlagen ist, nicht der Haupteinstieg. -->
-    <details class="reg-details">
-      <summary>
-        <span class="reg-summary-titel">Zutatenregister</span>
-        <span class="reg-summary-n">{zutaten.length} Zutaten in mehreren Rezepten</span>
-      </summary>
-      <ul class="reg-liste">
-        {zutaten.map(([slug, e]) => (
-          <li><a href={url(`/zutat/${slug}`)}>{e.name}<span>{e.n}</span></a></li>
+    <!-- Direktsprünge in die Rezeptliste. Der eigentliche Zweck des
+         Dashboards: schneller dorthin, wo man ohnehin hinwill. -->
+    <section class="dash-block">
+      <h2 class="dash-h2">Nach Art</h2>
+      <ul class="sprung">
+        {kategorien.map(({ k, n }) => (
+          <li>
+            <a href={url(`/rezepte?kat=${k}`)}>
+              {katLabel(k)}<span>{n}</span>
+            </a>
+          </li>
         ))}
       </ul>
-    </details>
-  </div>
+    </section>
 
-  <Kartenlogik />
+    <section class="dash-block">
+      <h2 class="dash-h2">Nach Aufwand</h2>
+      <ul class="sprung">
+        <li><a href={url('/rezepte?zeit=20')}>Höchstens 20 Minuten Arbeit<span>{schnell}</span></a></li>
+        <li><a href={url('/rezepte?warte=einplanen')}>Läuft von allein<span>{alle.filter((r) => (r.data.zeit_gesamt ?? 0) - (r.data.zeit_aktiv ?? 0) >= 60).length}</span></a></li>
+        {geraete.map((g) => (
+          <li>
+            <a href={url(`/rezepte?geraet=${g}`)}>
+              {g === 'airfryer' ? 'Airfryer' : g === 'ofen' ? 'Ofen' : g}
+              <span>{alle.filter((r) => (r.data.geraete ?? []).includes(g)).length}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
 
   <script is:inline>
     (() => {
-      const karten = [...document.querySelectorAll('.rk')];
-      const q = document.getElementById('fQ');
-      const zaehler = document.getElementById('fCount');
-      const leer = document.getElementById('fLeer');
-      const reset = document.getElementById('fReset');
-      const chips = [...document.querySelectorAll('.chip[data-f]')];
-
-      // Der Filterzustand lebt in der URL: teilbar, als Lesezeichen speicherbar,
-      // und der Zurück-Knopf räumt den Filter statt die Seite zu verlassen.
-      function lesen() {
-        const p = new URLSearchParams(location.search);
-        return {
-          q: (p.get('q') || '').toLowerCase(),
-          zeit: p.get('zeit') || '',
-          warte: p.get('warte') || '',
-          geraet: p.get('geraet') || '',
-          kat: p.get('kat') || '',
-          tag: p.get('tag') || '',
-          lange: p.get('lange') || '',
-        };
+      const zahl = document.getElementById('dashPlan');
+      const unter = document.getElementById('dashPlanUnter');
+      function zeichnen() {
+        const n = window.WSPlan?.count() ?? 0;
+        zahl.textContent = n;
+        unter.textContent = n === 0
+          ? 'Noch nichts gewählt'
+          : `${n === 1 ? 'Gericht' : 'Gerichte'} — Zutatenliste ansehen`;
       }
-      function schreiben(s, ersetzen) {
-        const p = new URLSearchParams();
-        for (const [k, v] of Object.entries(s)) if (v) p.set(k, v);
-        history[ersetzen ? 'replaceState' : 'pushState'](null, '', p.toString() ? `?${p}` : location.pathname);
-      }
-
-      function anwenden() {
-        const s = lesen();
-        if (q.value !== s.q) q.value = s.q;
-        for (const c of chips) c.setAttribute('aria-pressed', String(s[c.dataset.f] === c.dataset.v));
-
-        let n = 0;
-        for (const k of karten) {
-          const aktiv = Number(k.dataset.aktiv) || 0;
-          const tage = window.WSKoch?.tageSeit(k.dataset.slug);
-          const ok =
-            (!s.q || k.dataset.titel.includes(s.q) || (k.dataset.tags || '').includes(s.q)) &&
-            (!s.zeit || (aktiv > 0 && aktiv <= Number(s.zeit))) &&
-            (!s.warte || k.dataset.warte === s.warte) &&
-            (!s.geraet || (k.dataset.geraete || '').split(' ').includes(s.geraet)) &&
-            (!s.kat || k.dataset.kat === s.kat) &&
-            (!s.tag || (k.dataset.tags || '').split(' ').includes(s.tag)) &&
-            (!s.lange || (tage !== null && tage !== undefined && tage >= 21));
-          k.hidden = !ok;
-          if (ok) n++;
-        }
-        zaehler.textContent = n === karten.length ? `${n} Rezepte` : `${n} von ${karten.length} Rezepten`;
-        leer.hidden = n > 0;
-        reset.hidden = !Object.values(s).some(Boolean);
-      }
-
-      // Progressive Personalisierung: Der Verlaufsfilter erscheint erst, wenn
-      // mindestens fünf Kochvorgänge eingetragen sind. Vorher wäre er ein
-      // Filter mit Trefferquote 0 oder 1 — beides sagt nichts.
-      function verlaufsfilterPruefen() {
-        const genug = (window.WSKoch?.read() ?? []).length >= 5;
-        for (const c of document.querySelectorAll('.chip-verlauf')) c.hidden = !genug;
-      }
-
-      for (const c of chips) {
-        c.addEventListener('click', () => {
-          const s = lesen();
-          s[c.dataset.f] = s[c.dataset.f] === c.dataset.v ? '' : c.dataset.v;
-          schreiben(s);
-          anwenden();
-        });
-      }
-      let tipp;
-      q.addEventListener('input', () => {
-        clearTimeout(tipp);
-        tipp = setTimeout(() => { const s = lesen(); s.q = q.value.trim(); schreiben(s, true); anwenden(); }, 200);
-      });
-      reset.addEventListener('click', () => { history.pushState(null, '', location.pathname); anwenden(); });
-      window.addEventListener('popstate', anwenden);
-      window.addEventListener('ws-koch-change', () => { verlaufsfilterPruefen(); anwenden(); });
-
-      verlaufsfilterPruefen();
-      anwenden();
+      window.addEventListener('ws-plan-change', zeichnen);
+      zeichnen();
     })();
   </script>
 </Base>

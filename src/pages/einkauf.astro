@@ -3,20 +3,25 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
 import { parseZutaten } from '../lib/zutaten';
+import { katLabel, arbeitLabel } from '../lib/darstellung';
 
-// Zutatendaten eingebettet, damit die Liste ohne Netzabfrage funktioniert —
-// diese Seite wird im Supermarkt geöffnet, oft bei schlechtem Empfang.
 const rezepte = await getCollection('rezepte');
 const katalog = Object.fromEntries(
   rezepte.map((r) => [
     r.id,
-    { titel: r.data.titel, basis: r.data.portionen, zutaten: parseZutaten(r.data.zutaten) },
+    {
+      titel: r.data.titel,
+      basis: r.data.portionen,
+      kategorie: katLabel(r.data.kategorie),
+      zeit: arbeitLabel(r.data.zeit_aktiv, r.data.zeit_gesamt) ?? '',
+      zutaten: parseZutaten(r.data.zutaten),
+    },
   ]),
 );
 const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
 ---
 
-<Base titel="Einkauf" beschreibung="Die Einkaufsliste aus deinem Kochplan.">
+<Base titel="Einkauf" beschreibung="Gewählte Gerichte und die Zutaten dafür.">
   <div class="wrap ek-seite">
     <div class="ek-kopf">
       <h1>Einkauf</h1>
@@ -24,28 +29,34 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
     </div>
 
     <div id="ekLeer" class="leer-box" hidden>
-      <p>Die Einkaufsliste ist leer.</p>
-      <p class="muted">Sie entsteht aus deinem Kochplan — Mengen auf deine Portionen gerechnet und zusammengezählt.</p>
-      <a class="btn primary" href={url('/plan')}>Zum Kochplan</a>
+      <p>Noch keine Gerichte gewählt.</p>
+      <p class="muted">Tippe bei einem Rezept auf das <b>+</b> — die Zutaten sammeln sich hier.</p>
+      <a class="btn primary" href={url('/rezepte')}>Zu den Rezepten</a>
     </div>
 
     <div id="ekInhalt" hidden>
-      <!-- Eigene Zeilen: Ein echter Einkauf enthält Milch, Kaffee, Spülmittel.
-           Ohne diese Möglichkeit führt man daneben eine zweite Liste — und dann
-           ist die erzeugte Liste tot. -->
-      <form class="ek-zufuegen" id="ekForm">
-        <label class="sr-only" for="ekNeu">Etwas hinzufügen</label>
-        <input id="ekNeu" type="text" placeholder="Milch, Kaffee, Spülmittel …" autocomplete="off" />
-        <button class="btn" type="submit">Hinzufügen</button>
-      </form>
+      <!-- Oben: was gekocht wird. Darunter: was dafür fehlt. -->
+      <section class="ek-gerichte">
+        <h2 class="ek-abschnitt">Gerichte</h2>
+        <ul id="ekGerichte"></ul>
+      </section>
 
-      <div id="ekGruppen"></div>
+      <section class="ek-liste-block">
+        <h2 class="ek-abschnitt">Zutaten</h2>
+        <form class="ek-zufuegen" id="ekForm">
+          <label class="sr-only" for="ekNeu">Etwas hinzufügen</label>
+          <input id="ekNeu" type="text" placeholder="Milch, Kaffee, Spülmittel …" autocomplete="off" />
+          <button class="btn" type="submit">Hinzufügen</button>
+        </form>
+        <div id="ekGruppen"></div>
+      </section>
 
       <div class="ek-werkzeuge">
         <button class="btn ghost small" id="ekKopieren">Kopieren</button>
         <button class="btn ghost small" id="ekTeilen" hidden>Teilen</button>
         <button class="btn ghost small" id="ekDrucken">Drucken</button>
         <button class="btn ghost small" id="ekHaken">Haken zurücksetzen</button>
+        <button class="btn ghost small danger" id="ekLeeren">Alles leeren</button>
       </div>
     </div>
   </div>
@@ -57,6 +68,7 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
     const katalog = JSON.parse(document.getElementById('katalog').textContent);
     const leerEl = document.getElementById('ekLeer');
     const inhaltEl = document.getElementById('ekInhalt');
+    const gerichteEl = document.getElementById('ekGerichte');
     const gruppenEl = document.getElementById('ekGruppen');
     const fortschrittEl = document.getElementById('ekFortschritt');
     let zeilen = [];
@@ -66,20 +78,41 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
     const speichereHaken = (s) => localStorage.setItem(CHECK_KEY, JSON.stringify([...s]));
     const ladeEigen = () => lade(EIGEN_KEY, []);
     const speichereEigen = (l) => localStorage.setItem(EIGEN_KEY, JSON.stringify(l));
-
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const basisPfad = document.querySelector('link[rel="manifest"]').getAttribute('href').replace(/\/manifest\.webmanifest$/, '');
 
     function render() {
       const plan = window.WSPlan.read().filter((e) => katalog[e.slug]);
       const eigen = ladeEigen();
+      const etwasDa = plan.length > 0 || eigen.length > 0;
+      leerEl.hidden = etwasDa;
+      inhaltEl.hidden = !etwasDa;
+      if (!etwasDa) { fortschrittEl.textContent = ''; return; }
 
+      // --- Gerichte ---
+      gerichteEl.innerHTML = plan.map((e) => {
+        const r = katalog[e.slug];
+        return `<li class="ek-gericht">
+          <div class="eg-text">
+            <a class="eg-titel" href="${basisPfad}/rezept/${esc(e.slug)}">${esc(r.titel)}</a>
+            <span class="eg-meta">${esc(r.kategorie)}${r.zeit ? ' · ' + esc(r.zeit) : ''}</span>
+          </div>
+          <div class="eg-stepper" data-slug="${esc(e.slug)}">
+            <button class="minus" aria-label="weniger Portionen">−</button>
+            <span class="eg-portion">${e.ziel}</span>
+            <span class="eg-lbl">Port.</span>
+            <button class="plus" aria-label="mehr Portionen">+</button>
+          </div>
+          <button class="eg-weg" data-slug="${esc(e.slug)}" aria-label="Entfernen">×</button>
+        </li>`;
+      }).join('') || '<li class="ek-hinweis">Keine Gerichte gewählt — die Liste unten ist selbst eingetragen.</li>';
+
+      // --- Zutaten ---
       const ausPlan = aggregiere(
         plan.map((e) => ({
           slug: e.slug, titel: katalog[e.slug].titel,
           basis: katalog[e.slug].basis, ziel: e.ziel, zutaten: katalog[e.slug].zutaten,
         })),
-      // Vorratsware raus: Salz steckt in 9 von 18 Rezepten, Pfeffer in 8.
-      // Eine Liste, auf der Wasser steht, liest man misstrauisch.
       ).filter((z) => !istVorrat(z.kanonisch));
 
       zeilen = [
@@ -87,16 +120,10 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
         ...eigen.map((t) => ({ key: 'eigen|' + t, kanonisch: t, text: '', herkunft: [], ungenau: false, eigen: true })),
       ];
 
-      leerEl.hidden = zeilen.length > 0;
-      inhaltEl.hidden = zeilen.length === 0;
-      if (!zeilen.length) { fortschrittEl.textContent = ''; return; }
-
       const haken = ladeHaken();
       for (const k of [...haken]) if (!zeilen.some((z) => z.key === k)) haken.delete(k);
       speichereHaken(haken);
 
-      // Nach Warengruppen statt alphabetisch — sonst laeuft man den Markt
-      // dreimal ab: Butter, Haehnchen, Joghurt, Kartoffeln, Knoblauch, Mehl.
       const nachGruppe = new Map();
       for (const z of zeilen) {
         const g = z.eigen ? 'Sonstiges' : gruppeFuer(z.kanonisch);
@@ -108,21 +135,18 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
       for (const g of GRUPPEN) {
         const liste = nachGruppe.get(g);
         if (!liste?.length) continue;
-        // Erledigtes nach unten, damit die Restliste sichtbar schrumpft.
         liste.sort((a, b) => (haken.has(a.key) ? 1 : 0) - (haken.has(b.key) ? 1 : 0)
           || a.kanonisch.localeCompare(b.kanonisch, 'de'));
         const sec = document.createElement('section');
         sec.className = 'ek-gruppe';
-        sec.innerHTML = `<h2>${esc(g)}</h2><ul>${liste.map((z) => {
+        sec.innerHTML = `<h3>${esc(g)}</h3><ul>${liste.map((z) => {
           const ab = haken.has(z.key);
-          const herkunft = z.herkunft.length > 1
-            ? `<span class="ek-herkunft">${z.herkunft.length} Rezepte</span>` : '';
           return `<li class="ek-item${ab ? ' ab' : ''}">
             <label>
               <input type="checkbox" data-key="${esc(z.key)}"${ab ? ' checked' : ''} />
               <span class="ek-name">${esc(z.kanonisch)}</span>
               ${z.text ? `<span class="ek-menge${z.ungenau ? ' ungenau' : ''}">${esc(z.text)}</span>` : ''}
-              ${herkunft}
+              ${z.herkunft.length > 1 ? `<span class="ek-herkunft">${z.herkunft.length}×</span>` : ''}
               ${z.eigen ? `<button class="ek-weg" data-eigen="${esc(z.kanonisch)}" aria-label="Entfernen">×</button>` : ''}
             </label></li>`;
         }).join('')}</ul>`;
@@ -130,10 +154,23 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
       }
 
       const offen = zeilen.filter((z) => !haken.has(z.key)).length;
-      fortschrittEl.textContent = offen === 0
-        ? 'Alles im Wagen ✓'
+      fortschrittEl.textContent = zeilen.length === 0 ? ''
+        : offen === 0 ? 'Alles im Wagen ✓'
         : `${zeilen.length - offen} von ${zeilen.length} erledigt`;
     }
+
+    gerichteEl.addEventListener('click', (ev) => {
+      const step = ev.target.closest('.eg-stepper');
+      if (step) {
+        const e = window.WSPlan.read().find((x) => x.slug === step.dataset.slug);
+        if (!e) return;
+        if (ev.target.classList.contains('plus')) window.WSPlan.setPortion(e.slug, e.ziel + 1);
+        else if (ev.target.classList.contains('minus') && e.ziel > 1) window.WSPlan.setPortion(e.slug, e.ziel - 1);
+        return;
+      }
+      const weg = ev.target.closest('.eg-weg');
+      if (weg) window.WSPlan.remove(weg.dataset.slug);
+    });
 
     gruppenEl.addEventListener('change', (ev) => {
       const cb = ev.target.closest('input[type=checkbox]');
@@ -169,20 +206,21 @@ const katalogJson = JSON.stringify(katalog).replace(/</g, '\\u003c');
       setTimeout(() => { el.textContent = alt; }, 1400);
     }
     document.getElementById('ekKopieren').addEventListener('click', async (ev) => {
-      try {
-        await navigator.clipboard.writeText('Einkaufsliste\n' + alsText(zeilen));
-        blitz(ev.target, 'Kopiert ✓');
-      } catch { blitz(ev.target, 'Ging nicht'); }
+      try { await navigator.clipboard.writeText('Einkaufsliste\n' + alsText(zeilen)); blitz(ev.target, 'Kopiert ✓'); }
+      catch { blitz(ev.target, 'Ging nicht'); }
     });
     const teilen = document.getElementById('ekTeilen');
     if (navigator.share) {
       teilen.hidden = false;
-      teilen.addEventListener('click', () => {
-        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(zeilen) }).catch(() => {});
-      });
+      teilen.addEventListener('click', () =>
+        navigator.share({ title: 'Einkaufsliste', text: 'Einkaufsliste\n' + alsText(zeilen) }).catch(() => {}));
     }
     document.getElementById('ekDrucken').addEventListener('click', () => window.print());
     document.getElementById('ekHaken').addEventListener('click', () => { speichereHaken(new Set()); render(); });
+    document.getElementById('ekLeeren').addEventListener('click', () => {
+      if (!confirm('Gerichte und Liste komplett leeren?')) return;
+      speichereEigen([]); speichereHaken(new Set()); window.WSPlan.clear();
+    });
 
     window.addEventListener('ws-plan-change', render);
     render();
