@@ -1,0 +1,294 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { url } from '../../lib/url';
+import { parseZutaten, formatMenge } from '../../lib/zutaten';
+import { parseSchritte } from '../../lib/schritte';
+
+export async function getStaticPaths() {
+  const rezepte = await getCollection('rezepte');
+  return rezepte.map((r) => ({ params: { slug: r.id }, props: { r } }));
+}
+
+const { r } = Astro.props;
+const d = r.data;
+const schritte = parseSchritte(r.body ?? '');
+const zutaten = parseZutaten(d.zutaten);
+---
+
+<Base titel={`${d.titel} kochen`} beschreibung={`Kochmodus: ${d.titel}`}>
+  <div class="kochen" data-slug={r.id} data-basis={d.portionen}>
+    <!-- Kopfleiste: bleibt stehen, trägt Ausstieg, Fortschritt und Zutaten -->
+    <header class="k-kopf">
+      <a class="k-zurueck" href={url(`/rezept/${r.id}`)} aria-label="Kochmodus verlassen">Fertig</a>
+      <p class="k-fortschritt"><span id="kNr">1</span> / {schritte.length}</p>
+      <button class="k-zutaten-btn" id="kZutatenBtn" aria-expanded="false" aria-controls="kZutaten">
+        Zutaten
+      </button>
+    </header>
+
+    <div class="k-balken" aria-hidden="true"><div class="k-balken-fill" id="kBalken"></div></div>
+
+    <!-- Zutaten als Overlay: beim Kochen springt man ständig hin und her,
+         aber sie sollen den Schritt nicht wegdrücken. -->
+    <section class="k-zutaten" id="kZutaten" hidden>
+      <div class="k-zutaten-kopf">
+        <h2>Zutaten</h2>
+        <div class="k-portionen">
+          <button id="kMinus" aria-label="weniger Portionen">−</button>
+          <span id="kPortionen" class="k-pval">{d.portionen}</span>
+          <span class="k-plbl">Portionen</span>
+          <button id="kPlus" aria-label="mehr Portionen">+</button>
+        </div>
+      </div>
+      <ul class="k-zliste">
+        {zutaten.map((z) => (
+          <li>
+            <span
+              class="k-menge"
+              data-base={z.skalierbar ? String(z.menge) : ''}
+              data-basemax={z.skalierbar && z.mengeMax !== null ? String(z.mengeMax) : ''}
+              data-einheit={z.einheit ?? ''}
+            >{[
+              z.menge !== null ? (z.mengeMax ? `${formatMenge(z.menge)}–${formatMenge(z.mengeMax)}` : formatMenge(z.menge)) : '',
+              z.einheit ?? '',
+            ].filter(Boolean).join(' ')}</span>
+            <span class="k-zname">{z.name}{z.notiz && <span class="k-znotiz">, {z.notiz}</span>}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Schritte: alle im DOM, einer sichtbar. Kein Nachladen, funktioniert
+         auch wenn das Netz zwischendurch weg ist. -->
+    <div class="k-schritte" id="kSchritte">
+      {schritte.map((s) => (
+        <section class="k-schritt" data-nr={s.nr} hidden={s.nr !== 1}>
+          {s.abschnitt && <p class="k-abschnitt">{s.abschnitt}</p>}
+          {s.label && <h1 class="k-label">{s.label}</h1>}
+          <p class="k-text">{s.text}</p>
+          {s.timer.length > 0 && (
+            <div class="k-timer-reihe">
+              {s.timer.map((t) => (
+                <button class="k-timer" data-minuten={t.minuten}>
+                  ⏱ {t.text} stellen
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+      ))}
+
+      <!-- Abschluss: der einzige Moment, in dem die Kochdaten vorliegen und
+           die Motivation da ist, sie einzutragen. Ein Tap, kein Formular. -->
+      <section class="k-schritt k-ende" data-nr={schritte.length + 1} hidden>
+        <h1 class="k-label">Fertig</h1>
+        <p class="k-text">Guten Appetit.</p>
+        <button class="k-gekocht" id="kGekocht">Gekocht ✓</button>
+        <div class="k-urteil" id="kUrteil" hidden>
+          <p class="k-frage">War's gut?</p>
+          <div class="k-urteil-reihe">
+            <button data-urteil="nochmal">Nochmal</button>
+            <button data-urteil="ok">War ok</button>
+            <button data-urteil="nein">Eher nicht</button>
+          </div>
+        </div>
+        <p class="k-quittung" id="kQuittung" hidden></p>
+        <a class="k-fertig-link" href={url(`/rezept/${r.id}`)}>Zurück zum Rezept</a>
+      </section>
+    </div>
+
+    <!-- Steuerung unten: dort, wo der Daumen ist -->
+    <nav class="k-steuerung" aria-label="Schritte">
+      <button id="kVor" class="k-nav k-prev" disabled>Zurück</button>
+      <button id="kNext" class="k-nav k-next">Weiter</button>
+    </nav>
+
+    <!-- Laufende Timer, über allem -->
+    <div class="k-wecker" id="kWecker" hidden aria-live="polite"></div>
+  </div>
+
+  <script is:inline define:vars={{ anzahl: schritte.length }}>
+    (() => {
+      const wurzel = document.querySelector('.kochen');
+      const slug = wurzel.dataset.slug;
+      const basis = Number(wurzel.dataset.basis) || 1;
+      const schritte = [...document.querySelectorAll('.k-schritt')];
+      const nrAnzeige = document.getElementById('kNr');
+      const balken = document.getElementById('kBalken');
+      const btnVor = document.getElementById('kVor');
+      const btnNext = document.getElementById('kNext');
+      let i = 0;
+
+      /* ---- Navigation ---- */
+      function zeige(n) {
+        i = Math.max(0, Math.min(schritte.length - 1, n));
+        schritte.forEach((s, k) => (s.hidden = k !== i));
+        const istEnde = i === schritte.length - 1;
+        nrAnzeige.textContent = istEnde ? '✓' : String(i + 1);
+        balken.style.width = `${((i + 1) / schritte.length) * 100}%`;
+        btnVor.disabled = i === 0;
+        btnNext.hidden = istEnde;
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        // Position merken, damit ein versehentliches Schließen nicht alles kostet.
+        try { sessionStorage.setItem('ws-kochen-' + slug, String(i)); } catch {}
+      }
+      btnNext.addEventListener('click', () => zeige(i + 1));
+      btnVor.addEventListener('click', () => zeige(i - 1));
+
+      // Wischen — beim Kochen ist das die verlässlichste Geste.
+      let x0 = null;
+      wurzel.addEventListener('touchstart', (e) => { x0 = e.changedTouches[0].clientX; }, { passive: true });
+      wurzel.addEventListener('touchend', (e) => {
+        if (x0 === null) return;
+        const dx = e.changedTouches[0].clientX - x0;
+        if (Math.abs(dx) > 60) zeige(dx < 0 ? i + 1 : i - 1);
+        x0 = null;
+      }, { passive: true });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') zeige(i + 1);
+        if (e.key === 'ArrowLeft') zeige(i - 1);
+      });
+
+      // Angefangenen Kochvorgang fortsetzen.
+      try {
+        const gemerkt = Number(sessionStorage.getItem('ws-kochen-' + slug));
+        if (gemerkt > 0 && gemerkt < schritte.length - 1) zeige(gemerkt);
+      } catch {}
+
+      /* ---- Display wachhalten ----
+         Ohne das geht der Bildschirm mitten im Kochen aus und man tippt mit
+         Teighänden darauf herum. */
+      let sperre = null;
+      async function wachHalten() {
+        try {
+          if ('wakeLock' in navigator && !sperre) {
+            sperre = await navigator.wakeLock.request('screen');
+            sperre.addEventListener('release', () => { sperre = null; });
+          }
+        } catch {}
+      }
+      wachHalten();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') wachHalten();
+      });
+
+      /* ---- Zutaten-Overlay ---- */
+      const zBtn = document.getElementById('kZutatenBtn');
+      const zBox = document.getElementById('kZutaten');
+      zBtn.addEventListener('click', () => {
+        const offen = !zBox.hidden;
+        zBox.hidden = offen;
+        zBtn.setAttribute('aria-expanded', String(!offen));
+      });
+
+      /* ---- Portionen ---- */
+      const mengen = [...zBox.querySelectorAll('.k-menge')];
+      const pAnzeige = document.getElementById('kPortionen');
+      let ziel = basis;
+      // Im Plan gemerkte Portionszahl übernehmen.
+      const imPlan = (window.WSPlan?.read() || []).find((e) => e.slug === slug);
+      if (imPlan) ziel = imPlan.ziel;
+
+      function fmt(w) {
+        if (w === null || Number.isNaN(w)) return '';
+        const ganz = Math.floor(w), rest = w - ganz;
+        const br = [[0.25, '¼'], [0.5, '½'], [0.75, '¾'], [1 / 3, '⅓'], [2 / 3, '⅔']];
+        for (const [f, s] of br) if (Math.abs(rest - f) < 0.02) return ganz > 0 ? `${ganz} ${s}` : s;
+        return String(Math.round(w * 100) / 100).replace('.', ',');
+      }
+      function rechne() {
+        const faktor = ziel / basis;
+        for (const el of mengen) {
+          const b = el.dataset.base;
+          if (b === '') continue;
+          let txt = fmt(Number(b) * faktor);
+          if (el.dataset.basemax) txt += '–' + fmt(Number(el.dataset.basemax) * faktor);
+          el.textContent = [txt, el.dataset.einheit].filter(Boolean).join(' ');
+        }
+        pAnzeige.textContent = ziel;
+      }
+      document.getElementById('kPlus').addEventListener('click', () => { ziel++; rechne(); });
+      document.getElementById('kMinus').addEventListener('click', () => { if (ziel > 1) { ziel--; rechne(); } });
+      rechne();
+
+      /* ---- Timer ----
+         Läuft rein im Vordergrund. Eine echte Benachrichtigung bräuchte einen
+         Service Worker und die Erlaubnis des Nutzers; solange das Display
+         ohnehin wachgehalten wird, reicht Ton und sichtbarer Wecker. */
+      const wecker = document.getElementById('kWecker');
+      const laufende = new Map();
+      function tick() {
+        if (!laufende.size) { wecker.hidden = true; return; }
+        wecker.hidden = false;
+        const jetzt = Date.now();
+        const zeilen = [];
+        for (const [id, t] of laufende) {
+          const rest = Math.round((t.ende - jetzt) / 1000);
+          if (rest <= 0) {
+            laufende.delete(id);
+            klingeln(t.text);
+            continue;
+          }
+          const m = Math.floor(rest / 60), s = rest % 60;
+          zeilen.push(`<span class="k-wecker-zeile">${t.text} · ${m}:${String(s).padStart(2, '0')}</span>`);
+        }
+        wecker.innerHTML = zeilen.join('');
+        if (!zeilen.length) wecker.hidden = true;
+      }
+      setInterval(tick, 1000);
+
+      function klingeln(text) {
+        wecker.hidden = false;
+        wecker.innerHTML = `<span class="k-wecker-zeile k-aus">${text} — fertig</span>`;
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          for (let n = 0; n < 3; n++) {
+            const o = ctx.createOscillator(), g = ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value = 880;
+            g.gain.setValueAtTime(0.0001, ctx.currentTime + n * 0.45);
+            g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + n * 0.45 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + n * 0.45 + 0.3);
+            o.start(ctx.currentTime + n * 0.45); o.stop(ctx.currentTime + n * 0.45 + 0.35);
+          }
+        } catch {}
+        if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+        setTimeout(() => { if (!laufende.size) wecker.hidden = true; }, 20000);
+      }
+
+      document.getElementById('kSchritte').addEventListener('click', (e) => {
+        const b = e.target.closest('.k-timer');
+        if (!b) return;
+        const min = Number(b.dataset.minuten);
+        const id = Math.random();
+        laufende.set(id, { ende: Date.now() + min * 60000, text: b.textContent.replace('⏱', '').replace('stellen', '').trim() });
+        b.textContent = '⏱ läuft';
+        b.disabled = true;
+        tick();
+      });
+
+      /* ---- Abschluss ---- */
+      const btnGekocht = document.getElementById('kGekocht');
+      const boxUrteil = document.getElementById('kUrteil');
+      const quittung = document.getElementById('kQuittung');
+      btnGekocht.addEventListener('click', () => {
+        window.WSKoch.log(slug, null);
+        btnGekocht.hidden = true;
+        boxUrteil.hidden = false;
+        quittung.hidden = false;
+        quittung.textContent = 'Eingetragen. Steht ab jetzt im Verlauf.';
+      });
+      boxUrteil.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-urteil]');
+        if (!b) return;
+        window.WSKoch.log(slug, b.dataset.urteil);
+        for (const x of boxUrteil.querySelectorAll('[data-urteil]')) x.setAttribute('aria-pressed', String(x === b));
+        quittung.textContent = 'Notiert. Danke.';
+      });
+
+      zeige(i);
+    })();
+  </script>
+</Base>

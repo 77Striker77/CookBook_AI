@@ -69,9 +69,11 @@ const quelleText: Record<string, string> = {
             <button id="plus" aria-label="mehr">+</button>
           </div>
         </div>
+        <a class="btn kochen-btn" href={url(`/kochen/${r.id}`)}>Jetzt kochen →</a>
         <button class="btn plan-btn" id="planBtn" data-slug={r.id} aria-pressed="false">
           <span class="ic">🛒</span><span class="lbl">In den Kochplan</span>
         </button>
+        <p class="zuletzt" id="zuletzt" hidden></p>
         <ul class="zutaten">
           {anzeige.map((zeile) => zeile.typ === 'grp'
             ? <li class="grp">{zeile.text}</li>
@@ -156,6 +158,18 @@ const quelleText: Record<string, string> = {
       function syncPlan() { if (drin()) window.WSPlan.setPortion(slug, ziel); }
       btn.addEventListener('click', () => { window.WSPlan.toggle(slug, ziel); paint(); });
       window.addEventListener('ws-plan-change', paint);
+
+      // Kochverlauf anzeigen — die Belohnung fürs Eintragen kommt sofort,
+      // nicht erst nach einem Merge.
+      const zuletzt = document.getElementById('zuletzt');
+      function paintVerlauf() {
+        const label = window.WSKoch?.label(slug);
+        const n = window.WSKoch?.anzahl(slug) ?? 0;
+        zuletzt.hidden = !label;
+        if (label) zuletzt.textContent = n > 1 ? `${label} · ${n}× gekocht` : label;
+      }
+      window.addEventListener('ws-koch-change', paintVerlauf);
+      paintVerlauf();
     })();
   </script>
 </Base>

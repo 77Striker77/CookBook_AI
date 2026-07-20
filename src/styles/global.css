@@ -613,3 +613,142 @@ ul.zutaten .grp { border: 0; padding: var(--sp-sm) 0 var(--sp-3xs); font-weight:
 
 footer.site { border-top: var(--bw-hair) solid var(--color-line); padding: var(--sp-md) 0; color: var(--color-ink-muted); font-size: var(--fs-sm); }
 footer.site .wrap { display: flex; gap: var(--sp-xs); flex-wrap: wrap; justify-content: space-between; }
+
+/* ============================================================================
+   7  KOCHMODUS
+   Eigene Regeln, weil hier andere Bedingungen gelten als auf der Leseseite:
+   nasse Finger, Abstand zum Geraet, Unterbrechungen. Grosser Text, Steuerung
+   unten im Daumenbereich, keine Dekoration, nichts das ablenkt.
+   ========================================================================= */
+.kochen {
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  padding-bottom: 96px;  /* Platz fuer die feste Steuerung */
+}
+
+.k-kopf {
+  position: sticky; top: 0; z-index: var(--z-sticky);
+  display: flex; align-items: center; gap: var(--sp-sm);
+  padding: var(--sp-2xs) var(--sp-gutter);
+  background: var(--color-bg);
+  border-bottom: var(--bw-hair) solid var(--color-line);
+}
+.k-zurueck, .k-zutaten-btn {
+  border: 0; background: transparent; color: var(--color-ink);
+  font: var(--fw-semibold) var(--fs-md)/1 var(--ff-ui);
+  text-transform: uppercase; letter-spacing: var(--tr-caps);
+  text-decoration: none; cursor: pointer;
+  min-height: 48px; display: inline-flex; align-items: center; padding: 0 2px;
+}
+.k-zutaten-btn { margin-left: auto; border-bottom: var(--bw) solid var(--color-accent); }
+.k-fortschritt {
+  margin: 0 auto; font-variant-numeric: tabular-nums lining-nums;
+  font-size: var(--fs-sm); color: var(--color-ink-muted);
+}
+
+.k-balken { height: var(--bw-rule); background: var(--color-line); }
+.k-balken-fill { height: 100%; background: var(--color-accent); width: 0; transition: width var(--dur-fast) var(--ease); }
+
+/* ---- Zutaten-Overlay ---- */
+.k-zutaten {
+  position: sticky; top: 57px; z-index: calc(var(--z-sticky) - 1);
+  background: var(--color-surface);
+  border-bottom: var(--bw-rule) solid var(--color-ink);
+  padding: var(--sp-sm) var(--sp-gutter) var(--sp-md);
+  max-height: 60dvh; overflow-y: auto;
+}
+.k-zutaten-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-sm); margin-bottom: var(--sp-xs); }
+.k-zutaten-kopf h2 { margin: 0; font-size: var(--fs-h3); }
+.k-portionen { display: flex; align-items: center; gap: var(--sp-2xs); margin-left: auto; }
+.k-portionen button {
+  width: 48px; height: 48px; border: var(--bw-hair) solid var(--color-line-strong);
+  background: var(--color-surface-raised); color: var(--color-ink);
+  font-size: 1.3rem; line-height: 1; cursor: pointer;
+}
+.k-pval { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; font-size: var(--fs-xl); }
+.k-plbl { font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.k-zliste { list-style: none; margin: 0; padding: 0; }
+.k-zliste li { display: flex; gap: var(--sp-sm); padding: var(--sp-2xs) 0; border-bottom: var(--bw-hair) dashed var(--color-line); font-size: var(--fs-lg); }
+.k-zliste li:last-child { border-bottom: 0; }
+.k-menge { font-variant-numeric: tabular-nums lining-nums; font-weight: var(--fw-bold); white-space: nowrap; min-width: 5.5ch; }
+.k-znotiz { color: var(--color-ink-muted); }
+
+/* ---- Schritt ---- */
+.k-schritte { flex: 1; padding: var(--sp-lg) var(--sp-gutter) 0; max-width: var(--w-measure); margin-inline: auto; width: 100%; }
+.k-abschnitt { margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); font-weight: var(--fw-semibold); }
+.k-label { margin: 0 0 var(--sp-sm); font-size: var(--fs-h1); line-height: var(--lh-tight); letter-spacing: var(--tr-display); }
+/* Der Schritttext ist das Einzige, was beim Kochen zaehlt — entsprechend gross. */
+.k-text { margin: 0; font-family: var(--ff-body); font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem); line-height: 1.5; }
+
+.k-timer-reihe { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin-top: var(--sp-lg); }
+.k-timer {
+  border: 0; border-bottom: var(--bw-rule) solid var(--color-accent);
+  background: transparent; color: var(--color-ink);
+  font: var(--fw-semibold) var(--fs-md)/1 var(--ff-ui);
+  text-transform: uppercase; letter-spacing: .06em;
+  min-height: 48px; padding: 0 var(--sp-2xs); cursor: pointer;
+}
+.k-timer:disabled { color: var(--color-ink-muted); border-bottom-color: var(--color-line-strong); }
+
+/* ---- Steuerung ---- */
+.k-steuerung {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: var(--z-sticky);
+  display: flex; gap: var(--bw-hair);
+  background: var(--color-line);
+  border-top: var(--bw-rule) solid var(--color-ink);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.k-nav {
+  flex: 1; border: 0; min-height: 72px; cursor: pointer;
+  font: var(--fw-bold) var(--fs-md)/1 var(--ff-ui);
+  text-transform: uppercase; letter-spacing: var(--tr-caps);
+  background: var(--color-bg); color: var(--color-ink);
+}
+.k-next { flex: 2; background: var(--color-ink); color: var(--color-bg); }
+.k-nav:disabled { color: var(--color-ink-muted); }
+.k-nav:active { background: var(--color-accent); color: var(--c-white); }
+
+/* ---- Abschluss ---- */
+.k-ende { text-align: center; padding-top: var(--sp-xl); }
+.k-gekocht {
+  margin: var(--sp-xl) auto 0; display: block;
+  border: 0; background: var(--color-ink); color: var(--color-bg);
+  font: var(--fw-bold) var(--fs-xl)/1 var(--ff-ui);
+  text-transform: uppercase; letter-spacing: var(--tr-caps);
+  padding: var(--sp-md) var(--sp-xl); min-height: 64px; cursor: pointer;
+}
+.k-gekocht:active { background: var(--color-accent); }
+.k-frage { margin: var(--sp-lg) 0 var(--sp-2xs); font-size: var(--fs-md); color: var(--color-ink-muted); text-transform: uppercase; letter-spacing: var(--tr-caps); }
+.k-urteil-reihe { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); justify-content: center; }
+.k-urteil-reihe button {
+  border: var(--bw-hair) solid var(--color-line-strong); background: transparent;
+  color: var(--color-ink); font: var(--fw-semibold) var(--fs-md)/1 var(--ff-ui);
+  min-height: 52px; padding: 0 var(--sp-md); cursor: pointer;
+}
+.k-urteil-reihe button[aria-pressed="true"] { background: var(--color-ink); color: var(--color-bg); border-color: var(--color-ink); }
+.k-quittung { margin: var(--sp-sm) 0 0; color: var(--color-accent-text); font-size: var(--fs-md); }
+.k-fertig-link { display: inline-block; margin-top: var(--sp-xl); color: var(--color-ink-muted); font-size: var(--fs-md); }
+
+/* ---- Wecker ---- */
+.k-wecker {
+  position: fixed; left: 0; right: 0; bottom: calc(72px + env(safe-area-inset-bottom));
+  z-index: var(--z-overlay);
+  display: flex; flex-direction: column;
+  background: var(--color-accent); color: var(--c-white);
+  font: var(--fw-bold) var(--fs-md)/1.4 var(--ff-ui);
+  font-variant-numeric: tabular-nums lining-nums;
+  padding: var(--sp-2xs) var(--sp-gutter);
+}
+.k-wecker-zeile.k-aus { text-transform: uppercase; letter-spacing: var(--tr-caps); }
+
+/* Im Kochmodus stoert die Seitenkopfzeile — sie kostet Platz und fuehrt weg. */
+.kochen ~ *, body:has(.kochen) .site-header, body:has(.kochen) footer.site { display: none; }
+
+/* Einstieg in den Kochmodus — der wichtigste Knopf der Rezeptseite. */
+.kochen-btn {
+  width: 100%; justify-content: center; margin-bottom: var(--sp-2xs);
+  background: var(--color-ink); color: var(--color-bg);
+  border-bottom-color: var(--color-ink);
+}
+.kochen-btn:hover { background: var(--color-accent); border-bottom-color: var(--color-accent); color: var(--c-white); }
+.zuletzt { margin: var(--sp-2xs) 0 var(--sp-sm); font-size: var(--fs-sm); color: var(--color-accent-text); text-transform: uppercase; letter-spacing: var(--tr-caps); }
