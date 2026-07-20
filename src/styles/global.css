@@ -143,7 +143,11 @@
   --fs-h3:      clamp(1.25rem,  1.08rem + 0.68vw, 1.625rem);
   --fs-h2:      clamp(1.625rem, 1.23rem + 1.59vw, 2.5rem);
   --fs-h1:      clamp(2.125rem, 1.28rem + 3.41vw, 4rem);
-  --fs-display: clamp(2.75rem,  1.04rem + 6.82vw, 6.5rem);
+  /* Die Display-Stufe ist bewusst rein viewport-bezogen: Sie soll die Zeile
+     ausfuellen, nicht eine Groesse treffen. ~18.5vw entspricht acht
+     Grossbuchstaben ueber die volle Breite. Bei 17px Fliesstext sind das
+     4-9x Koerpergroesse - Stil #78 verlangt mindestens 4-5x. */
+  --fs-display: clamp(2.75rem, 18.5vw, 15rem);
 
   --lh-display: 0.95;
   --lh-tight:   1.08;
@@ -252,6 +256,17 @@ body {
   line-height: var(--lh-normal);
 }
 
+/* Papierkorn — 3 % Deckkraft, gerade so sichtbar. Nimmt der Flaeche das
+   Digitale, ohne dass man es bewusst wahrnimmt. Inline-SVG, kein Bild-Request. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: var(--z-overlay);
+  pointer-events: none; opacity: .035; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; opacity: .045; } }
+:root[data-theme="dark"] body::before { mix-blend-mode: screen; opacity: .045; }
+:root[data-theme="light"] body::before { mix-blend-mode: multiply; opacity: .035; }
+
 h1, h2, h3, h4 {
   font-family: var(--ff-display);
   line-height: var(--lh-tight);
@@ -323,45 +338,93 @@ img { max-width: 100%; display: block; }
 .nav a.nav-plan .badge { background: var(--color-accent); color: var(--c-white); font-size: var(--fs-2xs); font-weight: var(--fw-bold); min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
 .theme-toggle { border: var(--bw-hair) solid var(--color-line-strong); background: var(--color-surface-raised); color: var(--color-ink); border-radius: var(--r-xs); width: 44px; height: 44px; cursor: pointer; font-size: 1rem; }
 
-/* ---- Startseite ---- */
-.hero-band { border-bottom: var(--bw-hair) solid var(--color-line); }
-.hero { padding: var(--sp-3xl) 0 var(--sp-xl); }
-.eyebrow { display: inline-flex; align-items: center; gap: 9px; text-transform: uppercase; letter-spacing: var(--tr-caps); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-accent-text); margin: 0 0 .55rem; }
-.eyebrow::before { content: ""; width: 24px; height: var(--bw); background: var(--color-accent); }
-.hero h1 { font-size: var(--fs-h1); margin: 0 0 .5rem; font-weight: var(--fw-semibold); letter-spacing: var(--tr-display); }
+/* ---- Startseite: Hero ----
+   Die Titelzeile spannt die volle Breite und bricht bewusst bis an den Rand.
+   Das ist der Kern des Editorial-Looks — ein Titel, der sich benimmt, ist
+   keiner. Groesse ueber vw statt fester Stufen, damit die Zeile bei jeder
+   Fensterbreite ausfuellt. */
+.hero-band { border-bottom: var(--bw-heavy) solid var(--color-ink); }
+.hero { padding: var(--sp-xl) 0 var(--sp-lg); }
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; text-transform: uppercase; letter-spacing: var(--tr-caps); font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-accent-text); margin: 0 0 var(--sp-2xs); }
+.eyebrow::before { content: ""; width: 28px; height: var(--bw); background: var(--color-accent); }
+
+.hero h1 {
+  font-family: var(--ff-display);
+  font-size: var(--fs-display);
+  line-height: var(--lh-display);
+  letter-spacing: -0.045em;
+  font-weight: var(--fw-semibold);
+  margin: 0;
+  text-transform: uppercase;
+  text-wrap: nowrap;
+}
+.hero h1 span { display: block; }
 .hero h1 .accent { color: var(--color-accent-text); }
-.hero-sub { color: var(--color-ink-muted); margin: 0; max-width: 52ch; font-size: 1.06rem; }
-.hero-stats { display: flex; align-items: center; gap: var(--sp-xs); margin-top: var(--sp-md); color: var(--color-ink-muted); font-size: var(--fs-md); }
-.hero-stats b { color: var(--color-ink); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
-.hero-stats .dot { color: var(--color-line); }
 
-.controls { display: flex; flex-wrap: wrap; gap: var(--sp-xs); align-items: center; margin: var(--sp-lg) 0 var(--sp-2xs); }
-.searchfield { flex: 1 1 260px; display: flex; align-items: center; gap: var(--sp-2xs); background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line-strong); border-radius: var(--r-xs); padding: 9px 14px; }
+.hero-foot {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: var(--sp-xs) var(--sp-md);
+  margin-top: var(--sp-md);
+  padding-top: var(--sp-xs);
+  border-top: var(--bw-hair) solid var(--color-line);
+}
+.hero-sub { color: var(--color-ink-muted); margin: 0; max-width: 46ch; font-size: var(--fs-md); flex: 1 1 22ch; }
+.hero-stats { display: flex; align-items: baseline; gap: var(--sp-2xs); color: var(--color-ink-muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); white-space: nowrap; }
+.hero-stats b { color: var(--color-ink); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; }
+.hero-stats .dot { color: var(--color-line-strong); }
+
+.controls { display: flex; flex-wrap: wrap; gap: var(--sp-xs); align-items: stretch; margin: var(--sp-section) 0 var(--sp-sm); }
+/* Kein Kasten: nur eine Grundlinie. Feldrahmen sind Formular-Sprache, hier
+   soll die Suche wie eine Zeile im Satz wirken. */
+.searchfield { flex: 1 1 260px; display: flex; align-items: center; gap: var(--sp-2xs); border: 0; border-bottom: var(--bw) solid var(--color-line-strong); padding: 9px 2px; }
+.searchfield:focus-within { border-bottom-color: var(--color-accent); }
 .searchfield input { border: 0; background: transparent; color: var(--color-ink); font-size: var(--fs-md); width: 100%; outline: none; }
-.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2xs); margin: var(--sp-sm) 0 var(--sp-3xs); }
-.chip { border: var(--bw-hair) solid var(--color-line-strong); background: transparent; color: var(--color-ink-muted); border-radius: var(--r-xs); padding: 7px 14px; font-size: var(--fs-sm); font-weight: var(--fw-medium); cursor: pointer; text-transform: uppercase; letter-spacing: .06em; transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
-.chip[aria-pressed="true"] { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-bg); font-weight: var(--fw-semibold); }
-.btn { border: var(--bw-hair) solid var(--color-line-strong); background: transparent; color: var(--color-ink); border-radius: var(--r-xs); padding: 11px 18px; font-size: var(--fs-md); font-weight: var(--fw-semibold); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 7px; min-height: 44px; }
-.btn.primary { background: var(--color-accent-text); border-color: var(--color-accent-text); color: var(--color-accent-ink); }
 
-.count { color: var(--color-ink-muted); font-size: var(--fs-sm); margin: var(--sp-md) 0 var(--sp-xs); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-sm); margin: var(--sp-sm) 0 var(--sp-3xs); }
+/* Chips als Wortmarken statt Pillen. Aktiv = Inversion, nicht Faerbung. */
+.chip {
+  border: 0; border-bottom: var(--bw) solid transparent; background: transparent;
+  color: var(--color-ink-muted); border-radius: 0; padding: 6px 2px;
+  font-size: var(--fs-xs); font-weight: var(--fw-semibold); cursor: pointer;
+  text-transform: uppercase; letter-spacing: var(--tr-caps);
+}
+.chip:hover { color: var(--color-ink); border-bottom-color: var(--color-line-strong); }
+.chip[aria-pressed="true"] { color: var(--color-ink); border-bottom-color: var(--color-accent); }
 
-/* Editorial-Raster: Rhythmus von fuenf Karten — eine breite, dann vier
-   schmale. Die Position kommt aus data-pos, das beim Filtern neu vergeben
-   wird; :nth-child wuerde die versteckten Karten mitzaehlen und den Rhythmus
-   zerreissen. Bewusst KEINE Kartenkaesten: Bild, Haarlinie, Text. */
+/* Unterstrichene CTA statt Kasten — Stil #78, "underline CTA pattern". */
+.btn {
+  border: 0; border-bottom: var(--bw-rule) solid var(--color-ink);
+  background: transparent; color: var(--color-ink); border-radius: 0;
+  padding: 10px 2px; font-size: var(--fs-md); font-weight: var(--fw-semibold);
+  cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+  gap: 7px; min-height: 44px; text-transform: uppercase; letter-spacing: .08em;
+}
+.btn:hover { border-bottom-color: var(--color-accent); color: var(--color-accent-text); }
+.btn:active { background: var(--color-ink); color: var(--color-bg); }
+.btn.primary { border-bottom-color: var(--color-accent); color: var(--color-accent-text); }
+
+.count { color: var(--color-ink-muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); margin: var(--sp-lg) 0 var(--sp-sm); padding-bottom: var(--sp-2xs); border-bottom: var(--bw-rule) solid var(--color-ink); }
+
+/* Editorial-Raster: Rhythmus von sechs Karten in drei Groessen —
+   volle Breite, dann zwei Haelften, dann drei Drittel. Drei Massstaebe statt
+   zwei, das ist der Unterschied zwischen Raster und Seitenlayout.
+   Die Position kommt aus data-pos, das beim Filtern neu vergeben wird;
+   :nth-child wuerde die versteckten Karten mitzaehlen und den Rhythmus
+   zerreissen. Bewusst KEINE Kartenkaesten: Bild, Linie, Text. */
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: var(--sp-xl) var(--sp-md);
+  gap: var(--sp-2xl) var(--sp-md);
   padding-bottom: var(--sp-3xl);
 }
 .rcard { position: relative; grid-column: span 2; display: flex; flex-direction: column; }
-.rcard[data-pos="0"] { grid-column: span 4; }
+.rcard[data-pos="0"] { grid-column: span 6; }
+.rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 3; }
 
 .rcard .thumb { position: relative; overflow: hidden; aspect-ratio: 4/5; background: var(--color-surface); }
-.rcard[data-pos="0"] .thumb { aspect-ratio: 16/10; }
-.rcard .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity var(--dur-fast) var(--ease); }
+.rcard[data-pos="0"] .thumb { aspect-ratio: 21/9; }
+.rcard[data-pos="1"] .thumb, .rcard[data-pos="2"] .thumb { aspect-ratio: 3/2; }
+.rcard .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 .rcard .body {
   display: grid; grid-template-columns: auto 1fr; gap: 2px var(--sp-2xs);
@@ -378,12 +441,16 @@ img { max-width: 100%; display: block; }
   font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight);
   color: var(--color-ink); text-decoration: none;
 }
-.rcard[data-pos="0"] .title { font-size: var(--fs-h2); letter-spacing: var(--tr-display); }
+.rcard[data-pos="1"] .title, .rcard[data-pos="2"] .title { font-size: var(--fs-h3); }
+.rcard[data-pos="0"] .title { font-size: var(--fs-h1); letter-spacing: var(--tr-display); line-height: var(--lh-tight); max-width: 18ch; }
 /* Ganze Karte klickbar, ohne den Button zu verschachteln (waere ungueltiges
    HTML und per Tastatur kaputt). */
 .rcard .title::after { content: ""; position: absolute; inset: 0; }
-.rcard:hover .title { color: var(--color-accent-text); }
-.rcard:hover .thumb img { opacity: .88; }
+/* Sofortige Inversion statt weichem Uebergang — reagiert auch auf Tap, wo es
+   keinen Hover gibt. Stil #70: "instant inversion active state". */
+.rcard:hover .body, .rcard:focus-within .body { border-top-color: var(--color-accent); }
+.rcard:hover .title, .rcard:focus-within .title { color: var(--color-accent-text); }
+.rcard:active .title { background: var(--color-ink); color: var(--color-bg); }
 .rcard .meta { grid-column: 1 / -1; color: var(--color-ink-muted); font-size: var(--fs-sm); display: flex; gap: var(--sp-xs); flex-wrap: wrap; font-variant-numeric: tabular-nums; margin-top: 2px; }
 
 .add-plan {
@@ -399,14 +466,24 @@ img { max-width: 100%; display: block; }
 .empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
 
 @media (max-width: 1040px) {
-  .grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg) var(--sp-md); }
+  .grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-xl) var(--sp-md); }
+  .rcard { grid-column: span 2; }
   .rcard[data-pos="0"] { grid-column: span 4; }
-  .rcard[data-pos="0"] .title { font-size: var(--fs-h3); }
+  .rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 2; }
+  .rcard[data-pos="1"] .thumb, .rcard[data-pos="2"] .thumb { aspect-ratio: 4/5; }
+  .rcard[data-pos="1"] .title, .rcard[data-pos="2"] .title { font-size: var(--fs-xl); }
+  .rcard[data-pos="0"] .title { font-size: var(--fs-h2); }
 }
 @media (max-width: 560px) {
-  .grid { grid-template-columns: 1fr; gap: var(--sp-lg); }
-  .rcard, .rcard[data-pos="0"] { grid-column: span 1; }
-  .rcard .thumb, .rcard[data-pos="0"] .thumb { aspect-ratio: 16/10; }
+  .grid { grid-template-columns: 1fr; gap: var(--sp-xl); }
+  .rcard, .rcard[data-pos="0"],
+  .rcard[data-pos="1"], .rcard[data-pos="2"] { grid-column: span 1; }
+  .rcard .thumb { aspect-ratio: 4/3; }
+  .rcard[data-pos="0"] .thumb { aspect-ratio: 3/2; }
+  /* Das Lead-Bild bricht auf dem Handy ueber die Seitenraender —
+     "text bleeds to/over screen edges", Stil #78. */
+  .rcard[data-pos="0"] .thumb { width: 100vw; margin-left: calc(50% - 50vw); }
+  .rcard[data-pos="0"] .title { font-size: var(--fs-h2); }
 }
 
 /* ---- Rezeptseite ---- */
@@ -457,7 +534,7 @@ ul.zutaten .grp { border: 0; padding: var(--sp-sm) 0 var(--sp-3xs); font-weight:
 .plan-wrap { padding: var(--sp-lg) 0 var(--sp-3xl); }
 .plan-wrap h1 { font-size: var(--fs-h2); margin: 0 0 .4rem; font-weight: var(--fw-semibold); }
 .plan-intro { color: var(--color-ink-muted); max-width: 60ch; margin: 0 0 var(--sp-md); }
-.plan-empty { text-align: center; background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line); padding: var(--sp-2xl) var(--sp-md); }
+.plan-empty { text-align: center; max-width: var(--w-narrow); margin-inline: auto; border-top: var(--bw-rule) solid var(--color-ink); border-bottom: var(--bw-hair) solid var(--color-line); padding: var(--sp-2xl) var(--sp-md); }
 .plan-empty p { margin: 0 0 var(--sp-2xs); }
 .plan-empty .muted { color: var(--color-ink-muted); font-size: var(--fs-md); }
 .plan-empty .btn { margin-top: var(--sp-xs); }

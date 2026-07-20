@@ -28,12 +28,14 @@ const rezepte = alle.map((r) => ({
   <section class="hero-band">
     <div class="wrap hero">
       <p class="eyebrow">Gemeinsam gesammelt</p>
-      <h1>Well <span class="accent">Seasoned</span></h1>
-      <p class="hero-sub">Erprobte Lieblingsrezepte, über die Zeit zusammengekocht. Stöbern, filtern oder einfach überraschen lassen.</p>
-      <div class="hero-stats">
-        <span><b>{alle.length}</b> Rezepte</span>
-        <span class="dot" aria-hidden="true">·</span>
-        <span><b>{kategorien.length}</b> Kategorien</span>
+      <h1><span>Well</span><span class="accent">Seasoned</span></h1>
+      <div class="hero-foot">
+        <p class="hero-sub">Erprobte Lieblingsrezepte, über die Zeit zusammengekocht. Stöbern, filtern oder einfach überraschen lassen.</p>
+        <p class="hero-stats">
+          <span><b>{alle.length}</b> Rezepte</span>
+          <span class="dot" aria-hidden="true">·</span>
+          <span><b>{kategorien.length}</b> Kategorien</span>
+        </p>
       </div>
     </div>
   </section>
@@ -62,7 +64,7 @@ const rezepte = alle.map((r) => ({
       {rezepte.map((r, i) => (
         <article
           class="rcard"
-          data-pos={i % 5}
+          data-pos={i % 6}
           data-titel={r.titel.toLowerCase()}
           data-kat={r.kategorie}
           data-tags={r.tags.join(' ')}
@@ -103,8 +105,8 @@ const rezepte = alle.map((r) => ({
     const empty = document.getElementById('empty');
     const state = { text: '', kat: '', tag: '', time: 0 };
 
-    // Das Editorial-Raster hat einen Rhythmus von fünf Karten: eine breite,
-    // dann vier schmale. Die Position wird nach jedem Filtern neu vergeben —
+    // Das Editorial-Raster hat einen Rhythmus von sechs Karten in drei Größen:
+    // volle Breite, zwei Hälften, drei Drittel. Position nach jedem Filtern neu —
     // sonst zählt CSS die versteckten Karten mit und der Rhythmus zerfällt.
     function apply() {
       let n = 0;
@@ -116,7 +118,7 @@ const rezepte = alle.map((r) => ({
         const show = okText && okKat && okTag && okTime;
         c.hidden = !show;
         if (show) {
-          c.dataset.pos = n % 5;
+          c.dataset.pos = n % 6;
           c.querySelector('.nr').textContent = String(n + 1).padStart(2, '0');
           n++;
         }
