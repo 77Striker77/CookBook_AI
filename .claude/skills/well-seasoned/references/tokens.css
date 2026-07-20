@@ -1,0 +1,309 @@
+/* ============================================================================
+   WELL SEASONED — Design-Tokens (Referenzfassung)
+   Editorial / Kochbuch-Magazin
+
+   Zwei Schichten: PRIMITIVE (Rohwerte) -> SEMANTIC (Bedeutung).
+   Komponenten greifen ausschliesslich auf SEMANTIC zu.
+   Component-Tokens werden lokal im Regelblock der Komponente eingefuehrt,
+   niemals hier in :root.
+   ========================================================================= */
+
+
+/* ============================================================================
+   1  PRIMITIVE — Rohwerte ohne Bedeutung. Nie direkt in Komponenten benutzen.
+   ========================================================================= */
+:root {
+  /* Stone-Skala — warme Neutrale. Traegt Papier und Tinte. */
+  --c-stone-50:  #FAFAF9;
+  --c-stone-100: #F5F5F4;
+  --c-stone-200: #E7E5E4;
+  --c-stone-300: #D6D3D1;
+  --c-stone-400: #A8A29E;
+  --c-stone-500: #78716C;
+  --c-stone-600: #57534E;
+  --c-stone-700: #44403C;
+  --c-stone-800: #292524;
+  --c-stone-900: #1C1917;
+  --c-stone-950: #0C0A09;
+
+  --c-white:     #FFFFFF;
+  --c-paper-dim: #E9EAE2;  /* Text im Dark Mode — leicht warm, nicht reinweiss */
+  --c-raised-dk: #363130;  /* gehobene Flaeche im Dark Mode */
+
+  /* Vermillion — der einzige Akzent. Zweistufig, siehe Kontrastnotiz unten. */
+  --c-verm-500:  #FF3D00;  /* Flaechen, Rahmen, Marker. 3.40:1 auf stone-50 */
+  --c-verm-700:  #C2410C;  /* Text auf hellem Grund.    4.96:1 auf stone-50 */
+  --c-verm-100:  #FFE9E2;  /* sehr blasse Akzentflaeche */
+  --c-verm-950:  #3A1408;  /* Akzentflaeche im Dark Mode */
+}
+
+/* KONTRAST — gemessen, nicht geschaetzt. Schwellen: Text 4.5:1, Non-Text 3:1.
+   --------------------------------------------------------------------------
+   #0C0A09 auf #FAFAF9 ......... 18.92:1  PASS Text
+   #57534E auf #FAFAF9 .......... 7.30:1  PASS Text
+   #78716C auf #FAFAF9 .......... 4.59:1  PASS Text + Non-Text
+   #D6D3D1 auf #FAFAF9 .......... 1.43:1  NUR dekorativ, nie als Bedienrahmen
+   #FF3D00 auf #FAFAF9 .......... 3.40:1  PASS Non-Text / FAIL Text
+   #C2410C auf #FAFAF9 .......... 4.96:1  PASS Text
+   #E9EAE2 auf #1C1917 ......... 14.43:1  PASS Text (dark)
+   #A8A29E auf #1C1917 .......... 6.93:1  PASS Text (dark)
+   #FF3D00 auf #1C1917 .......... 4.93:1  PASS Text (dark) — hier reicht er
+   -------------------------------------------------------------------------- */
+
+
+/* ============================================================================
+   2  SEMANTIC — Bedeutung. Jeder Token GENAU EINMAL via light-dark().
+   Voraussetzung: color-scheme unten. Der Toggle kippt nur color-scheme,
+   niemals einzelne Farbwerte.
+   ========================================================================= */
+:root {
+  color-scheme: light dark;
+
+  /* Flaechen */
+  --color-bg:             light-dark(var(--c-stone-50),  var(--c-stone-900));
+  --color-surface:        light-dark(var(--c-stone-100), var(--c-stone-800));
+  --color-surface-raised: light-dark(var(--c-white),     var(--c-raised-dk));
+
+  /* Text */
+  --color-ink:        light-dark(var(--c-stone-950), var(--c-paper-dim));
+  --color-ink-muted:  light-dark(var(--c-stone-600), var(--c-stone-400));
+
+  /* Linien — zwei Rollen, nicht vermischen!
+     line        = dekorative Trennung (Karten, Listen). WCAG-befreit.
+     line-strong = begrenzt ein BEDIENELEMENT (Input, Chip, Button). Braucht 3:1. */
+  --color-line:        light-dark(var(--c-stone-300), var(--c-stone-700));
+  --color-line-strong: light-dark(var(--c-stone-500), var(--c-stone-400));
+
+  /* Akzent — Vermillion. Nur fuer Interaktion und Aktivzustand, nie Dekor. */
+  --color-accent:      light-dark(var(--c-verm-500), var(--c-verm-500));
+  --color-accent-ink:  light-dark(var(--c-white),    var(--c-stone-950));
+  --color-accent-soft: light-dark(var(--c-verm-100), var(--c-verm-950));
+  --color-accent-text: light-dark(var(--c-verm-700), var(--c-verm-500));
+
+  --color-danger: light-dark(#B91C1C, #F87171);
+
+  /* Schattenfarbe getrennt: light-dark() liefert nur <color>, keine Shorthands */
+  --shadow-rgb: light-dark(28 25 23, 0 0 0);
+}
+
+/* Manueller Toggle — kippt ausschliesslich das Schema. Keine Wertwiederholung. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark;  }
+
+/* Fallback fuer Browser ohne light-dark() (vor Mitte 2024). Bewusst grob:
+   nur die vier Token, ohne die die Seite unlesbar waere. */
+@supports not (color: light-dark(#000, #fff)) {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-bg:        var(--c-stone-900);
+      --color-surface:   var(--c-stone-800);
+      --color-ink:       var(--c-paper-dim);
+      --color-ink-muted: var(--c-stone-400);
+      --color-line:      var(--c-stone-700);
+    }
+  }
+}
+
+
+/* ============================================================================
+   3  TYPOGRAFIE
+   Dual-Ratio: Text 1.125 (feine Abstufung fuers UI),
+               Display ~1.618 (der Sprung, der Editorial ausmacht).
+   Basis 17px. Text FEST, Display FLUID.
+   Fluid im Fliesstext ist ein Anti-Pattern (bricht Browser-Zoom) — deshalb
+   haben nur Display-Stufen clamp().
+   ========================================================================= */
+:root {
+  /* Familien. latin-ext geprueft -> ae oe ue ss vorhanden. */
+  --ff-display: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
+  --ff-body:    "Source Serif 4", Georgia, "Times New Roman", serif;
+  --ff-ui:      system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* Text / UI — feste Stufen */
+  --fs-2xs:  0.6875rem;  /* 11px  Kategorie-Badge, Herkunft-Pill */
+  --fs-xs:   0.75rem;    /* 12px  Eyebrow, Caption */
+  --fs-sm:   0.8125rem;  /* 13px  Meta, Tags, Breadcrumb */
+  --fs-md:   0.9375rem;  /* 15px  Nav, Chip, Button */
+  --fs-base: 1.0625rem;  /* 17px  UI-Fliesstext */
+  --fs-lg:   1.1875rem;  /* 19px  Lesetext, Zubereitung */
+
+  /* Display — fluid, interpoliert zwischen 400px und 1280px Viewport */
+  --fs-xl:      1.375rem;                                     /* 22px Kartentitel */
+  --fs-h3:      clamp(1.25rem,  1.08rem + 0.68vw, 1.625rem);  /* 20 -> 26 */
+  --fs-h2:      clamp(1.625rem, 1.23rem + 1.59vw, 2.5rem);    /* 26 -> 40 */
+  --fs-h1:      clamp(2.125rem, 1.28rem + 3.41vw, 4rem);      /* 34 -> 64 */
+  --fs-display: clamp(2.75rem,  1.04rem + 6.82vw, 6.5rem);    /* 44 -> 104 */
+
+  /* Zeilenhoehe */
+  --lh-display: 0.95;  /* ab 64px: unter 1 ist bei Serifen korrekt */
+  --lh-tight:   1.08;
+  --lh-snug:    1.25;
+  --lh-normal:  1.45;
+  --lh-read:    1.65;
+
+  /* Gewicht */
+  --fw-normal:   400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Laufweite — je groesser, desto enger */
+  --tr-display: -0.035em;
+  --tr-tight:   -0.02em;
+  --tr-normal:  0;
+  --tr-caps:     0.14em;
+}
+
+
+/* ============================================================================
+   4  ABSTAENDE — 4px-Raster, oben geometrisch verduennt. Genau neun Stufen.
+   Bewusst keine 21-stufige Leiter: eine Skala hilft erst, wenn sie
+   Entscheidungen wegnimmt.
+   ========================================================================= */
+:root {
+  --sp-3xs: 0.25rem;  /*   4px */
+  --sp-2xs: 0.5rem;   /*   8px */
+  --sp-xs:  0.75rem;  /*  12px */
+  --sp-sm:  1rem;     /*  16px */
+  --sp-md:  1.5rem;   /*  24px */
+  --sp-lg:  2rem;     /*  32px */
+  --sp-xl:  3rem;     /*  48px */
+  --sp-2xl: 4rem;     /*  64px */
+  --sp-3xl: 6rem;     /*  96px */
+
+  --sp-gutter:  clamp(1rem, 4vw, 2rem);  /* 16 -> 32px Seitenrand */
+  --sp-section: clamp(3rem, 6vw, 6rem);  /* 48 -> 96px Blockabstand */
+}
+
+
+/* ============================================================================
+   5  RAHMEN, RADIEN, ELEVATION
+   Editorial strukturiert ueber Linien, nicht ueber Schatten.
+   ========================================================================= */
+:root {
+  /* Strichstaerken — ersetzen die Schattenskala als Strukturmittel */
+  --bw-hair:  1px;  /* Standardtrennung */
+  --bw:       2px;  /* betonte Trennung, Aktivzustand */
+  --bw-rule:  3px;  /* Sektionslinie ueber Ueberschriften */
+  --bw-heavy: 6px;  /* Hero-Unterstreichung, max. 1x pro Seite */
+
+  /* Radien — Default ist NULL. Das ist der sichtbarste Editorial-Hebel. */
+  --r-none: 0;
+  --r-xs:   2px;    /* Bedienflaechen: Button, Input, Chip */
+  --r-sm:   4px;    /* Maximum */
+  --r-pill: 999px;  /* nur echte Rundlinge: Zaehler-Badge, Icon-Button */
+
+  /* Elevation — zwei Stufen. --elev-1 NUR fuer echt schwebende Elemente. */
+  --elev-0: none;
+  --elev-1: 0 1px 2px  rgb(var(--shadow-rgb) / 0.10),
+            0 4px 12px rgb(var(--shadow-rgb) / 0.08);
+}
+
+
+/* ============================================================================
+   6  BEWEGUNG
+   ========================================================================= */
+:root {
+  --dur-fast: 200ms;  /* Micro-Interaktion */
+  --dur-base: 300ms;  /* Scroll-Reveal */
+  --dur-slow: 450ms;  /* Layoutwechsel */
+  --ease:     cubic-bezier(0.25, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ============================================================================
+   7  EBENEN, BREITEN, BREAKPOINTS
+   ========================================================================= */
+:root {
+  --z-base:    0;
+  --z-raised:  1;    /* Karteninhalt ueber Bild */
+  --z-float:   2;    /* schwebender Button */
+  --z-sticky:  100;  /* Header, Zutaten-Box */
+  --z-overlay: 200;
+
+  --w-page:    70rem;  /* 1120px  Uebersicht darf breiter als frueher */
+  --w-content: 56rem;  /*  896px  Standardinhalt */
+  --w-measure: 42rem;  /*  672px  Lesemass ~70 Zeichen bei 19px */
+  --w-narrow:  32rem;  /*  512px  Leerzustaende */
+}
+
+/* BREAKPOINTS — als Custom Property NICHT nutzbar: Media Queries koennen
+   var() nicht aufloesen, und @custom-media braeuchte PostCSS. Deshalb hier
+   als verbindliche Werte dokumentiert. Nur diese drei verwenden:
+       560px   einspaltig, Karten volle Breite
+       780px   Sidebar-Layouts brechen um
+      1040px   volle Rasterbreite erreicht
+   ------------------------------------------------------------------------ */
+
+
+/* ============================================================================
+   8  BASIS — was direkt aus den Tokens folgt
+   ========================================================================= */
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--ff-ui);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--ff-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-tight);
+  text-wrap: balance;
+  font-optical-sizing: auto;
+}
+
+p, li { text-wrap: pretty; }  /* verhindert Schusterjungen */
+
+/* Lesetext: eigene Familie, eigene Groesse, eigenes Mass. */
+.reading, .zubereitung {
+  font-family: var(--ff-body);
+  font-size: var(--fs-lg);
+  line-height: var(--lh-read);
+  max-width: var(--w-measure);
+  font-variant-numeric: oldstyle-num;  /* Mediaevalziffern im Fliesstext */
+}
+
+/* Mengen und Zeiten: Tabellenziffern, damit Zahlenkolonnen fluchten. */
+.menge, .ek-menge, .stepper .val, .pr-portion {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.wrap {
+  max-width: var(--w-page);
+  margin-inline: auto;
+  padding-inline: var(--sp-gutter);
+}
+
+/* Fokus — sichtbar auf ALLEM Interaktiven. Nie outline:none ohne Ersatz. */
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: var(--bw) solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* Screenreader-only — Voraussetzung fuer den Skip-Link */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.skip-link:focus {
+  position: fixed; top: var(--sp-2xs); left: var(--sp-2xs);
+  z-index: var(--z-overlay);
+  width: auto; height: auto; margin: 0;
+  padding: var(--sp-2xs) var(--sp-sm);
+  clip-path: none;
+  background: var(--color-ink); color: var(--color-bg);
+}

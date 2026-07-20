@@ -18,3 +18,7 @@ scratch-artifact/
 
 # Claude Code – persönliche lokale Einstellungen
 .claude/settings.local.json
+
+# Fremd-Skill als Nachschlagewerk waehrend des Redesigns — nicht ins Repo.
+# Wiederherstellbar mit: npm i -g ui-ux-pro-max-cli && uipro init --ai claude
+.claude/skills/ui-ux-pro-max/
