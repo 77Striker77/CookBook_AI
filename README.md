@@ -1,5 +1,7 @@
 # Unser Kochbuch 🍳
 
+🍳 **Website:** https://77striker77.github.io/CookBook_AI/ — alle weiteren Links in [LINKS.md](LINKS.md)
+
 Ein gemeinsames, digitales Kochbuch für 2+ Personen — erreichbar von jedem Gerät.
 
 **Das Prinzip:** Ein Obsidian-Vault als Datenzentrum (Markdown in diesem Git-Repo),

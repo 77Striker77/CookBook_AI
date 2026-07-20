@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:r.jina.ai)",
+      "WebFetch(domain:hoffmann-germany.de)",
+      "PowerShell(winget install --id yt-dlp.yt-dlp --accept-source-agreements --accept-package-agreements --disable-interactivity -e 2>&1)",
+      "PowerShell(winget install --id Gyan.FFmpeg --accept-source-agreements --accept-package-agreements --disable-interactivity -e 2>&1)",
+      "Bash(curl -sSL \"https://cdn.shopify.com/s/files/1/0066/4295/8420/files/callekocht_geschmorter_rinderbraten_selbstgemacht.jpg?v=1763721463\" -o kochbuch/anhang/zarter-rinderbraten.jpg)",
+      "PowerShell(npm run build 2>&1)",
+      "Bash(npm -v)",
+      "PowerShell(winget install --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --disable-interactivity -e 2>&1)",
+      "Bash(git check-ignore *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git config *)",
+      "Bash(git push *)",
+      "Bash(git credential *)"
+    ]
+  }
+}
