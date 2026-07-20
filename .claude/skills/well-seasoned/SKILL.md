@@ -38,7 +38,8 @@ Fünf Regeln, aus denen der Rest folgt:
 4. **Editorial-Ornamente nur im Lesetext.** Drop Cap und Pull-Quote gehören auf
    die Rezeptseite (einmal pro Seite). Startseite, Wochenplan und
    Einkaufsliste sind strukturell Katalog und Werkzeug — dort nur Typografie,
-   Kontrast und Raster, keine Ornamente.
+   Kontrast und Raster, keine Ornamente. Je Seite ausformuliert in
+   `references/seiten.md`.
 5. **Kein Verlass auf Hover.** In der Küche gibt es keinen Mauszeiger. Jede
    Interaktion muss per Tap funktionieren und sichtbar quittiert werden.
 
@@ -145,8 +146,12 @@ unsichtbar machen — die Seite muss ohne JS vollständig lesbar bleiben.
 
 ## Referenzen
 
+**Reihenfolge beim Bauen einer Seite:** erst `references/seiten.md` prüfen —
+steht dort eine Abweichung, gewinnt sie. Sonst gilt diese Datei.
+
 | Datei | Inhalt |
 |---|---|
+| `references/seiten.md` | **Abweichungen je Seite** — vor dem Bauen lesen |
 | `references/tokens.css` | Vollständiger Token-Block, übernahmefertig |
 | `references/stimme.md` | Stimmen-Leitfaden mit Regeln je Textsorte |
 | `references/komponenten.md` | Bauteil-Spezifikationen (Anatomie, Zustände) |
