@@ -326,13 +326,17 @@ img { max-width: 100%; display: block; }
   backdrop-filter: saturate(140%) blur(8px);
   border-bottom: var(--bw-hair) solid var(--color-line);
 }
-.site-header .bar { display: flex; align-items: center; gap: var(--sp-sm); height: 60px; }
-.logo { font-family: var(--ff-display); font-weight: 650; font-size: 1.25rem; color: var(--color-ink); text-decoration: none; letter-spacing: var(--tr-tight); }
+/* Umbruchfaehig: Fuenf Navigationspunkte plus Wortmarke passen auf 390px
+   nicht in eine Zeile — vorher wurden "+ Rezept" und der Theme-Umschalter
+   einfach abgeschnitten. Lieber zwei Reihen als unerreichbare Bedienelemente.
+   Wird in Etappe 4 ohnehin neu geordnet (Suche wandert hinter eine Lupe). */
+.site-header .bar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-sm); min-height: 60px; padding-block: var(--sp-2xs); }
+.logo { font-family: var(--ff-display); font-weight: 650; font-size: 1.25rem; color: var(--color-ink); text-decoration: none; letter-spacing: var(--tr-tight); white-space: nowrap; }
 .logo span { color: var(--color-accent-text); }
 .nav { display: flex; gap: var(--sp-3xs); margin-left: auto; align-items: center; }
 .nav a { color: var(--color-ink-muted); text-decoration: none; font-size: var(--fs-md); font-weight: var(--fw-medium); padding: 7px 12px; border-radius: var(--r-xs); }
 .nav a:hover { background: var(--color-surface); color: var(--color-ink); }
-.nav a.nav-add { background: var(--color-accent-text); color: var(--color-accent-ink); font-weight: var(--fw-semibold); }
+.nav a.nav-add { background: var(--color-accent-text); color: var(--color-accent-ink); font-weight: var(--fw-bold); min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem; padding: 0; }
 .nav a.nav-add:hover { background: color-mix(in srgb, var(--color-accent-text) 88%, #000); color: var(--color-accent-ink); }
 .nav a.nav-plan { display: inline-flex; align-items: center; gap: 6px; }
 .nav a.nav-plan .badge { background: var(--color-accent); color: var(--c-white); font-size: var(--fs-2xs); font-weight: var(--fw-bold); min-width: 18px; height: 18px; padding: 0 5px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
@@ -752,3 +756,36 @@ footer.site .wrap { display: flex; gap: var(--sp-xs); flex-wrap: wrap; justify-c
 }
 .kochen-btn:hover { background: var(--color-accent); border-bottom-color: var(--color-accent); color: var(--c-white); }
 .zuletzt { margin: var(--sp-2xs) 0 var(--sp-sm); font-size: var(--fs-sm); color: var(--color-accent-text); text-transform: uppercase; letter-spacing: var(--tr-caps); }
+
+/* ---- Verlauf ---- */
+.verlauf-wrap { padding: var(--sp-lg) 0 var(--sp-3xl); max-width: var(--w-content); }
+.verlauf-wrap h1 { font-size: var(--fs-h1); margin: 0 0 var(--sp-sm); letter-spacing: var(--tr-display); }
+.v-intro { color: var(--color-ink-muted); max-width: var(--w-measure); margin: 0 0 var(--sp-xl); }
+.v-leer { text-align: center; max-width: var(--w-narrow); margin-inline: auto; border-top: var(--bw-rule) solid var(--color-ink); padding: var(--sp-2xl) var(--sp-md); }
+.v-leer p { margin: 0 0 var(--sp-2xs); }
+.v-leer .muted { color: var(--color-ink-muted); font-size: var(--fs-md); }
+.v-leer .btn { margin-top: var(--sp-md); }
+
+.v-zahlen { display: flex; flex-wrap: wrap; gap: var(--sp-sm) var(--sp-lg); padding-bottom: var(--sp-sm); margin-bottom: var(--sp-xl); border-bottom: var(--bw-rule) solid var(--color-ink); font-size: var(--fs-sm); color: var(--color-ink-muted); text-transform: uppercase; letter-spacing: var(--tr-caps); }
+.v-zahlen b { color: var(--color-ink); font-variant-numeric: tabular-nums lining-nums; }
+
+.v-block { margin-bottom: var(--sp-2xl); }
+.v-block h2 { font-size: var(--fs-h3); margin: 0 0 var(--sp-3xs); }
+.v-hinweis { color: var(--color-ink-muted); font-size: var(--fs-md); margin: 0 0 var(--sp-sm); max-width: var(--w-measure); }
+
+.v-liste { list-style: none; margin: 0; padding: 0; }
+.v-liste li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2xs) var(--sp-sm); padding: var(--sp-xs) 0; border-bottom: var(--bw-hair) solid var(--color-line); }
+.v-liste li a { font-family: var(--ff-display); font-size: var(--fs-xl); color: var(--color-ink); text-decoration: none; flex: 1 1 14ch; }
+.v-liste li a:hover { color: var(--color-accent-text); }
+.v-meta { font-size: var(--fs-sm); color: var(--color-ink-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v-urteil { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); font-weight: var(--fw-bold); padding: 3px 8px; white-space: nowrap; }
+.v-nochmal { background: var(--color-accent); color: var(--c-white); }
+.v-ok { border: var(--bw-hair) solid var(--color-line-strong); color: var(--color-ink-muted); }
+.v-nein { color: var(--color-ink-muted); text-decoration: line-through; }
+
+.v-export { border-top: var(--bw-rule) solid var(--color-ink); padding-top: var(--sp-md); }
+.v-roh { margin-top: var(--sp-sm); font-size: var(--fs-sm); color: var(--color-ink-muted); }
+.v-roh summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.v-roh pre { background: var(--color-surface); padding: var(--sp-xs); overflow-x: auto; font-family: var(--ff-mono); font-size: var(--fs-sm); }
+.v-fuss { margin-top: var(--sp-2xl); }
+a.btn[aria-disabled="true"] { opacity: .45; pointer-events: none; }

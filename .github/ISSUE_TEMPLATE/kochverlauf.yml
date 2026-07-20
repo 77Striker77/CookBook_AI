@@ -1,0 +1,36 @@
+name: "📓 Kochverlauf übertragen"
+description: "Gekochte Rezepte und Bewertungen aus dem Browser ins Kochbuch schreiben"
+title: "[Verlauf] "
+labels: ["verlauf"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Diese Einreichung wird normalerweise **automatisch von der Website
+        vorbefüllt** — über den Knopf „Ins Kochbuch übertragen" auf
+        [/verlauf](https://77striker77.github.io/CookBook_AI/verlauf).
+
+        Der Verlauf liegt im Browser (localStorage). Damit er dauerhaft im
+        Repo landet, auf allen Geräten sichtbar ist und ein Löschen der
+        Browserdaten übersteht, muss er einmal hierher übertragen werden.
+
+  - type: textarea
+    id: daten
+    attributes:
+      label: Kochdaten
+      description: "Wird von der Website eingesetzt. Format: slug · datum · urteil"
+      placeholder: |
+        ofen-kebab · 2026-07-14 · nochmal
+        sticky-beef-gurkensalat · 2026-07-11 · ok
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: anmerkung
+    attributes:
+      label: Anmerkung
+      description: "Optional — was beim Kochen aufgefallen ist, für die Notizen im Rezept."
+      placeholder: "Beim Ofen-Kebab war die Soße zu dünn, nächstes Mal weniger Wasser."
+    validations:
+      required: false

@@ -1,0 +1,12 @@
+# Zeilenenden im Repo immer LF. Der Vault enthielt gemischt LF und CRLF, was
+# den Schritt-Parser stillschweigend an jeder CRLF-Datei scheitern ließ
+# (in JavaScript matcht `.` kein \r). Einmal normalisiert, nie wieder.
+* text=auto eol=lf
+
+# Binärdateien nicht anfassen.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff2 binary
+*.ico binary

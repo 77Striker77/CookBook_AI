@@ -103,14 +103,26 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
     <header class="site-header">
       <div class="wrap bar">
         <a class="logo" href={url('/')}>Well <span>Seasoned</span></a>
+        {/* Vier Ziele plus zwei Knöpfe passen auf 390px; fünf passten nicht —
+            „+ Rezept" brach um und der Theme-Umschalter fiel aus dem Bild.
+            „Suche" ist bewusst raus: Ein zweites Suchfeld neben dem auf der
+            Startseite zwingt zu einer Entscheidung, die niemand treffen kann.
+            Wird in Etappe 4 durch eine Suche im Kopf ersetzt; bis dahin bleibt
+            /suche über die Fußzeile erreichbar. */}
         <nav class="nav" aria-label="Hauptnavigation">
           <a href={url('/')}>Rezepte</a>
-          <a href={url('/suche')}>Suche</a>
+          <a href={url('/verlauf')}>Verlauf</a>
           <a href={url('/plan')} class="nav-plan">
             🛒 Plan<span class="badge" id="planBadge" hidden>0</span>
             <span class="sr-only" id="planStatus" aria-live="polite"></span>
           </a>
-          <a class="nav-add" href="https://github.com/77Striker77/CookBook_AI/issues/new?template=neues-rezept.yml" target="_blank" rel="noreferrer">+ Rezept</a>
+          <a
+            class="nav-add"
+            href="https://github.com/77Striker77/CookBook_AI/issues/new?template=neues-rezept.yml"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Neues Rezept einwerfen"
+          >+</a>
           <button class="theme-toggle" id="themeToggle" aria-label="Hell/Dunkel umschalten">◐</button>
         </nav>
       </div>
@@ -123,6 +135,7 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
     <footer class="site">
       <div class="wrap">
         <span>Well Seasoned · gemeinsam gesammelt</span>
+        <a href={url('/suche')}>Volltextsuche</a>
         <span>{new Date().getFullYear()}</span>
       </div>
     </footer>
