@@ -117,8 +117,12 @@ navigierbar“. Zwei Web-Recherchen gaben dem recht.
 
 ### Offen aus dieser Phase
 
-- [ ] Mobil liegen Zutaten und Zubereitung auf der Rezeptseite untereinander.
-      Der Kochmodus löst das fürs Kochen, die Leseseite nicht.
+- [x] **Zutaten auf dem Handy klappbar und klebend.** Vorher lagen sie über der
+      Zubereitung — beim Lesen scrollte man bei jedem Schritt hoch, um eine
+      Menge nachzusehen, und dann zurück und suchte die Stelle wieder. Jetzt
+      eine Sticky-Leiste, die sich über den Text legt statt ihn wegzudrücken;
+      dasselbe Muster wie im Kochmodus. Umgesetzt als `<details>`, damit ohne
+      JavaScript alles offen bleibt.
 - [x] **Zwei-Geräte-Problem gelöst.** Der Plan liegt in localStorage, also auf
       einem Gerät — einer plant am Desktop, der andere steht im Laden ohne
       Liste. Der Teilen-Knopf erzeugt jetzt einen Link, der Gerichte samt

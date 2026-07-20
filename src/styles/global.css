@@ -360,6 +360,27 @@ img { max-width: 100%; display: block; }
 .eyebrow { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 var(--sp-2xs); font-size: var(--fs-xs); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-accent-text); }
 .eyebrow::before { content: ""; width: 28px; height: var(--bw); background: var(--color-accent); }
 
+/* Knopf. Unterstrichene Grundform statt Kasten — Stil #78, "underline CTA".
+   Diese Regel war beim Umbau der Startseite versehentlich mit entfernt worden;
+   dadurch sahen alle Knoepfe auf allen Seiten wie nackter Text aus. */
+.btn {
+  border: 0; border-bottom: var(--bw-rule) solid var(--color-ink);
+  background: transparent; color: var(--color-ink); border-radius: 0;
+  padding: 10px var(--sp-2xs); min-height: 48px;
+  font: var(--fw-semibold) var(--fs-md)/1 var(--ff-ui);
+  text-transform: uppercase; letter-spacing: .08em;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+}
+.btn:hover { border-bottom-color: var(--color-accent); color: var(--color-accent-text); }
+.btn:active { background: var(--color-ink); color: var(--color-bg); }
+.btn.primary { background: var(--color-ink); color: var(--color-bg); padding-inline: var(--sp-md); }
+.btn.primary:hover { background: var(--color-accent); color: var(--c-white); border-bottom-color: var(--color-accent); }
+.btn.ghost { border-bottom-color: var(--color-line-strong); color: var(--color-ink-muted); }
+.btn.ghost:hover { color: var(--color-ink); border-bottom-color: var(--color-accent); }
+.btn.ghost.danger:hover { color: var(--color-danger); border-bottom-color: var(--color-danger); }
+.btn.small { min-height: 42px; font-size: var(--fs-sm); }
+
 /* Trefferzahl ueber einer Liste. */
 .count { margin: var(--sp-md) 0 var(--sp-sm); padding-bottom: var(--sp-2xs); border-bottom: var(--bw-rule) solid var(--color-ink); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
 
@@ -488,21 +509,44 @@ img { max-width: 100%; display: block; }
 .zubereitung img { width: 100%; max-width: 520px; height: auto; border: var(--bw-hair) solid var(--color-line); background: #fff; margin: var(--sp-2xs) 0; display: block; }
 .layout { display: grid; grid-template-columns: 320px 1fr; gap: var(--sp-lg); margin-top: var(--sp-md); align-items: start; }
 @media (max-width: 780px) {
-  .layout { grid-template-columns: 1fr; gap: var(--sp-md); }
-  /* Auf dem Handy darf die Zutaten-Box nicht kleben, sonst ueberlappt der Text.
-     Hoehere Spezifitaet, damit dieser Override die spaetere sticky-Basisregel
-     sicher schlaegt. */
-  .layout .zutaten-box { position: static; top: auto; }
+  .layout { grid-template-columns: 1fr; gap: var(--sp-sm); }
   .hero-bild img { max-height: 60vh; }
-}
 
-.zutaten-box { background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line); padding: var(--sp-md); position: sticky; top: 76px; }
-.zutaten-box h2 { font-size: var(--fs-h3); margin: 0 0 var(--sp-xs); }
-.portionen { display: flex; align-items: center; gap: var(--sp-2xs); background: var(--color-surface); padding: var(--sp-2xs) var(--sp-xs); margin-bottom: var(--sp-sm); }
+  /* Zutaten kleben oben und lassen sich zuklappen. Vorher lagen sie ueber der
+     Zubereitung: Beim Lesen scrollte man bei jedem Schritt hoch, um eine
+     Menge nachzusehen, und dann zurueck und suchte die Stelle wieder. */
+  .zutaten-box {
+    position: sticky; top: 0; z-index: var(--z-sticky);
+    padding: var(--sp-2xs) var(--sp-sm) var(--sp-sm);
+    border: 0; border-bottom: var(--bw-rule) solid var(--color-ink);
+    margin-inline: calc(var(--sp-gutter) * -1);
+    background: var(--color-surface);
+  }
+  /* Die Aktionen bleiben immer sichtbar, nur die Liste klappt. */
+  .zutaten-box .kochen-btn, .zutaten-box .plan-btn { margin-bottom: var(--sp-2xs); }
+  .z-klapp { margin-top: var(--sp-2xs); }
+  .z-kopf { cursor: pointer; min-height: 48px; align-items: center; border-bottom: 0; padding-bottom: 0; }
+  .z-kopf::after {
+    content: "▾"; margin-left: var(--sp-2xs); color: var(--color-accent-text);
+    transition: transform var(--dur-fast) var(--ease);
+  }
+  .z-klapp[open] .z-kopf::after { transform: rotate(180deg); }
+  .z-klapp[open] .z-kopf { border-bottom: var(--bw) solid var(--color-ink); padding-bottom: var(--sp-2xs); }
+  /* Geoeffnet ueberlagert die Liste den Text, statt ihn wegzudruecken —
+     und bleibt selbst scrollbar, damit lange Listen nicht die Seite kapern. */
+  .z-klapp[open] ul.zutaten { max-height: 52dvh; overflow-y: auto; }
+}
+.z-kopf::-webkit-details-marker { display: none; }
+.z-kopf::marker { content: ""; }
+.z-titel { font-family: var(--ff-display); font-size: var(--fs-h3); letter-spacing: var(--tr-tight); }
+.z-zahl { margin-left: auto; font-size: var(--fs-sm); color: var(--color-ink-muted); font-variant-numeric: tabular-nums lining-nums; }
+
+.portionen { display: flex; align-items: center; gap: var(--sp-2xs); background: var(--color-surface); padding: var(--sp-2xs) var(--sp-xs); margin: var(--sp-sm) 0; }
 .portionen .lbl { font-size: var(--fs-sm); color: var(--color-ink-muted); margin-right: auto; }
 .stepper { display: flex; align-items: center; gap: var(--sp-2xs); }
 .stepper button { width: 44px; height: 44px; border-radius: var(--r-xs); border: var(--bw-hair) solid var(--color-line-strong); background: var(--color-surface-raised); color: var(--color-ink); font-size: 1.1rem; cursor: pointer; line-height: 1; }
-.stepper .val { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+.stepper .val { min-width: 2ch; text-align: center; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums lining-nums; }
+
 ul.zutaten { list-style: none; margin: 0; padding: 0; }
 ul.zutaten li { display: flex; gap: var(--sp-2xs); padding: 7px 0; border-bottom: var(--bw-hair) dashed var(--color-line); font-size: var(--fs-md); }
 ul.zutaten li:last-child { border-bottom: 0; }

@@ -75,21 +75,34 @@ const quelleText: Record<string, string> = {
 
     <div class="layout">
       <aside class="zutaten-box" id="zbox" data-basis={d.portionen}>
-        <h2>Zutaten</h2>
-        <div class="portionen">
-          <span class="lbl">Portionen</span>
-          <div class="stepper">
-            <button id="minus" aria-label="weniger">−</button>
-            <span class="val" id="pval">{d.portionen}</span>
-            <button id="plus" aria-label="mehr">+</button>
-          </div>
-        </div>
         <a class="btn kochen-btn" href={url(`/kochen/${r.id}`)}>Jetzt kochen →</a>
         <button class="btn plan-btn" id="planBtn" data-slug={r.id} aria-pressed="false">
           <span class="ic">🛒</span><span class="lbl">In den Kochplan</span>
         </button>
         <p class="zuletzt" id="zuletzt" hidden></p>
-        <ul class="zutaten">
+
+        {/* Auf dem Handy klappbar und klebend: Beim Lesen springt man ständig
+            zwischen Zutaten und Zubereitung, vorher lagen sie untereinander
+            und man scrollte bei jedem Schritt hoch und wieder zurück.
+            Dasselbe Muster wie im Kochmodus.
+            <details> statt Button, damit ohne JavaScript alles offen bleibt —
+            der bisherige Zustand, also keine Verschlechterung. */}
+        <details class="z-klapp" id="zKlapp" open>
+          <summary class="z-kopf">
+            <span class="z-titel">Zutaten</span>
+            <span class="z-zahl">{zutaten.length}</span>
+          </summary>
+
+          <div class="portionen">
+            <span class="lbl">Portionen</span>
+            <div class="stepper">
+              <button id="minus" aria-label="weniger">−</button>
+              <span class="val" id="pval">{d.portionen}</span>
+              <button id="plus" aria-label="mehr">+</button>
+            </div>
+          </div>
+
+          <ul class="zutaten">
           {anzeige.map((zeile) => zeile.typ === 'grp'
             ? <li class="grp">{zeile.text}</li>
             : (
@@ -106,7 +119,8 @@ const quelleText: Record<string, string> = {
                 <span class="znam"><a href={url(`/zutat/${zeile.z.slug}`)}>{zeile.z.name}</a>{zeile.z.notiz && <span class="znotiz">, {zeile.z.notiz}</span>}</span>
               </li>
             ))}
-        </ul>
+          </ul>
+        </details>
       </aside>
 
       <div class="zubereitung reading">
@@ -199,6 +213,14 @@ const quelleText: Record<string, string> = {
       }
       document.getElementById('plus').addEventListener('click', () => { ziel++; render(); syncPlan(); });
       document.getElementById('minus').addEventListener('click', () => { if (ziel > 1) { ziel--; render(); syncPlan(); } });
+
+      // Auf dem Handy eingeklappt starten — auf breiten Schirmen steht die
+      // Spalte ohnehin daneben und soll offen bleiben.
+      const klapp = document.getElementById('zKlapp');
+      const schmal = window.matchMedia('(max-width: 780px)');
+      function klappAnpassen(e) { klapp.open = !e.matches; }
+      klappAnpassen(schmal);
+      schmal.addEventListener('change', klappAnpassen);
 
       // Kochplan-Button: fügt dieses Rezept mit der aktuell gewählten Portionszahl
       // hinzu bzw. entfernt es wieder. Ist es schon im Plan, spiegelt der Stepper
