@@ -48,3 +48,23 @@ Ziel: aus einer beliebigen Quelle eine schema-konforme Datei
 - Nichts erfinden. Fehlt eine Menge oder Zeit, Feld weglassen und im Zutaten-
   bzw. Notiztext kennzeichnen, statt zu raten.
 - Kategorie und Schwierigkeit nur aus den erlaubten Werten (siehe schema.md).
+
+## Geräte im Frontmatter (`geraete`)
+
+Pflichtfeld-Logik seit dem Umbau: Geräte stehen **nicht mehr in `tags`**,
+sondern im eigenen Feld `geraete` als Enum. Erlaubt sind:
+`airfryer`, `ofen`, `herd`, `mixer`, `eismaschine`.
+
+**Regel:** Ein Gerät wird nur eingetragen, wenn es in der **Zubereitung dieses
+Rezepts** tatsächlich benutzt wird.
+
+**Die Falle:** Erwähnungen in Querverweisen zählen nicht. Ein Rezept trug
+einmal `airfryer`, weil in den Notizen stand: *„Nicht verwechseln mit dem
+[Greek Chicken Bowl](greek-chicken-bowl.md) — das ist ein anderes Rezept mit
+Spießen und Kartoffeln aus dem Airfryer."* Das Gerät gehörte zum verlinkten
+Gericht, nicht zu diesem.
+
+Eine einzelne Nennung reicht, wenn sie eine Kochanweisung ist — „Alternativ im
+Ofen 20 Minuten backen" ist ein gültiger Ofen-Beleg.
+
+`npm run pruefen` prüft das automatisch und bricht sonst den Build ab.

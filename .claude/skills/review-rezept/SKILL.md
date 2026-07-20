@@ -34,3 +34,23 @@ ist). Bezugspunkte: `kochbuch/_meta/schema.md` und `kochbuch/_meta/synonyme.yaml
 Kurze Liste: ✅ bestanden / ⚠️ Hinweise / ❌ Blocker. Bei Blockern konkret sagen,
 welche Zeile im Rezept zu ändern ist. Keine stillschweigenden Korrekturen an
 Mengen oder Zutaten — Unklarheiten dem User vorlegen.
+
+## Geräte im Frontmatter (`geraete`)
+
+Pflichtfeld-Logik seit dem Umbau: Geräte stehen **nicht mehr in `tags`**,
+sondern im eigenen Feld `geraete` als Enum. Erlaubt sind:
+`airfryer`, `ofen`, `herd`, `mixer`, `eismaschine`.
+
+**Regel:** Ein Gerät wird nur eingetragen, wenn es in der **Zubereitung dieses
+Rezepts** tatsächlich benutzt wird.
+
+**Die Falle:** Erwähnungen in Querverweisen zählen nicht. Ein Rezept trug
+einmal `airfryer`, weil in den Notizen stand: *„Nicht verwechseln mit dem
+[Greek Chicken Bowl](greek-chicken-bowl.md) — das ist ein anderes Rezept mit
+Spießen und Kartoffeln aus dem Airfryer."* Das Gerät gehörte zum verlinkten
+Gericht, nicht zu diesem.
+
+Eine einzelne Nennung reicht, wenn sie eine Kochanweisung ist — „Alternativ im
+Ofen 20 Minuten backen" ist ein gültiger Ofen-Beleg.
+
+`npm run pruefen` prüft das automatisch und bricht sonst den Build ab.
