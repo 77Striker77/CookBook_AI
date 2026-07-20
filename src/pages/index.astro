@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import { url } from '../lib/url';
-import { verlauf, katLabel, zeitLabel } from '../lib/darstellung';
+import { katLabel, zeitLabel } from '../lib/darstellung';
 
 const alle = (await getCollection('rezepte')).sort((a, b) =>
   a.data.titel.localeCompare(b.data.titel, 'de'),
@@ -19,7 +19,6 @@ const rezepte = alle.map((r) => ({
   kategorie: r.data.kategorie,
   tags: r.data.tags,
   zeit: r.data.zeit_gesamt ?? 0,
-  bewertung: r.data.bewertung ?? 0,
   portionen: r.data.portionen,
   bild: r.data.bild,
 }));
@@ -42,82 +41,88 @@ const rezepte = alle.map((r) => ({
   <div class="wrap">
     <div class="controls">
       <label class="searchfield">
-        🔍 <input type="search" id="q" placeholder="Suchen … Titel eingeben" autocomplete="off" />
+        <span aria-hidden="true">🔍</span>
+        <input type="search" id="q" placeholder="Rezept suchen …" autocomplete="off" aria-label="Rezepte nach Titel filtern" />
       </label>
       <button class="btn" id="random">🎲 Überrasch mich</button>
     </div>
 
-    <div class="chips" id="katChips">
+    <div class="chips" id="katChips" role="group" aria-label="Nach Kategorie filtern">
       <button class="chip" data-kat="" aria-pressed="true">Alle</button>
       {kategorien.map((k) => <button class="chip" data-kat={k} aria-pressed="false">{katLabel(k)}</button>)}
     </div>
-    <div class="chips" id="tagChips">
-      {topTags.map((t) => <button class="chip" data-tag={t} aria-pressed="false">#{t}</button>)}
+    <div class="chips" id="tagChips" role="group" aria-label="Nach Merkmal filtern">
+      {topTags.map((t) => <button class="chip" data-tag={t} aria-pressed="false">{t}</button>)}
       <button class="chip" data-time="30" aria-pressed="false">≤ 30 min</button>
     </div>
 
-    <p class="count" id="count"></p>
+    <p class="count" id="count" aria-live="polite"></p>
 
     <div class="grid" id="grid">
-      {rezepte.map((r) => (
-        <a
+      {rezepte.map((r, i) => (
+        <article
           class="rcard"
-          href={url(`/rezept/${r.slug}`)}
+          data-pos={i % 5}
           data-titel={r.titel.toLowerCase()}
           data-kat={r.kategorie}
           data-tags={r.tags.join(' ')}
           data-zeit={r.zeit}
         >
-          <div class="thumb" style={`background:${verlauf(r.kategorie)}`}>
-            {r.bild && <Image src={r.bild} alt={r.titel} widths={[260, 460]} sizes="260px" />}
-            <span class="kat">{katLabel(r.kategorie)}</span>
-            <button
-              class="add-plan"
-              data-slug={r.slug}
-              data-basis={r.portionen}
-              aria-label="Zum Kochplan hinzufügen"
-              aria-pressed="false"
-            >+</button>
+          <div class="thumb">
+            {/* alt bleibt leer: der Titel direkt daneben benennt das Gericht
+                bereits, sonst liest der Screenreader alles doppelt. */}
+            {r.bild && <Image src={r.bild} alt="" widths={[320, 560, 900]} sizes="(max-width: 780px) 100vw, 45vw" loading={i < 3 ? 'eager' : 'lazy'} />}
           </div>
           <div class="body">
-            <span class="title">{r.titel}</span>
+            <span class="nr" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span class="kat">{katLabel(r.kategorie)}</span>
+            <a class="title" href={url(`/rezept/${r.slug}`)}>{r.titel}</a>
             <span class="meta">
               {zeitLabel(r.zeit) && <span>{zeitLabel(r.zeit)}</span>}
               <span>{r.portionen} Portionen</span>
             </span>
-            {r.bewertung > 0 && <span class="stars">{'★'.repeat(r.bewertung)}{'☆'.repeat(5 - r.bewertung)}</span>}
           </div>
-        </a>
+          <button
+            class="add-plan"
+            data-slug={r.slug}
+            data-basis={r.portionen}
+            aria-label={`„${r.titel}" zum Kochplan hinzufügen`}
+            aria-pressed="false"
+          >+</button>
+        </article>
       ))}
+      <p class="empty" id="empty" hidden>Nichts gefunden — Filter zurücksetzen?</p>
     </div>
   </div>
 
-  <script is:inline define:vars={{ homeUrl: url('/') }}>
+  <script is:inline>
     const grid = document.getElementById('grid');
     const cards = [...grid.querySelectorAll('.rcard')];
     const q = document.getElementById('q');
     const count = document.getElementById('count');
+    const empty = document.getElementById('empty');
     const state = { text: '', kat: '', tag: '', time: 0 };
 
+    // Das Editorial-Raster hat einen Rhythmus von fünf Karten: eine breite,
+    // dann vier schmale. Die Position wird nach jedem Filtern neu vergeben —
+    // sonst zählt CSS die versteckten Karten mit und der Rhythmus zerfällt.
     function apply() {
       let n = 0;
       for (const c of cards) {
         const okText = !state.text || c.dataset.titel.includes(state.text);
         const okKat = !state.kat || c.dataset.kat === state.kat;
         const okTag = !state.tag || c.dataset.tags.split(' ').includes(state.tag);
-        const okTime = !state.time || Number(c.dataset.zeit) > 0 && Number(c.dataset.zeit) <= state.time;
+        const okTime = !state.time || (Number(c.dataset.zeit) > 0 && Number(c.dataset.zeit) <= state.time);
         const show = okText && okKat && okTag && okTime;
-        c.style.display = show ? '' : 'none';
-        if (show) n++;
+        c.hidden = !show;
+        if (show) {
+          c.dataset.pos = n % 5;
+          c.querySelector('.nr').textContent = String(n + 1).padStart(2, '0');
+          n++;
+        }
       }
       count.textContent = n === cards.length ? `${n} Rezepte` : `${n} von ${cards.length} Rezepten`;
-      let leer = grid.querySelector('.empty');
-      if (n === 0 && !leer) {
-        leer = document.createElement('p');
-        leer.className = 'empty';
-        leer.textContent = 'Nichts gefunden — Filter zurücksetzen?';
-        grid.appendChild(leer);
-      } else if (n > 0 && leer) leer.remove();
+      empty.hidden = n > 0;
     }
 
     q.addEventListener('input', () => { state.text = q.value.trim().toLowerCase(); apply(); });
@@ -140,13 +145,13 @@ const rezepte = alle.map((r) => ({
     });
 
     document.getElementById('random').addEventListener('click', () => {
-      const sichtbar = cards.filter((c) => c.style.display !== 'none');
+      const sichtbar = cards.filter((c) => !c.hidden);
       const pool = sichtbar.length ? sichtbar : cards;
       const pick = pool[Math.floor(Math.random() * pool.length)];
-      if (pick) location.href = pick.getAttribute('href');
+      if (pick) location.href = pick.querySelector('.title').getAttribute('href');
     });
 
-    // Schnell-Hinzufügen zum Kochplan direkt aus dem Grid (ohne das Rezept zu öffnen).
+    // Schnell-Hinzufügen direkt aus dem Raster, ohne das Rezept zu öffnen.
     const addBtns = [...grid.querySelectorAll('.add-plan')];
     function paintAdd() {
       for (const b of addBtns) {
@@ -158,8 +163,6 @@ const rezepte = alle.map((r) => ({
     grid.addEventListener('click', (e) => {
       const b = e.target.closest('.add-plan');
       if (!b) return;
-      e.preventDefault();
-      e.stopPropagation();
       window.WSPlan.toggle(b.dataset.slug, Number(b.dataset.basis) || 1);
       paintAdd();
     });

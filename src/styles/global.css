@@ -346,19 +346,68 @@ img { max-width: 100%; display: block; }
 
 .count { color: var(--color-ink-muted); font-size: var(--fs-sm); margin: var(--sp-md) 0 var(--sp-xs); }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--sp-md); padding-bottom: var(--sp-3xl); }
-.rcard { background: var(--color-surface-raised); border: var(--bw-hair) solid var(--color-line); border-radius: var(--r-none); overflow: hidden; text-decoration: none; color: inherit; display: flex; flex-direction: column; transition: border-color var(--dur-fast) var(--ease); }
-.rcard:hover { border-color: var(--color-ink); }
-.rcard .thumb { aspect-ratio: 16/10; display: flex; align-items: flex-end; padding: var(--sp-xs); position: relative; overflow: hidden; }
-.rcard .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.rcard .thumb .kat { position: relative; z-index: var(--z-raised); background: rgba(0,0,0,.55); color: #fff; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); padding: 3px 9px; font-weight: var(--fw-semibold); }
-.add-plan { position: absolute; top: var(--sp-2xs); right: var(--sp-2xs); z-index: var(--z-float); width: 44px; height: 44px; border-radius: var(--r-pill); border: 0; background: rgba(255,255,255,.94); color: #0C0A09; font-size: 1.25rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--dur-fast) var(--ease); }
+/* Editorial-Raster: Rhythmus von fuenf Karten — eine breite, dann vier
+   schmale. Die Position kommt aus data-pos, das beim Filtern neu vergeben
+   wird; :nth-child wuerde die versteckten Karten mitzaehlen und den Rhythmus
+   zerreissen. Bewusst KEINE Kartenkaesten: Bild, Haarlinie, Text. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--sp-xl) var(--sp-md);
+  padding-bottom: var(--sp-3xl);
+}
+.rcard { position: relative; grid-column: span 2; display: flex; flex-direction: column; }
+.rcard[data-pos="0"] { grid-column: span 4; }
+
+.rcard .thumb { position: relative; overflow: hidden; aspect-ratio: 4/5; background: var(--color-surface); }
+.rcard[data-pos="0"] .thumb { aspect-ratio: 16/10; }
+.rcard .thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity var(--dur-fast) var(--ease); }
+
+.rcard .body {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px var(--sp-2xs);
+  padding-top: var(--sp-2xs);
+  border-top: var(--bw) solid var(--color-ink);
+  margin-top: var(--sp-xs);
+}
+/* Laufende Nummer — das Magazin-Motiv. Aendert sich beim Filtern mit. */
+.rcard .nr { grid-row: 1; font-size: var(--fs-2xs); font-weight: var(--fw-bold); color: var(--color-accent-text); font-variant-numeric: tabular-nums lining-nums; letter-spacing: .04em; }
+.rcard .kat { grid-row: 1; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); }
+.rcard .title {
+  grid-column: 1 / -1; margin-top: var(--sp-3xs);
+  font-family: var(--ff-display); font-weight: 600;
+  font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight);
+  color: var(--color-ink); text-decoration: none;
+}
+.rcard[data-pos="0"] .title { font-size: var(--fs-h2); letter-spacing: var(--tr-display); }
+/* Ganze Karte klickbar, ohne den Button zu verschachteln (waere ungueltiges
+   HTML und per Tastatur kaputt). */
+.rcard .title::after { content: ""; position: absolute; inset: 0; }
+.rcard:hover .title { color: var(--color-accent-text); }
+.rcard:hover .thumb img { opacity: .88; }
+.rcard .meta { grid-column: 1 / -1; color: var(--color-ink-muted); font-size: var(--fs-sm); display: flex; gap: var(--sp-xs); flex-wrap: wrap; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+.add-plan {
+  position: absolute; top: var(--sp-2xs); right: var(--sp-2xs); z-index: var(--z-float);
+  width: 44px; height: 44px; border-radius: var(--r-pill); border: 0;
+  background: rgba(250,250,249,.94); color: #0C0A09;
+  font-size: 1.25rem; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--dur-fast) var(--ease);
+}
 .add-plan[aria-pressed="true"] { background: var(--color-accent); color: var(--c-white); font-size: 1rem; font-weight: var(--fw-bold); }
-.rcard .body { padding: var(--sp-xs) var(--sp-sm) var(--sp-sm); display: flex; flex-direction: column; gap: 5px; }
-.rcard .title { font-family: var(--ff-display); font-weight: 650; font-size: var(--fs-xl); line-height: var(--lh-snug); letter-spacing: var(--tr-tight); }
-.rcard .meta { color: var(--color-ink-muted); font-size: var(--fs-sm); display: flex; gap: var(--sp-xs); flex-wrap: wrap; font-variant-numeric: tabular-nums; }
-.stars { color: var(--color-accent-text); font-size: var(--fs-xs); letter-spacing: .06em; }
+
 .empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
+
+@media (max-width: 1040px) {
+  .grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-lg) var(--sp-md); }
+  .rcard[data-pos="0"] { grid-column: span 4; }
+  .rcard[data-pos="0"] .title { font-size: var(--fs-h3); }
+}
+@media (max-width: 560px) {
+  .grid { grid-template-columns: 1fr; gap: var(--sp-lg); }
+  .rcard, .rcard[data-pos="0"] { grid-column: span 1; }
+  .rcard .thumb, .rcard[data-pos="0"] .thumb { aspect-ratio: 16/10; }
+}
 
 /* ---- Rezeptseite ---- */
 .recipe { padding: var(--sp-lg) 0 var(--sp-3xl); }
