@@ -250,6 +250,12 @@
    5  BASIS
    ========================================================================= */
 * { box-sizing: border-box; }
+
+/* Das HTML-Attribut `hidden` setzt nur `display: none` im Browser-Stylesheet.
+   Jede eigene display-Regel schlaegt das — .rk hat display:flex, also blieben
+   gefilterte Karten sichtbar, obwohl die Logik sie korrekt versteckt hatte
+   (der Zaehler zeigte "1 von 18", das Raster alle 18). Deshalb hart. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
 body {
