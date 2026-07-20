@@ -114,9 +114,21 @@
    Typo: Dual-Ratio — Text 1.125 (fest), Display ~1.618 (fluid).
    Fluid im Fliesstext waere ein Anti-Pattern (bricht Browser-Zoom).
    ========================================================================= */
+/* SCHRIFT — Fraunces nur fuers Display, selbst gehostet (kein Google-CDN:
+   schneller, und in Deutschland datenschutzrechtlich unbedenklich).
+   Die @font-face-Regeln stehen in src/layouts/Base.astro, weil sie den
+   base-Pfad brauchen (/CookBook_AI auf GitHub Pages) und CSS-Dateien den
+   nicht aufloesen koennen.
+
+   Achsen bewusst auf opsz+wght begrenzt: alle vier Achsen (mit SOFT und WONK)
+   kosten 118 KB statt 65 KB. Die opsz-Achse bleibt, weil der Titel von 22px
+   bis 104px skaliert und optische Groessenanpassung dort sichtbar traegt.
+   Lesetext laeuft auf der System-Serife: er ist das, was man beim Kochen
+   liest, und soll ohne Nachladen sofort stehen. */
+
 :root {
   --ff-display: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
-  --ff-body:    "Source Serif 4", Georgia, "Times New Roman", serif;
+  --ff-body:    Georgia, "Iowan Old Style", Palatino, "Times New Roman", serif;
   --ff-ui:      system-ui, "Segoe UI", Roboto, sans-serif;
   --ff-mono:    ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 

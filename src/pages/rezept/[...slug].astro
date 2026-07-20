@@ -31,7 +31,11 @@ const quelleText: Record<string, string> = {
 };
 ---
 
-<Base titel={d.titel} beschreibung={`${katLabel(d.kategorie)} · ${d.portionen} Portionen`}>
+<Base
+  titel={d.titel}
+  beschreibung={`${katLabel(d.kategorie)} · ${d.portionen} Portionen${zeitLabel(d.zeit_gesamt) ? ` · ${zeitLabel(d.zeit_gesamt)}` : ''}`}
+  bild={d.bild}
+>
   <div class="wrap recipe" data-pagefind-body>
     <p class="crumb"><a href={url('/')}>Rezepte</a> › {katLabel(d.kategorie)}</p>
     <h1>{d.titel}</h1>
