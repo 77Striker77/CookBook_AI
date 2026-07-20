@@ -73,6 +73,7 @@ automatisiert via GitHub Actions.
 |---|---|
 | `/inbox` | Arbeitet alle offenen Einreichungen (Label `import`) in einer Session ab |
 | `/neues-rezept <url\|datei>` | Manueller Import einer einzelnen Quelle |
+| `/eigenes-rezept` | Interview: nimmt ein Rezept aus dem Kopf des Users auf, Runde für Runde |
 | `/review-rezept [datei]` | Schema-, Plausibilitäts- und Duplikat-Check |
 | `/koch-was [zutaten]` | Vorrats-Abgleich → Vorschläge aus dem Kochbuch |
 | `/wochenplan` | Ausgewogener Wochenplan + Einkaufsliste |

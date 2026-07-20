@@ -44,7 +44,7 @@ src/               <- Astro-Website
     kochen/[slug]      Kochmodus
     zutat/[slug]       Rezepte mit dieser Zutat (ab 2 Treffern)
 scripts/           <- pruefe-rezepte.mjs laeuft vor jedem Build
-.claude/skills/    <- /inbox, /neues-rezept, /review-rezept, well-seasoned
+.claude/skills/    <- /inbox, /neues-rezept, /eigenes-rezept, /review-rezept, well-seasoned
 .github/workflows/ <- Build & Deploy auf GitHub Pages
 docs/              <- Konzept, Architektur, Roadmap
 ```
