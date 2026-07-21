@@ -36,6 +36,9 @@ zusätzlich alle offenen Issues listen und die als Einreichung behandeln, deren
 Body die Formular-Überschriften enthält (`### Link …`, `### … oder Foto / Scan`)
 — das Label fehlt manchmal. Gibt es gar nichts, dem User Bescheid geben und
 stoppen. Zeig dem User kurz die Liste (Nummer + Titel), bevor du loslegst.
+**Prüfe früh auf Dubletten:** Reel-/Post-URL gegen `quelle.url` der vorhandenen
+Rezepte abgleichen — schon im Vault ⇒ nicht neu anlegen, in Schritt 7 als
+Dublette schließen.
 
 ### 2. Quelle vollständig sichten
 Felder aus dem Issue-Body: „Link", „Foto / Scan / Video (mp4)", „Rezept-Text /
@@ -154,15 +157,42 @@ Neue, sinnvolle Varianten in `synonyme.yaml` ergänzen (z. B. „Schoko-Kuvertü
 verarbeitet die Bilder. Fehler beheben, bis grün. Kurz `dist/zutat` gegen
 `synonyme.yaml` prüfen (überraschende Doppel-Slugs = fehlendes Synonym).
 
-### 7. Übernehmen & Issue schließen
-Auf dem aktuellen Arbeitsbranch committen und pushen. Jedes eingearbeitete Issue
-mit kurzem Kommentar schließen (GitHub-MCP: `add_issue_comment` + `issue_write`
-`state: closed`), z. B. „Eingepflegt als `rezepte/<slug>.md` ✅". Konnte etwas
-nicht ausgewertet werden, Issue **offen lassen** und im Kommentar sagen, was fehlt.
+### 7. Übernehmen & Issues schließen — **verpflichtend**
+Auf dem aktuellen Arbeitsbranch committen und pushen. Danach **jedes bearbeitete
+Issue schließen** (eingepflegt *oder* Dublette) — mit kurzem Kommentar, z. B.
+„Eingepflegt als `rezepte/<slug>.md` ✅" bzw. „Dublette von #N — bereits im Vault".
 
-### 8. Zusammenfassen
-Dem User auflisten: X eingepflegt (mit den übernommenen Bildern/Schaubildern),
-Y offen geblieben (mit Grund).
+Das Schließen ist **Teil der Aufgabe, kein To-do für den User.** Wege, bis einer
+greift: (1) GitHub-MCP (`add_issue_comment` + `issue_write` `state: closed`),
+falls die Tools da sind; (2) `gh issue comment`/`gh issue close`, falls
+installiert; (3) sonst über denselben GitHub-Zugang, mit dem auch `git push`
+schon funktioniert — die genaue, erprobte Vorgehensweise steht in der
+Projekt-Memory [[issues-schliessen-via-token]]. Wird der Zugang beim ersten Mal
+automatisch abgewiesen, **nach dem ersten Nein nicht aufgeben** (mit
+User-Freigabe klappt es).
+
+Konnte ein Issue **inhaltlich nicht** ausgewertet werden (z. B. Video ohne
+Rezepttext), **offen lassen** und im Kommentar sagen, was fehlt — das ist der
+*einzige* legitime Grund, ein bearbeitetes Issue offen zu lassen.
+
+Klappt das Schließen technisch **gar nicht**, ist das ein **lauter Fehler**, kein
+stilles Übergehen: in der Zusammenfassung mit `⚠️` genau auflisten, welche Nummern
+noch offen sind und dass sie **nicht** automatisch geschlossen wurden — plus was
+der User einrichten muss, damit es beim nächsten Lauf klappt.
+
+### 8. Abschluss-Kontrolle (Soll/Ist) & Zusammenfassen
+**Erst prüfen, dann melden.** Offene `import`-Issues erneut abrufen und gegen die
+in diesem Lauf bearbeitete Liste abgleichen:
+
+- **Jedes** bearbeitete Issue (eingepflegt **oder** Dublette) muss jetzt `closed`
+  sein. Ist eines noch offen → `⚠️ #N wurde bearbeitet, ist aber noch OFFEN` laut
+  melden und Schließen erneut versuchen.
+- Nur bewusst offengelassene („nicht auswertbar", Schritt 2/7) dürfen offen sein.
+
+Danach dem User auflisten: X eingepflegt (mit den übernommenen Bildern/
+Schaubildern), welche Dubletten, **welche Issues geschlossen wurden**, und Y
+bewusst offen geblieben (mit Grund). Ein bearbeitetes, aber noch offenes Issue
+ohne Warnung ist genau der Fehler, den diese Kontrolle verhindert.
 
 ## Wichtig
 
