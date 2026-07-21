@@ -81,32 +81,44 @@ Bauteilebene — und es funktioniert im Gegensatz zum Hover-Lift auch per Tap.
 
 ---
 
+## `.chip` — Filter-Chip
+
+Umschaltbarer Filter auf `/rezepte`. Ein `<button>` mit `aria-pressed`,
+Zustände über lokale Component-Tokens (eine Zeile pro Zustand statt drei
+Einzelregeln). Umgesetzt in `global.css`, Abschnitt „Liste und Filter".
+
+### Erlaubte Tokens
+
+| Rolle | Token |
+|---|---|
+| Schrift | `--ff-ui`, `--fs-sm`, `--fw-semibold` |
+| Rahmen | `--bw-hair` / `--chip-br` (Default `--color-line-strong` — Bedienelement, 3:1) |
+| Radius | `--r-none` |
+| Höhe | min. 44px |
+| Trefferzahl | `.chip-n`, Tabellenziffern, gedämpft |
+
+### Zustände
+
+| Zustand | Werte |
+|---|---|
+| default | transparent, `--color-ink-muted`, Rahmen `--color-line-strong` |
+| hover | Text und Rahmen `--color-ink` |
+| active (Tap) | gefüllt `--color-ink`, Text `--color-bg` — sichtbare Tap-Quittung |
+| `[aria-pressed="true"]` | gefüllt `--color-accent-text`, Text `--color-accent-ink` |
+| focus-visible | globale Outline-Regel |
+
+**Warum `--color-accent-text` als Füllung, nicht `--color-accent`:**
+`#FF3D00` trägt auf hellem Grund keinen weißen Text (3.40:1). Die Kombination
+aus `--color-accent-text` + `--color-accent-ink` ist dieselbe wie beim
++-Knopf der Navigation und in beiden Themes gemessen.
+
+---
+
 ## Noch zu spezifizieren
 
 Gleiches Format anwenden, sobald das Bauteil umgebaut wird:
 
 - `.zutaten li` — Zutatenzeile (Menge, Name, Notiz, Gruppentrenner)
-- `.chip` — Filter. Kandidat für lokale Component-Tokens, hat zwei Zustände
-  die je drei Eigenschaften ändern:
-
-  ```css
-  .chip {
-    --chip-bg: var(--color-surface);
-    --chip-fg: var(--color-ink-muted);
-    --chip-br: var(--color-line-strong);
-    background: var(--chip-bg); color: var(--chip-fg);
-    border: var(--bw-hair) solid var(--chip-br);
-  }
-  .chip[aria-pressed="true"] {
-    --chip-bg: var(--color-accent);
-    --chip-fg: var(--color-accent-ink);
-    --chip-br: var(--color-accent);
-  }
-  ```
-
-  Eine Zeile pro Variante statt drei. So sehen Component-Tokens richtig aus:
-  lokal im Regelblock, nicht in `:root`.
-
 - `.stepper` — Portionsregler. Aktuell 30px, muss auf ≥44px
 - `.ek-item` — Einkaufslisten-Zeile. Checkbox folgt jetzt via `color-scheme`
   dem Theme

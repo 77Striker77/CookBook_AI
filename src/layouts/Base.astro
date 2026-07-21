@@ -94,10 +94,17 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
     <link rel="manifest" href={url('/manifest.webmanifest')} />
     <link rel="icon" href={url('/icon.svg')} type="image/svg+xml" />
     <script is:inline>
-      // Theme früh setzen, damit kein Flackern entsteht.
+      // Theme früh setzen, damit kein Flackern entsteht. Die theme-color-Metas
+      // sind medienbasiert und wissen nichts vom manuellen Umschalter — bei
+      // gesetztem Theme werden beide hart auf dessen Farbe gestellt, sonst
+      // bliebe die Browserleiste am Handy in der Systemfarbe stehen.
       (() => {
         const t = localStorage.getItem('theme');
-        if (t) document.documentElement.dataset.theme = t;
+        if (!t) return;
+        document.documentElement.dataset.theme = t;
+        const farbe = t === 'dark' ? '#1C1917' : '#FAFAF9';
+        for (const m of document.querySelectorAll('meta[name="theme-color"]'))
+          m.setAttribute('content', farbe);
       })();
 
     </script>
@@ -145,6 +152,9 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
         const next = cur === 'dark' ? 'light' : 'dark';
         document.documentElement.dataset.theme = next;
         localStorage.setItem('theme', next);
+        const farbe = next === 'dark' ? '#1C1917' : '#FAFAF9';
+        for (const m of document.querySelectorAll('meta[name="theme-color"]'))
+          m.setAttribute('content', farbe);
       });
 
     </script>

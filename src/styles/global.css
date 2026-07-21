@@ -300,6 +300,10 @@ img { max-width: 100%; display: block; }
   outline-offset: 2px;
 }
 
+/* Ohne das warten Touch-Browser 300ms auf einen moeglichen Doppeltap —
+   in der Kueche fuehlt sich jeder Knopf dadurch kaputt an. */
+:where(a, button, input, select, summary, label) { touch-action: manipulation; }
+
 /* Screenreader-only — Voraussetzung fuer den Skip-Link */
 .sr-only {
   position: absolute; width: 1px; height: 1px;
@@ -337,6 +341,16 @@ img { max-width: 100%; display: block; }
    Namen je Rezept im Markup (vtName in lib/darstellung.ts) und morphen so von
    der Karte ins Titelbild. */
 .site-header { view-transition-name: kopf; }
+/* Browser-Default sind 250ms — fuer ein Buch zu hastig. Blende und Foto-Morph
+   laufen gemaechlicher und auf unserer Kurve. */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 350ms;
+  animation-timing-function: var(--ease);
+}
+::view-transition-group(*) {
+  animation-duration: 400ms;
+  animation-timing-function: var(--ease);
+}
 
 
 /* ============================================================================
@@ -471,20 +485,9 @@ img { max-width: 100%; display: block; }
 .s-alle-link:hover { color: var(--color-accent-text); }
 .s-alle-pfeil { margin-left: auto; }
 
-/* ---- Katalog /alle ---- */
-.katalog { padding: var(--sp-lg) 0 var(--sp-3xl); }
-.katalog h1 { font-size: var(--fs-h1); margin: 0 0 var(--sp-md); letter-spacing: var(--tr-display); }
-.filter { display: flex; flex-direction: column; gap: var(--sp-sm); margin-bottom: var(--sp-md); }
-.f-suche input { width: 100%; border: 0; border-bottom: var(--bw) solid var(--color-line-strong); background: transparent; color: var(--color-ink); font-size: var(--fs-lg); padding: var(--sp-2xs) 2px; outline: none; }
-.f-suche input:focus { border-bottom-color: var(--color-accent); }
-.f-gruppe { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2xs) var(--sp-sm); }
-.f-gruppe legend { float: left; width: 100%; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); margin-bottom: var(--sp-3xs); }
-.chip-n { font-variant-numeric: tabular-nums; opacity: .55; font-size: var(--fs-2xs); }
-
-.liste { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-lg) var(--sp-md); padding-bottom: var(--sp-2xl); }
-@media (max-width: 900px) { .liste { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .liste { grid-template-columns: 1fr; gap: var(--sp-xl); } }
-.empty { grid-column: 1/-1; text-align: center; color: var(--color-ink-muted); padding: var(--sp-xl) 0; }
+/* Hier stand ein zweiter Filter-/Listen-Block fuer die verworfene Seite
+   /alle (.katalog, .f-gruppe) — toter Code, entfernt. Der lebende Block
+   steht unter "Liste und Filter". */
 
 /* ---- Rezeptseite ---- */
 /* Eckdaten: ein einziger Stil. Unterschieden wird ueber Position und Groesse,
@@ -582,6 +585,34 @@ ul.zutaten .grp { border: 0; padding: var(--sp-sm) 0 var(--sp-3xs); font-weight:
 .f-mehr[open] summary { color: var(--color-accent-text); border-bottom-color: var(--color-accent); }
 .f-mehr-inhalt { display: flex; flex-wrap: wrap; gap: var(--sp-2xs) var(--sp-sm); padding: var(--sp-sm) 0; }
 .f-gruppentitel { width: 100%; margin: var(--sp-2xs) 0 0; font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: var(--tr-caps); color: var(--color-ink-muted); font-weight: var(--fw-semibold); }
+
+/* Filter-Chip. Zustaende ueber lokale Component-Tokens (Muster siehe
+   komponenten.md): eine Zeile pro Zustand statt drei Einzelregeln.
+   Aktiv traegt den Akzent — gefuellt mit --color-accent-text, weil
+   --color-accent auf hellem Grund fuer weissen Text nicht reicht
+   (3.40:1); dieselbe gemessene Kombination wie der +-Knopf der Nav. */
+.chip {
+  --chip-bg: transparent;
+  --chip-fg: var(--color-ink-muted);
+  --chip-br: var(--color-line-strong);
+  background: var(--chip-bg); color: var(--chip-fg);
+  border: var(--bw-hair) solid var(--chip-br);
+  border-radius: var(--r-none);
+  font: var(--fw-semibold) var(--fs-sm)/1 var(--ff-ui);
+  min-height: 44px; padding: 0 var(--sp-xs);
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              background var(--dur-fast) var(--ease);
+}
+.chip:hover { --chip-fg: var(--color-ink); --chip-br: var(--color-ink); }
+.chip:active { --chip-bg: var(--color-ink); --chip-fg: var(--color-bg); --chip-br: var(--color-ink); }
+.chip[aria-pressed="true"] {
+  --chip-bg: var(--color-accent-text);
+  --chip-fg: var(--color-accent-ink);
+  --chip-br: var(--color-accent-text);
+}
 .chip-n { font-variant-numeric: tabular-nums; opacity: .55; font-size: var(--fs-2xs); }
 .f-reset { margin-bottom: var(--sp-sm); }
 

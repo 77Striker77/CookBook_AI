@@ -127,10 +127,10 @@ Projekt kommt eines dazu, und es wiegt schwer:
 sein. Ein Hover-Lift als Karten-Feedback ist hier nicht nur unschön, sondern
 funktionslos.
 
-Drei bekannte offene Mängel, die beim Umbau mitgehen:
-- `.add-plan` liegt als `<button>` im `<a>` der Rezeptkarte — verschachtelt
-- Checkboxen der Einkaufsliste sind im Dark Mode systemhell — löst `color-scheme`
-- Kein Skip-Link, obwohl fünf Nav-Elemente vor `<main>` liegen
+Die drei früher offenen Mängel sind behoben (Stand Juli 2026): Der Plan-Knopf
+liegt als Geschwister neben dem Link (`.rk-titel::after` macht die Karte
+klickbar), `color-scheme` ist gesetzt, der Skip-Link existiert.
+`touch-action: manipulation` liegt global auf allem Interaktiven.
 
 Vollständige Prüfliste in `references/pruefliste.md`, vor jedem Merge
 durchgehen.
@@ -143,7 +143,9 @@ Zähler-Puls. Seitenwechsel über die reine CSS-Regel `@view-transition`
 (MPA bleibt MPA, kein Client-Router); Rezeptfotos morphen dabei von Karte
 bzw. Bildwand ins Titelbild (`vtName()` in `lib/darstellung.ts` — Namen
 müssen je Seite eindeutig sein, sonst lässt der Browser die Transition
-still aus). Dauern: 200ms Micro, 300ms Reveal.
+still aus). Dauern: 200ms Micro, ~500ms Auftritt/Reveal, 350–400ms
+Seitenblende — Auftritte bewusst gemächlich (Buch, keine App), nur die
+Reaktion auf Berührung bleibt schnell.
 Easing `cubic-bezier(0.25, 0, 0, 1)`; Federn nur als Druck-Quittung.
 
 Kein Parallax auf Text. Reveal-Effekte dürfen Inhalt **nie** per Default

@@ -6,13 +6,15 @@
      dieses Skript — nie das CSS.
    - Sichtbares wird nicht angefasst: Reveals nur für Inhalt unterhalb des
      ersten Viewports.
-   - 200 ms Micro, 300 ms Reveal, Easing cubic-bezier(.25, 0, 0, 1).
+   - 200 ms Micro, ~500 ms Auftritt, Easing cubic-bezier(.25, 0, 0, 1).
+     Auftritte bewusst gemaechlich (Buch, keine App); nur die Reaktion auf
+     Beruehrung bleibt schnell, sonst fuehlt sie sich kaputt an.
    - prefers-reduced-motion beendet alles hier, und im Kochmodus ruht es. */
 import { animate, inView, press, stagger } from 'motion';
 
 const EASE: [number, number, number, number] = [0.25, 0, 0, 1];
 const MICRO = 0.2;
-const REVEAL = 0.3;
+const REVEAL = 0.5;
 
 if (
   !matchMedia('(prefers-reduced-motion: reduce)').matches &&
@@ -33,14 +35,14 @@ function heldAuftritt() {
     animate(
       text,
       { opacity: [0, 1], y: [14, 0] },
-      { duration: REVEAL, ease: EASE, delay: stagger(0.07) },
+      { duration: REVEAL, ease: EASE, delay: stagger(0.1) },
     );
   }
   if (bilder.length) {
     animate(
       bilder,
       { opacity: [0, 1], scale: [0.97, 1] },
-      { duration: REVEAL, ease: EASE, delay: stagger(0.06, { startDelay: 0.12 }) },
+      { duration: REVEAL, ease: EASE, delay: stagger(0.09, { startDelay: 0.2 }) },
     );
   }
 }
@@ -59,7 +61,7 @@ function kartenReveal() {
         animate(
           karte,
           { opacity: [0, 1], y: [18, 0] },
-          { duration: REVEAL, ease: EASE, delay: (i % 3) * 0.05 },
+          { duration: REVEAL, ease: EASE, delay: (i % 3) * 0.08 },
         );
         stop();
       },
@@ -74,8 +76,8 @@ function tastendruck() {
   press(
     '.rk-plan, .theme-toggle, .stepper button, .pz-stepper button, .eg-stepper button',
     (el) => {
-      animate(el, { scale: 0.9 }, { type: 'spring', stiffness: 700, damping: 30 });
-      return () => animate(el, { scale: 1 }, { type: 'spring', stiffness: 400, damping: 15 });
+      animate(el, { scale: 0.92 }, { type: 'spring', stiffness: 550, damping: 30 });
+      return () => animate(el, { scale: 1 }, { type: 'spring', stiffness: 300, damping: 20 });
     },
   );
 }
