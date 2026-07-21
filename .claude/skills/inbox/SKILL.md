@@ -158,11 +158,24 @@ verarbeitet die Bilder. Fehler beheben, bis grün. Kurz `dist/zutat` gegen
 `synonyme.yaml` prüfen (überraschende Doppel-Slugs = fehlendes Synonym).
 
 ### 7. Übernehmen & Issues schließen — **verpflichtend**
-Auf dem aktuellen Arbeitsbranch committen und pushen. Danach **jedes bearbeitete
-Issue schließen** (eingepflegt *oder* Dublette) — mit kurzem Kommentar, z. B.
-„Eingepflegt als `rezepte/<slug>.md` ✅" bzw. „Dublette von #N — bereits im Vault".
+Auf dem aktuellen Arbeitsbranch committen und pushen.
 
-Das Schließen ist **Teil der Aufgabe, kein To-do für den User.** Wege, bis einer
+**Primär & am robustesten (ohne Token/MCP): `Closes #N` in der Commit-Message.**
+Der Arbeitsbranch ist der **Default-Branch** des Repos — GitHub schließt Issues
+automatisch, sobald ein Commit mit `Closes #N` dorthin gepusht wird. Also für
+**jedes** bearbeitete Issue (eingepflegt *oder* Dublette) eine Zeile in die
+Message, mit Kontext, z. B.:
+```
+Closes #19 — honig-cashew-chicken
+Closes #21 — Dublette von #5 (ofen-kebab)
+```
+So schließen sie sich beim Push von selbst, ganz ohne API. (Bleibt der
+Default-Branch mal nicht der Arbeitsbranch, greift das nicht — dann die Wege
+unten.)
+
+**Zusätzlich Kommentar (optional, netter Verlauf).** Ein erklärender Kommentar
+(„Eingepflegt als `rezepte/<slug>.md` ✅") ist schön, aber nicht Pflicht, weil
+der Auto-Close schon auf den Commit verweist. Wenn gewünscht, Wege bis einer
 greift: (1) GitHub-MCP (`add_issue_comment` + `issue_write` `state: closed`),
 falls die Tools da sind; (2) `gh issue comment`/`gh issue close`, falls
 installiert; (3) sonst über denselben GitHub-Zugang, mit dem auch `git push`
