@@ -74,6 +74,17 @@ export const WARTE_KURZ: Record<Warteklasse, string> = {
    und werden auf Rezeptseite und im Kochmodus angezeigt (siehe
    `mitGruppen()` in lib/zutaten.ts). Sie zählen nur nichts mehr. */
 
+/**
+ * Eindeutiger view-transition-name je Rezeptfoto: Beim Seitenwechsel morpht
+ * das Kartenbild in das Titelbild der Rezeptseite (reines CSS, Browser ohne
+ * @view-transition ignorieren es). Ein ungültiger oder doppelter Name lässt
+ * den Browser die ganze Transition still auslassen — deshalb wird alles
+ * Nicht-Identifier-Fähige ersetzt und ein Präfix gegen führende Ziffern gesetzt.
+ */
+export function vtName(id: string): string {
+  return 'foto-' + id.replace(/[^a-zA-Z0-9_-]/g, '-');
+}
+
 export const GERAET_LABEL: Record<string, string> = {
   airfryer: 'Airfryer',
   ofen: 'Ofen',

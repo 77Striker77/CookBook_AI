@@ -332,6 +332,11 @@ img { max-width: 100%; display: block; }
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
 }
+/* Die Kopfzeile ist auf beiden Seiten dieselbe — mit eigenem Namen steht sie
+   waehrend der Blende still, statt mitzublitzen. Die Rezeptfotos bekommen ihre
+   Namen je Rezept im Markup (vtName in lib/darstellung.ts) und morphen so von
+   der Karte ins Titelbild. */
+.site-header { view-transition-name: kopf; }
 
 
 /* ============================================================================

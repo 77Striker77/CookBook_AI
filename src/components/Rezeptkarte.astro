@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { url } from '../lib/url';
 import { parseZutaten } from '../lib/zutaten';
 import {
-  katLabel, arbeitLabel, warteklasse, WARTE_KURZ, GERAET_LABEL,
+  katLabel, arbeitLabel, warteklasse, WARTE_KURZ, GERAET_LABEL, vtName,
 } from '../lib/darstellung';
 
 interface Props {
@@ -38,7 +38,7 @@ const zutatenSuche = [...new Set(parseZutaten(d.zutaten ?? []).map((z) => z.kano
   data-warte={wk ?? ''}
 >
   {form !== 'zeile' && (
-    <div class="rk-bild">
+    <div class="rk-bild" style={d.bild ? `view-transition-name: ${vtName(r.id)}` : undefined}>
       {/* alt bleibt leer: der Titel daneben benennt das Gericht bereits. */}
       {d.bild && (
         <Image

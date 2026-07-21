@@ -4,7 +4,7 @@ import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/url';
 import { parseZutaten, formatMenge, mitGruppen } from '../../lib/zutaten';
-import { katLabel, zeitLabel, arbeitLabel, GERAET_LABEL } from '../../lib/darstellung';
+import { katLabel, zeitLabel, arbeitLabel, GERAET_LABEL, vtName } from '../../lib/darstellung';
 
 export async function getStaticPaths() {
   const rezepte = await getCollection('rezepte');
@@ -59,7 +59,7 @@ const quelleText: Record<string, string> = {
     )}
 
     {d.bild && (
-      <figure class="hero-bild">
+      <figure class="hero-bild" style={`view-transition-name: ${vtName(r.id)}`}>
         <Image src={d.bild} alt={d.titel} widths={[480, 800, 1200]} sizes="(max-width: 780px) 100vw, 720px" />
       </figure>
     )}

@@ -140,7 +140,10 @@ durchgehen.
 Sparsam. Engine ist `motion` (die Vanilla-Variante von Framer Motion, **ohne
 React**) in `src/scripts/bewegung.ts` — Reveals, Federn auf Tasten,
 Zähler-Puls. Seitenwechsel über die reine CSS-Regel `@view-transition`
-(MPA bleibt MPA, kein Client-Router). Dauern: 200ms Micro, 300ms Reveal.
+(MPA bleibt MPA, kein Client-Router); Rezeptfotos morphen dabei von Karte
+bzw. Bildwand ins Titelbild (`vtName()` in `lib/darstellung.ts` — Namen
+müssen je Seite eindeutig sein, sonst lässt der Browser die Transition
+still aus). Dauern: 200ms Micro, 300ms Reveal.
 Easing `cubic-bezier(0.25, 0, 0, 1)`; Federn nur als Druck-Quittung.
 
 Kein Parallax auf Text. Reveal-Effekte dürfen Inhalt **nie** per Default
