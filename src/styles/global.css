@@ -325,6 +325,14 @@ img { max-width: 100%; display: block; }
   }
 }
 
+/* Seitenwechsel: weiche Blende statt Weissblitz — reines CSS, kein Router.
+   Browser ohne @view-transition ignorieren die Regel und laden hart wie bisher.
+   Micro-Interaktionen und Reveals liegen in src/scripts/bewegung.ts. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 
 /* ============================================================================
    6  KOMPONENTEN

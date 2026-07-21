@@ -137,12 +137,17 @@ durchgehen.
 
 ## Bewegung
 
-Sparsam. Ohne JS-Bibliothek — `animation-timeline: view()` für Scroll-Reveal,
-Astro View Transitions für Seitenwechsel. Dauern: 200ms Micro, 300ms Reveal.
-Easing `cubic-bezier(0.25, 0, 0, 1)`.
+Sparsam. Engine ist `motion` (die Vanilla-Variante von Framer Motion, **ohne
+React**) in `src/scripts/bewegung.ts` — Reveals, Federn auf Tasten,
+Zähler-Puls. Seitenwechsel über die reine CSS-Regel `@view-transition`
+(MPA bleibt MPA, kein Client-Router). Dauern: 200ms Micro, 300ms Reveal.
+Easing `cubic-bezier(0.25, 0, 0, 1)`; Federn nur als Druck-Quittung.
 
 Kein Parallax auf Text. Reveal-Effekte dürfen Inhalt **nie** per Default
-unsichtbar machen — die Seite muss ohne JS vollständig lesbar bleiben.
+unsichtbar machen — Ausgangszustände setzt ausschließlich das Skript, nie das
+CSS; die Seite muss ohne JS vollständig lesbar bleiben. Sichtbares im ersten
+Viewport wird nicht weganimiert, und `prefers-reduced-motion` schaltet alles
+ab (im Skript geprüft, nicht nur per CSS).
 
 ## Referenzen
 
