@@ -1,6 +1,7 @@
 ---
 titel: Homemade Wraps (Fladen aus der Pfanne)
 kategorie: grundrezept
+küche: orientalisch
 tags: [teig, fladenbrot, wraps, pfanne, selbstgemacht]
 portionen: 6
 zeit_aktiv: 30

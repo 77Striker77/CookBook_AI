@@ -1,6 +1,7 @@
 ---
 titel: Blaubeer-Zitronen-Spritz (alkoholfrei)
 kategorie: getränk
+küche: international
 tags: [alkoholfrei, sommerdrink, blaubeere, schnell]
 portionen: 1
 zeit_aktiv: 5

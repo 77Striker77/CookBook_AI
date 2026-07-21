@@ -69,8 +69,13 @@ Je nach Typ:
   - **`voll`** — `frames/*.jpg` (eingeblendete Texte/Zutaten — **mit dem Read-Tool
     ansehen**), `transkript.txt` (Tonspur) und `caption.txt`/`titel.txt`/`autor.txt`.
     Rezept aus **Bildern + Transkript + Caption gemeinsam** bauen.
-  - **`nur-beschreibung`** — kein Video/keine Frames, aber `caption.txt`. Daraus
-    bauen; keine Schritt-Bilder (ok), Titelbild ggf. als Illustration oder weglassen.
+  - **`nur-beschreibung`** — kein Video/keine Frames, aber `caption.txt`. Rezept
+    daraus bauen. **Titelbild trotzdem beschaffen, nicht weglassen:** Die Action
+    scheitert oft, wo `yt-dlp` lokal noch durchkommt — also erst das Reel lokal
+    ziehen (siehe [[instagram-lokal-ytdlp]], nötigenfalls mit Firefox-Cookies) und
+    Titel-/Schritt-Frames wie bei `voll` gewinnen. Klappt das wirklich nicht, eine
+    Illustration im Kochbuch-Look bauen (Schritt 3). **Ein Rezept ohne `bild` ist
+    nie das Endergebnis.**
   Nach dem Einarbeiten den Ordner `kochbuch/_reel-inbox/<nr>/` löschen
   (`git rm -r`).
 - **YouTube:** Die Action springt bei YouTube **bewusst nicht** an (YouTube
@@ -152,10 +157,19 @@ und Unklares kennzeichnen.
 Neue, sinnvolle Varianten in `synonyme.yaml` ergänzen (z. B. „Schoko-Kuvertüre" →
 `Schokolade`), damit Verlinkung und Vorrats-Abgleich sauber bleiben.
 
-### 6. Prüfen
+### 6. Prüfen — **grün heißt: 0 Fehler UND 0 Warnungen**
 `npm run build` (im Projekt-Root!) laufen lassen — validiert das Schema und
-verarbeitet die Bilder. Fehler beheben, bis grün. Kurz `dist/zutat` gegen
-`synonyme.yaml` prüfen (überraschende Doppel-Slugs = fehlendes Synonym).
+verarbeitet die Bilder. **Warnungen zählen wie Fehler:** die Prüfung
+(`pruefe-rezepte.mjs`) meldet sie am Anfang der Ausgabe, der Build läuft trotzdem
+durch — genau da rutscht sonst was durch. Also **jede Warnung abarbeiten**, nicht
+nur die roten Fehler:
+- `kein Bild` → Titelbild beschaffen (Reel lokal ziehen bzw. Illustration, siehe
+  Schritt 2/3). **Kein Rezept ohne `bild`.**
+- `küche fehlt` → `küche` setzen (bei einem Getränk zur Not `international`).
+- `hinzugefuegt fehlt`, Tag = Gerät/Kategorie, Zeiten etc. → laut Meldung beheben.
+Danach erneut bauen, bis die Prüfung **wörtlich `✓ keine Fehler` ohne jede
+Warnung** zeigt. Kurz `dist/zutat` gegen `synonyme.yaml` prüfen (überraschende
+Doppel-Slugs = fehlendes Synonym).
 
 ### 7. Übernehmen & Issues schließen — **verpflichtend**
 Auf dem aktuellen Arbeitsbranch committen und pushen.
@@ -201,6 +215,9 @@ in diesem Lauf bearbeitete Liste abgleichen:
   sein. Ist eines noch offen → `⚠️ #N wurde bearbeitet, ist aber noch OFFEN` laut
   melden und Schließen erneut versuchen.
 - Nur bewusst offengelassene („nicht auswertbar", Schritt 2/7) dürfen offen sein.
+- **Letzter `npm run build`:** muss `✓ keine Fehler` **ohne jede Warnung** zeigen.
+  Steht noch eine Warnung da (z. B. fehlendes Bild/`küche`), ist der Lauf **nicht
+  fertig** — zurück zu Schritt 6, beheben, neu bauen.
 
 Danach dem User auflisten: X eingepflegt (mit den übernommenen Bildern/
 Schaubildern), welche Dubletten, **welche Issues geschlossen wurden**, und Y
@@ -212,7 +229,9 @@ ohne Warnung ist genau der Fehler, den diese Kontrolle verhindert.
 - **Vollständigkeit vor Kürze.** Lieber ein langes, exaktes Rezept als eine
   hübsche Vereinfachung. Schaubilder und Maße sind Teil des Rezepts.
 - Keine stillen Mengen- oder Reihenfolge-Änderungen: Unsicheres dem User vorlegen.
-- Ein kaputtes Rezept darf den Build nicht rot lassen (vor dem Push grün).
+- „Grün" = **0 Fehler UND 0 Warnungen** vor dem Push. Warnungen sind To-dos, kein
+  Rauschen — sie sind genau die Stellen, an denen sonst etwas durchrutscht (ein
+  Rezept ohne Titelbild ist so entstanden). Und **jedes Rezept hat ein `bild`.**
 - Shell-Arbeitsverzeichnis im Blick behalten — `npm run build` gehört ins
   Projekt-Root, nicht nach `kochbuch/anhang`.
 

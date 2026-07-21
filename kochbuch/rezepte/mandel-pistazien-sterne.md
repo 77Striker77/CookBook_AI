@@ -1,6 +1,7 @@
 ---
 titel: Mandel-Pistazien-Sterne
 kategorie: backen
+küche: orientalisch
 tags: [plätzchen, weihnachten, pistazie, mandel, glutenfrei]
 portionen: 60
 zeit_aktiv: 40
