@@ -32,6 +32,7 @@ const hier = (z: string) => {
 };
 const fontLatin = url('/fonts/fraunces-latin.woff2');
 const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
+const swPfad = url('/sw.js');
 ---
 
 <!doctype html>
@@ -161,6 +162,15 @@ const fontLatinExt = url('/fonts/fraunces-latin-ext.woff2');
     <script>
       // Bewegung als Progressive Enhancement — laedt gebuendelt, blockiert nichts.
       import '../scripts/bewegung';
+    </script>
+    <script is:inline define:vars={{ swPfad }}>
+      // Offline-Gedaechtnis (public/sw.js): besuchte Seiten bleiben auf dem
+      // Geraet. Erst nach dem Laden registrieren, damit der Erstaufbau nicht
+      // mit dem Cache-Fuellen konkurriert. Nicht auf localhost — im Dev-Server
+      // wuerde der Cache nur verwirren.
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+        addEventListener('load', () => navigator.serviceWorker.register(swPfad));
+      }
     </script>
   </body>
 </html>

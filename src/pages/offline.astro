@@ -1,0 +1,20 @@
+---
+// Fallback des Service Workers: erscheint nur, wenn ohne Netz eine Seite
+// aufgerufen wird, die auf diesem Geraet noch nie geoeffnet war.
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+
+<Base titel="Ohne Netz" beschreibung="Diese Seite ist auf diesem Gerät noch nicht gespeichert.">
+  <div class="wrap">
+    <div class="leer-box">
+      <p>Gerade keine Verbindung — und diese Seite war auf diesem Gerät noch nicht geöffnet.</p>
+      <p class="muted">Einmal geöffnete Rezepte bleiben auch ohne Netz verfügbar.</p>
+      <button class="btn primary" id="nochmal">Nochmal laden</button>
+      <a class="btn ghost" href={url('/')}>Zur Übersicht</a>
+    </div>
+  </div>
+  <script is:inline>
+    document.getElementById('nochmal')?.addEventListener('click', () => location.reload());
+  </script>
+</Base>
